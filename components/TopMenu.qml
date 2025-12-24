@@ -87,16 +87,16 @@ PanelWindow {
             id: topMenuBackground
             anchors.fill: parent
             radius: 0
-            color: "#111111"
+            color: (sharedData && sharedData.colorBackground) ? sharedData.colorBackground : "#111111"
             
             // Gradient tła
             gradient: Gradient {
-                GradientStop { position: 0.0; color: "#131313" }
-                GradientStop { position: 1.0; color: "#0d0d0d" }
+                GradientStop { position: 0.0; color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#131313" }
+                GradientStop { position: 1.0; color: (sharedData && sharedData.colorBackground) ? sharedData.colorBackground : "#0d0d0d" }
             }
             
             // Border z subtelnym efektem
-            border.color: "#252525"
+            border.color: (sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#252525"
             border.width: 1
         }
 
@@ -580,9 +580,9 @@ PanelWindow {
                         Repeater {
                             id: topMenuSystemStatsRepeater
                             model: [
-                                { name: "CPU", value: cpuUsageValue },
-                                { name: "RAM", value: ramUsageValue },
-                                { name: "GPU", value: gpuUsageValue }
+                                { name: "CPU", value: cpuUsageValue, temp: cpuTempValue },
+                                { name: "RAM", value: ramUsageValue, temp: -1 },
+                                { name: "GPU", value: gpuUsageValue, temp: gpuTempValue }
                             ]
 
                             Row {
@@ -619,13 +619,13 @@ PanelWindow {
 
                                 Text {
                                     id: topMenuSystemStatValue
-                                    text: modelData.value + "%"
+                                    text: modelData.value + "%" + (modelData.temp >= 0 ? " " + modelData.temp + "°" : "")
                                     font.pixelSize: 14
                                     font.family: "JetBrains Mono"
                                     font.weight: Font.Medium
                                     font.letterSpacing: 0.2
                                     color: "#f5f5f5"
-                                    width: 50
+                                    width: 70
                                     horizontalAlignment: Text.AlignRight
                                 }
                             }
@@ -788,6 +788,8 @@ PanelWindow {
     property int ramUsageValue: 0
     property int cpuUsageValue: 0
     property int gpuUsageValue: 0
+    property int cpuTempValue: 0
+    property int gpuTempValue: 0
     property real volumeValue: 50
     property bool bluetoothEnabled: false
     property string mpTitle: ""
@@ -1120,8 +1122,17 @@ PanelWindow {
         repeat: true
         running: true
         function readGpu() {
+            // Read GPU usage
             Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh','-c','nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null | head -1 > /tmp/quickshell_gpu_usage || echo 0 > /tmp/quickshell_gpu_usage']; running: true }", topMenuRoot)
             
+            // Read GPU temperature
+            Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh','-c','nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits 2>/dev/null | head -1 > /tmp/quickshell_gpu_temp || (sensors 2>/dev/null | grep -i \"gpu\\|radeon\\|amdgpu\" | head -1 | grep -oE \"[0-9]+\\.[0-9]+\" | head -1 | cut -d. -f1 > /tmp/quickshell_gpu_temp) || echo 0 > /tmp/quickshell_gpu_temp']; running: true }", topMenuRoot)
+            
+            Qt.createQmlObject("import QtQuick; Timer { interval: 100; running: true; repeat: false; onTriggered: topMenuRoot.readGpuData() }", topMenuRoot)
+        }
+        
+        function readGpuData() {
+            // Read GPU usage
             var xhr = new XMLHttpRequest()
             xhr.open("GET", "file:///tmp/quickshell_gpu_usage")
             xhr.onreadystatechange = function() {
@@ -1131,9 +1142,50 @@ PanelWindow {
                 }
             }
             xhr.send()
+            
+            // Read GPU temperature
+            var xhr2 = new XMLHttpRequest()
+            xhr2.open("GET", "file:///tmp/quickshell_gpu_temp")
+            xhr2.onreadystatechange = function() {
+                if (xhr2.readyState === XMLHttpRequest.DONE) {
+                    var temp = parseInt(xhr2.responseText.trim())
+                    if (!isNaN(temp) && temp > 0) gpuTempValue = temp
+                }
+            }
+            xhr2.send()
         }
+        
         onTriggered: readGpu()
         Component.onCompleted: readGpu()
+    }
+    
+    Timer {
+        id: topMenuCpuTempTimer
+        interval: 2000
+        repeat: true
+        running: true
+        function readCpuTemp() {
+            // Try multiple methods to get CPU temperature
+            // Method 1: sensors (if available)
+            // Method 2: /sys/class/thermal/thermal_zone*/temp (default Linux)
+            Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh','-c','(sensors 2>/dev/null | grep -i \"cpu\" | grep -E \"[0-9]+\\.[0-9]+°C\" | head -1 | grep -oE \"[0-9]+\\.[0-9]+\" | head -1 | cut -d. -f1) || (cat /sys/class/thermal/thermal_zone*/temp 2>/dev/null | head -1 | awk \"{print int(\\$1/1000)}\") || echo 0 > /tmp/quickshell_cpu_temp']; running: true }", topMenuRoot)
+            
+            Qt.createQmlObject("import QtQuick; Timer { interval: 150; running: true; repeat: false; onTriggered: topMenuRoot.readCpuTempData() }", topMenuRoot)
+        }
+        
+        function readCpuTempData() {
+            var xhr = new XMLHttpRequest()
+            xhr.open("GET", "file:///tmp/quickshell_cpu_temp")
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    var temp = parseInt(xhr.responseText.trim())
+                    if (!isNaN(temp) && temp > 0 && temp < 150) cpuTempValue = temp
+                }
+            }
+            xhr.send()
+        }
+        onTriggered: readCpuTemp()
+        Component.onCompleted: readCpuTemp()
     }
 
     Component.onCompleted: {

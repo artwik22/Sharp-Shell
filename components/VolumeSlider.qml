@@ -29,13 +29,14 @@ PanelWindow {
         top: 0
         bottom: 0
         right: slideOffset
+        left: 0
     }
     
-    // Animacja slideOffset dla slide in/out
+    // Animacja slideOffset dla slide in/out - szybsza i bardziej płynna
     Behavior on slideOffset {
         NumberAnimation { 
-            duration: 400
-            easing.type: Easing.OutQuart
+            duration: 300
+            easing.type: Easing.OutCubic
         }
     }
 
@@ -44,14 +45,23 @@ PanelWindow {
         id: volumeSliderContainer
         anchors.fill: parent
         
-        // Właściwości animacji fade
+        // Właściwości animacji fade i scale
         opacity: (sharedData && sharedData.volumeVisible) ? 1.0 : 0.0
+        scale: (sharedData && sharedData.volumeVisible) ? 1.0 : 0.95
         
-        // Animacja fade in/out
+        // Animacja fade in/out - zsynchronizowana z slide
         Behavior on opacity {
             NumberAnimation { 
-                duration: 400
-                easing.type: Easing.OutQuart
+                duration: 300
+                easing.type: Easing.OutCubic
+            }
+        }
+        
+        // Lekka animacja scale dla lepszego efektu
+        Behavior on scale {
+            NumberAnimation { 
+                duration: 300
+                easing.type: Easing.OutCubic
             }
         }
         
@@ -88,18 +98,24 @@ PanelWindow {
         Rectangle {
             id: volumeSliderBackground
             anchors.fill: parent
+            anchors.rightMargin: 0
             radius: 0
-            color: "#111111"
+            color: (sharedData && sharedData.colorBackground) ? sharedData.colorBackground : "#111111"
             
             // Gradient tła
             gradient: Gradient {
-                GradientStop { position: 0.0; color: "#131313" }
-                GradientStop { position: 1.0; color: "#0d0d0d" }
+                GradientStop { position: 0.0; color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#131313" }
+                GradientStop { position: 1.0; color: (sharedData && sharedData.colorBackground) ? sharedData.colorBackground : "#0d0d0d" }
             }
-            
-            // Border z subtelnym efektem
-            border.color: "#252525"
-            border.width: 1
+        }
+        
+        // Border tylko z lewej strony
+        Rectangle {
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            width: 1
+            color: (sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#252525"
         }
 
         // Slider głośności - pionowy
@@ -119,7 +135,7 @@ PanelWindow {
                     else return "󰕾"
                 }
                 font.pixelSize: 24
-                color: "#f5f5f5"
+                color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#f5f5f5"
                 anchors.horizontalCenter: parent.horizontalCenter
             }
 
@@ -136,7 +152,7 @@ PanelWindow {
                     anchors.centerIn: parent
                     width: 5
                     height: parent.height
-                    color: "#1e1e1e"
+                    color: (sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#1e1e1e"
                     radius: 0
                 }
 
@@ -147,7 +163,7 @@ PanelWindow {
                     anchors.horizontalCenter: sliderTrack.horizontalCenter
                     width: sliderTrack.width
                     height: sliderTrack.height * (volumeValue / 100)
-                    color: "#ffffff"
+                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                     radius: 0
                     
                     Behavior on height {
@@ -207,7 +223,7 @@ PanelWindow {
                 font.family: "JetBrains Mono"
                 font.weight: Font.Medium
                 font.letterSpacing: 0.2
-                color: "#f5f5f5"
+                color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#f5f5f5"
                 anchors.horizontalCenter: parent.horizontalCenter
             }
         }

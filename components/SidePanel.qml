@@ -7,7 +7,7 @@ PanelWindow {
     id: sidePanel
     
     required property var screen
-    property string projectPath: "/home/artwik/sharpshell"  // Domyślna ścieżka
+    property string projectPath: ""  // Will be set from environment or auto-detected
     
     screen: sidePanel.screen
     
@@ -26,36 +26,42 @@ PanelWindow {
         bottom: 0
     }
 
+    property var sharedData: null
+    
     Rectangle {
         id: sidePanelRect
         anchors.fill: parent
-        color: "#0d0d0d"
+        color: (sharedData && sharedData.colorBackground) ? sharedData.colorBackground : "#0d0d0d"
         radius: 0
         border.width: 0
         
-        // Zegar na górze
-        Text {
-            id: sidePanelHoursDisplay
+        // Zegar na górze - godzina nad minutą
+        Column {
+            id: sidePanelClockColumn
             anchors.top: parent.top
-            anchors.topMargin: 12
+            anchors.topMargin: 14
             anchors.horizontalCenter: parent.horizontalCenter
-            text: "00"
-            font.pixelSize: 16
-            font.family: "JetBrains Mono"
-            font.weight: Font.Bold
-            color: "#ffffff"
-        }
-        
-        Text {
-            id: sidePanelMinutesDisplay
-            anchors.top: sidePanelHoursDisplay.bottom
-            anchors.topMargin: 4
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: "00"
-            font.pixelSize: 16
-            font.family: "JetBrains Mono"
-            font.weight: Font.Medium
-            color: "#888888"
+            spacing: 4
+            
+            Text {
+                id: sidePanelHoursDisplay
+                text: "00"
+                font.pixelSize: 20
+                font.family: "JetBrains Mono"
+                font.weight: Font.Bold
+                color: "#ffffff"
+                horizontalAlignment: Text.AlignHCenter
+            }
+            
+            Text {
+                id: sidePanelMinutesDisplay
+                text: "00"
+                font.pixelSize: 20
+                font.family: "JetBrains Mono"
+                font.weight: Font.Bold
+                color: "#ffffff"
+                horizontalAlignment: Text.AlignHCenter
+            }
         }
         
         Timer {
@@ -117,9 +123,20 @@ PanelWindow {
                     Rectangle {
                         id: workspaceLine
                         anchors.centerIn: parent
-                        width: 5
-                        height: workspaceItem.isActive ? 32 : workspaceItem.hasWindows ? 18 : 11
-                        color: workspaceItem.isActive ? "#ffffff" : workspaceItem.hasWindows ? "#888888" : "#4a4a4a"
+                        width: workspaceItem.isActive ? 6 : 4
+                        height: workspaceItem.isActive ? 36 : workspaceItem.hasWindows ? 20 : 12
+                        color: workspaceItem.isActive ? 
+                            ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff") : 
+                            workspaceItem.hasWindows ? 
+                            ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#777777") : 
+                            ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#3a3a3a")
+                        
+                        Behavior on width {
+                            NumberAnimation { 
+                                duration: 300
+                                easing.type: Easing.OutCubic
+                            }
+                        }
                         
                         Behavior on height {
                             NumberAnimation { 
@@ -177,8 +194,8 @@ PanelWindow {
                         hoverEnabled: true
                         
                         onEntered: {
-                            workspaceLine.scale = 1.3
-                            workspaceLine.opacity = 1.3
+                            workspaceLine.scale = 1.25
+                            workspaceLine.opacity = 1.2
                         }
                         
                         onExited: {
@@ -233,7 +250,7 @@ PanelWindow {
                     height: 3  // Grubość paska
                     width: Math.max(3, visualizerBarValue)  // Szerokość zależy od audio
                     anchors.horizontalCenter: parent.horizontalCenter
-                    color: "#ffffff"
+                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                     radius: 0
                     visible: true
                     
@@ -283,7 +300,19 @@ PanelWindow {
                 console.log("Cava available:", available, "cavaRunning:", cavaRunning)
                 if (available && !cavaRunning) {
                     // Użyj skryptu start-cava.sh do uruchomienia cava z poprawną konfiguracją
-                    var absScriptPath = "/home/artwik/.config/sharpshell/scripts/start-cava.sh"
+                    // Use projectPath if available, otherwise try to detect
+                    var scriptPath = (projectPath && projectPath.length > 0) ? (projectPath + "/scripts/start-cava.sh") : ""
+                    if (!scriptPath || scriptPath === "/scripts/start-cava.sh") {
+                        // Try to get from environment or use relative path
+                        Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh', '-c', 'echo \"$QUICKSHELL_PROJECT_PATH\" > /tmp/quickshell_cava_path 2>/dev/null || echo \"\" > /tmp/quickshell_cava_path']; running: true }", sidePanel)
+                        Qt.createQmlObject("import QtQuick; Timer { interval: 100; running: true; repeat: false; onTriggered: sidePanel.readCavaPath() }", sidePanel)
+                        return
+                    }
+                    if (!scriptPath || scriptPath.length === 0 || scriptPath === "/scripts/start-cava.sh") {
+                        console.log("Invalid script path for cava:", scriptPath)
+                        return
+                    }
+                    var absScriptPath = scriptPath
                     Qt.createQmlObject('import Quickshell.Io; import QtQuick; Process { command: ["bash", "' + absScriptPath + '"]; running: true }', sidePanel)
                     
                     cavaRunning = true
@@ -301,25 +330,54 @@ PanelWindow {
         xhr.open("GET", "file:///tmp/quickshell_cava")
         xhr.onreadystatechange = function() {
             if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status !== 200 && xhr.status !== 0) {
+                    // File not accessible, try to restart cava
+                    if (cavaRunning) {
+                        console.log("Cava file not accessible, status:", xhr.status)
+                        cavaRunning = false
+                        startCava()
+                    }
+                    return
+                }
                 var data = xhr.responseText
-                if (data && data.length > 5) {
-                    var values = data.trim().split(";")
-                    for (var i = 0; i < 36; i++) {
-                        var val = parseInt(values[i]) || 0
-                        var normalizedWidth = Math.max(3, (val / 100) * 24)
-                        if (visualizerBarsRepeater.itemAt(i)) {
-                            visualizerBarsRepeater.itemAt(i).visualizerBarValue = normalizedWidth
-                            var intensity = val / 100
-                            if (intensity > 0.7) {
-                                visualizerBarsRepeater.itemAt(i).color = "#ffffff"
-                            } else if (intensity > 0.4) {
-                                visualizerBarsRepeater.itemAt(i).color = "#d0d0d0"
-                            } else if (intensity > 0.1) {
-                                visualizerBarsRepeater.itemAt(i).color = "#999999"
-                            } else {
-                                visualizerBarsRepeater.itemAt(i).color = "#5a5a5a"
+                if (data && data.length > 0) {
+                    // Remove any trailing semicolons and split
+                    var cleanData = data.trim().replace(/;+$/, '')
+                    var values = cleanData.split(";")
+                    
+                    // Ensure we have at least some values
+                    if (values.length > 0) {
+                        // Use sharedData colors if available
+                        var colorText = (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                        var colorLight = (sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#d0d0d0"
+                        var colorMedium = "#999999"
+                        var colorDark = "#5a5a5a"
+                        
+                        for (var i = 0; i < 36; i++) {
+                            var val = 0
+                            if (i < values.length && values[i]) {
+                                val = parseInt(values[i]) || 0
+                            }
+                            var normalizedWidth = Math.max(3, (val / 100) * 24)
+                            if (visualizerBarsRepeater.itemAt(i)) {
+                                visualizerBarsRepeater.itemAt(i).visualizerBarValue = normalizedWidth
+                                var intensity = val / 100
+                                if (intensity > 0.7) {
+                                    visualizerBarsRepeater.itemAt(i).color = colorText
+                                } else if (intensity > 0.4) {
+                                    visualizerBarsRepeater.itemAt(i).color = colorLight
+                                } else if (intensity > 0.1) {
+                                    visualizerBarsRepeater.itemAt(i).color = colorMedium
+                                } else {
+                                    visualizerBarsRepeater.itemAt(i).color = colorDark
+                                }
                             }
                         }
+                    }
+                } else {
+                    // No data, check if cava is still running
+                    if (cavaRunning) {
+                        console.log("Cava file is empty, checking if process is running...")
                     }
                 }
             }
@@ -380,10 +438,62 @@ PanelWindow {
         }
     }
     
+    // Load project path from environment
+    function loadProjectPath() {
+        // Try to read path from environment variable
+        Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh', '-c', 'echo \"$QUICKSHELL_PROJECT_PATH\" > /tmp/quickshell_sidepanel_path 2>/dev/null || echo \"\" > /tmp/quickshell_sidepanel_path']; running: true }", sidePanel)
+        Qt.createQmlObject("import QtQuick; Timer { interval: 100; running: true; repeat: false; onTriggered: sidePanel.readProjectPath() }", sidePanel)
+    }
+    
+    function readProjectPath() {
+        var xhr = new XMLHttpRequest()
+        xhr.open("GET", "file:///tmp/quickshell_sidepanel_path")
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                var path = xhr.responseText.trim()
+                if (path && path.length > 0) {
+                    projectPath = path
+                    console.log("SidePanel project path loaded:", projectPath)
+                    // Start cava after path is loaded
+                    startCava()
+                } else {
+                    // Fallback to default
+                    projectPath = "/tmp/sharpshell"
+                    console.log("SidePanel using fallback project path:", projectPath)
+                    startCava()
+                }
+            }
+        }
+        xhr.send()
+    }
+    
+    function readCavaPath() {
+        var xhr = new XMLHttpRequest()
+        xhr.open("GET", "file:///tmp/quickshell_cava_path")
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                var path = xhr.responseText.trim()
+                if (path && path.length > 0) {
+                    projectPath = path
+                    console.log("SidePanel project path loaded from cava path:", projectPath)
+                    // Retry starting cava
+                    startCava()
+                } else {
+                    // Fallback
+                    projectPath = "/tmp/sharpshell"
+                    console.log("SidePanel using fallback project path (from readCavaPath):", projectPath)
+                    startCava()
+                }
+            }
+        }
+        xhr.send()
+    }
+    
     Component.onCompleted: {
-        // Uruchom inicjalizację visualizera i cava
+        // Uruchom inicjalizację visualizera
         visualizerInitTimer.start()
-        startCava()
+        // Load project path first, then start cava
+        loadProjectPath()
     }
 }
 

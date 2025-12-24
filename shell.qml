@@ -14,6 +14,91 @@ ShellRoot {
         property bool launcherVisible: false
         property bool volumeVisible: false
         property bool volumeEdgeHovered: false  // Czy myszka jest nad detektorem krawędzi
+        
+        // Color theme properties
+        property string colorBackground: "#0a0a0a"
+        property string colorPrimary: "#1a1a1a"
+        property string colorSecondary: "#141414"
+        property string colorText: "#ffffff"
+        property string colorAccent: "#4a9eff"
+    }
+    
+    // Color config file path - dynamically determined
+    property string colorConfigPath: ""
+    
+    // Initialize color config path from environment
+    function initializeColorPath() {
+        Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh', '-c', 'echo \"$HOME\" > /tmp/quickshell_home_root 2>/dev/null || echo \"\" > /tmp/quickshell_home_root']; running: true }", root)
+        Qt.createQmlObject("import QtQuick; Timer { interval: 100; running: true; repeat: false; onTriggered: root.readHomePathRoot() }", root)
+    }
+    
+    function readHomePathRoot() {
+        var xhr = new XMLHttpRequest()
+        xhr.open("GET", "file:///tmp/quickshell_home_root")
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                var home = xhr.responseText.trim()
+                if (home && home.length > 0) {
+                    colorConfigPath = home + "/.config/sharpshell/colors.json"
+                    console.log("Color config path initialized:", colorConfigPath)
+                    loadColors()
+                } else {
+                    // Fallback - try to use QUICKSHELL_PROJECT_PATH
+                    Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh', '-c', 'echo \"$QUICKSHELL_PROJECT_PATH\" > /tmp/quickshell_config_path 2>/dev/null || echo \"\" > /tmp/quickshell_config_path']; running: true }", root)
+                    Qt.createQmlObject("import QtQuick; Timer { interval: 100; running: true; repeat: false; onTriggered: root.readConfigPath() }", root)
+                }
+            }
+        }
+        xhr.send()
+    }
+    
+    function readConfigPath() {
+        var xhr = new XMLHttpRequest()
+        xhr.open("GET", "file:///tmp/quickshell_config_path")
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                var path = xhr.responseText.trim()
+                if (path && path.length > 0) {
+                    colorConfigPath = path + "/colors.json"
+                } else {
+                    colorConfigPath = "/tmp/sharpshell/colors.json"
+                }
+                console.log("Color config path (fallback):", colorConfigPath)
+                loadColors()
+            }
+        }
+        xhr.send()
+    }
+    
+    // Load colors on startup
+    Component.onCompleted: {
+        initializeColorPath()
+    }
+    
+    function loadColors() {
+        if (!colorConfigPath) {
+            console.log("Color config path not initialized yet")
+            return
+        }
+        var xhr = new XMLHttpRequest()
+        xhr.open("GET", "file://" + colorConfigPath)
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200 || xhr.status === 0) {
+                    try {
+                        var json = JSON.parse(xhr.responseText)
+                        if (json.background) sharedData.colorBackground = json.background
+                        if (json.primary) sharedData.colorPrimary = json.primary
+                        if (json.secondary) sharedData.colorSecondary = json.secondary
+                        if (json.text) sharedData.colorText = json.text
+                        if (json.accent) sharedData.colorAccent = json.accent
+                    } catch (e) {
+                        console.log("Error parsing colors.json:", e)
+                    }
+                }
+            }
+        }
+        xhr.send()
     }
     
     // Funkcja do zamykania/otwierania menu
@@ -79,6 +164,7 @@ ShellRoot {
                 SidePanel {
                     id: sidePanelInstance
                     screen: modelData
+                    sharedData: root.sharedData
                     lockScreenFunction: root.lockScreen
                     settingsFunction: root.openSettings
                     launcherFunction: root.openLauncher
