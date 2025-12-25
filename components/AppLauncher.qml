@@ -161,6 +161,28 @@ PanelWindow {
         console.log("Saving colors to:", colorConfigPath)
     }
     
+    function saveWallpaper(wallpaperPath) {
+        // Validate paths before saving
+        if (!projectPath || projectPath.length === 0) {
+            console.log("Project path not initialized, cannot save wallpaper")
+            return
+        }
+        if (!colorConfigPath || colorConfigPath.length === 0) {
+            console.log("Color config path not initialized, cannot save wallpaper")
+            return
+        }
+        if (!wallpaperPath || wallpaperPath.length === 0) {
+            console.log("Wallpaper path is empty, cannot save")
+            return
+        }
+        // Use Python script to save wallpaper - pass colors and wallpaper as arguments
+        var scriptPath = projectPath + "/scripts/save-colors.py"
+        var escapedWallpaper = wallpaperPath.replace(/"/g, '\\"')
+        var cmd = 'python3 "' + scriptPath + '" "' + colorBackground + '" "' + colorPrimary + '" "' + colorSecondary + '" "' + colorText + '" "' + colorAccent + '" "' + colorConfigPath + '" "' + escapedWallpaper + '"'
+        Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh', '-c', '" + cmd + "']; running: true }", appLauncherRoot)
+        console.log("Saving wallpaper to:", colorConfigPath, "path:", wallpaperPath)
+    }
+    
     function updateColor(colorType, value) {
         console.log("Updating color:", colorType, "to", value)
         var oldValue = ""
@@ -233,164 +255,164 @@ PanelWindow {
     property var colorPresets: {
         "Dark": {
             background: "#0a0a0a",
-            primary: "#1f1f1f",
-            secondary: "#151515",
+            primary: "#252525",
+            secondary: "#1a1a1a",
             text: "#ffffff",
-            accent: "#5dade2"
+            accent: "#6bb6ff"
         },
         "Ocean": {
             background: "#0a1628",
-            primary: "#1a2d3f",
+            primary: "#1e3a52",
             secondary: "#152535",
             text: "#ffffff",
-            accent: "#3498db"
+            accent: "#4fc3f7"
         },
         "Forest": {
             background: "#0d1a0d",
-            primary: "#1a2e1a",
+            primary: "#1e3a1e",
             secondary: "#152515",
             text: "#ffffff",
-            accent: "#52c17a"
+            accent: "#66bb6a"
         },
         "Violet": {
             background: "#1a0d26",
-            primary: "#2d1f3f",
+            primary: "#2e1f3f",
             secondary: "#231a35",
             text: "#ffffff",
-            accent: "#9b59b6"
+            accent: "#ab47bc"
         },
         "Crimson": {
             background: "#1a0a0a",
-            primary: "#2d1a1a",
+            primary: "#2e1a1a",
             secondary: "#231515",
             text: "#ffffff",
-            accent: "#e74c3c"
+            accent: "#ef5350"
         },
         "Amber": {
             background: "#1a150d",
-            primary: "#2d251a",
+            primary: "#2e251a",
             secondary: "#231f15",
             text: "#ffffff",
-            accent: "#f39c12"
+            accent: "#ffb74d"
         },
         "Teal": {
             background: "#0d1a1a",
-            primary: "#1a2e2e",
+            primary: "#1e2e2e",
             secondary: "#152525",
             text: "#ffffff",
-            accent: "#1abc9c"
+            accent: "#26a69a"
         },
         "Rose": {
             background: "#1a0d15",
-            primary: "#2d1a23",
+            primary: "#2e1a23",
             secondary: "#23151f",
             text: "#ffffff",
-            accent: "#e91e63"
+            accent: "#f06292"
         },
         "Sunset": {
             background: "#1a150d",
-            primary: "#2d251a",
+            primary: "#2e251a",
             secondary: "#231f15",
             text: "#ffffff",
-            accent: "#f39c12"
+            accent: "#ff9800"
         },
         "Midnight": {
             background: "#0a0d1a",
-            primary: "#1a1f2d",
+            primary: "#1e1f2d",
             secondary: "#151a23",
             text: "#ffffff",
-            accent: "#6c7a89"
+            accent: "#78909c"
         },
         "Emerald": {
             background: "#0d1a0d",
-            primary: "#1a2e1a",
+            primary: "#1e3a1e",
             secondary: "#152515",
             text: "#ffffff",
-            accent: "#27ae60"
+            accent: "#4caf50"
         },
         "Lavender": {
             background: "#1a0d1a",
-            primary: "#2d1a2d",
+            primary: "#2e1a2d",
             secondary: "#231523",
             text: "#ffffff",
-            accent: "#9b59b6"
+            accent: "#ba68c8"
         },
         "Sapphire": {
             background: "#0d0d1a",
-            primary: "#1a1f2d",
+            primary: "#1e1f2d",
             secondary: "#151a23",
             text: "#ffffff",
-            accent: "#3498db"
+            accent: "#42a5f5"
         },
         "Coral": {
             background: "#1a0d0d",
-            primary: "#2d1a1a",
+            primary: "#2e1a1a",
             secondary: "#231515",
             text: "#ffffff",
-            accent: "#e67e22"
+            accent: "#ff7043"
         },
         "Mint": {
             background: "#0d1a0d",
-            primary: "#1a2e1a",
+            primary: "#1e3a1e",
             secondary: "#152515",
             text: "#ffffff",
-            accent: "#1abc9c"
+            accent: "#4dd0e1"
         },
         "Plum": {
             background: "#1a0d1a",
-            primary: "#2d1a2d",
+            primary: "#2e1a2d",
             secondary: "#231523",
             text: "#ffffff",
-            accent: "#8e44ad"
+            accent: "#9575cd"
         },
         "Gold": {
             background: "#1a150d",
-            primary: "#2d251a",
+            primary: "#2e251a",
             secondary: "#231f15",
             text: "#ffffff",
-            accent: "#f1c40f"
+            accent: "#ffd54f"
         },
         "Monochrome": {
             background: "#000000",
-            primary: "#1a1a1a",
-            secondary: "#0d0d0d",
+            primary: "#1f1f1f",
+            secondary: "#0f0f0f",
             text: "#ffffff",
-            accent: "#ffffff"
+            accent: "#888888"
         },
         "Cherry": {
             background: "#1a0a0a",
-            primary: "#2d1a1a",
+            primary: "#2e1a1a",
             secondary: "#231515",
             text: "#ffffff",
-            accent: "#e91e63"
+            accent: "#ec407a"
         },
         "Azure": {
             background: "#0d1a26",
-            primary: "#1a2d3f",
+            primary: "#1e2d3f",
             secondary: "#152535",
             text: "#ffffff",
-            accent: "#3498db"
+            accent: "#29b6f6"
         },
         "Jade": {
             background: "#0d1a0d",
-            primary: "#1a2e1a",
+            primary: "#1e3a1e",
             secondary: "#152515",
             text: "#ffffff",
-            accent: "#16a085"
+            accent: "#26c6da"
         },
         "Ruby": {
             background: "#1a0a0a",
-            primary: "#2d1a1a",
+            primary: "#2e1a1a",
             secondary: "#231515",
             text: "#ffffff",
-            accent: "#c0392b"
+            accent: "#d32f2f"
         },
         "Indigo": {
             background: "#0d0d1a",
-            primary: "#1a1f2d",
+            primary: "#1e1f2d",
             secondary: "#151a23",
             text: "#ffffff",
-            accent: "#5b2c6f"
+            accent: "#7986cb"
         }
     }
     
@@ -582,6 +604,9 @@ PanelWindow {
     
     function setWallpaper(wallpaperPath) {
         console.log("Setting wallpaper via Quickshell:", wallpaperPath)
+        
+        // Save wallpaper path to colors.json for persistence
+        saveWallpaper(wallpaperPath)
         
         // Use Quickshell's built-in wallpaper system (like Caelestia Shell)
         // Set wallpaper directly in sharedData or root component
@@ -1875,47 +1900,47 @@ PanelWindow {
                 id: modeItem
                 width: modesList.width
                     height: 64
-                    color: selectedIndex === index ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (modeItemMouseArea.containsMouse ? ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : colorSecondary) : "transparent")
+                    color: selectedIndex === index ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (modeItemMouseArea.containsMouse ? ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : "transparent")
                 radius: 0
-                    scale: (selectedIndex === index || modeItemMouseArea.containsMouse) ? 1.01 : 1.0
+                    scale: (selectedIndex === index || modeItemMouseArea.containsMouse) ? 1.015 : 1.0
                 
                 Behavior on color {
                         ColorAnimation { 
-                            duration: 180
-                            easing.type: Easing.OutQuart
+                            duration: 200
+                            easing.type: Easing.OutCubic
                         }
                     }
                     
                     Behavior on scale {
                         NumberAnimation {
-                            duration: 180
-                            easing.type: Easing.OutQuart
+                            duration: 200
+                            easing.type: Easing.OutCubic
                         }
                 }
                 
                 Row {
                     anchors.left: parent.left
-                    anchors.leftMargin: 18
+                    anchors.leftMargin: 20
                     anchors.verticalCenter: parent.verticalCenter
-                    spacing: 14
+                    spacing: 16
                     
                     Text {
                         text: model.icon || ""
-                        font.pixelSize: 20
+                        font.pixelSize: 22
                         color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                         anchors.verticalCenter: parent.verticalCenter
                     }
                     
                     Column {
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: 5
+                        spacing: 4
                         
                         Text {
                             text: model.name
                             font.pixelSize: 15
                             font.family: "JetBrains Mono"
-                            font.weight: Font.Medium
-                            color: selectedIndex === index ? colorText : (modeItemMouseArea.containsMouse ? colorText : ((sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#cccccc"))
+                            font.weight: selectedIndex === index ? Font.Bold : Font.Medium
+                            color: selectedIndex === index ? colorText : (modeItemMouseArea.containsMouse ? colorText : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"))
                         }
                         
                         Text {
@@ -1923,6 +1948,7 @@ PanelWindow {
                             font.pixelSize: 12
                             font.family: "JetBrains Mono"
                             color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
+                            opacity: selectedIndex === index ? 0.85 : (modeItemMouseArea.containsMouse ? 0.75 : 0.6)
                         }
                     }
                 }
@@ -1987,7 +2013,7 @@ PanelWindow {
                                 TextInput {
                                     id: searchInput
                                     anchors.fill: parent
-                                    anchors.margins: 16
+                                    anchors.margins: 20
                                     font.pixelSize: 15
                                     font.family: "JetBrains Mono"
                                     font.weight: Font.Medium
@@ -2057,7 +2083,7 @@ PanelWindow {
                                 width: parent.width
                                 height: parent.height - searchBox.height - parent.spacing
                                 clip: true
-                                spacing: 2
+                                spacing: 4
                                 
                                 model: filteredApps
                                 currentIndex: selectedIndex
@@ -2109,22 +2135,22 @@ PanelWindow {
                                 delegate: Rectangle {
                                 id: appItem
                                 width: appsList.width
-                                height: 56
-                                color: selectedIndex === index ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (appItemMouseArea.containsMouse ? colorSecondary : "transparent")
+                                height: 64
+                                color: selectedIndex === index ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (appItemMouseArea.containsMouse ? ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : "transparent")
                                 radius: 0
                                 scale: (selectedIndex === index || appItemMouseArea.containsMouse) ? 1.01 : 1.0
                                 
                                 Behavior on color {
                                     ColorAnimation { 
-                                        duration: 180
-                                        easing.type: Easing.OutQuart
+                                        duration: 200
+                                        easing.type: Easing.OutCubic
                                     }
                                 }
                                 
                                 Behavior on scale {
                                     NumberAnimation {
-                                        duration: 180
-                                        easing.type: Easing.OutQuart
+                                        duration: 200
+                                        easing.type: Easing.OutCubic
                                     }
                                 }
                                 
@@ -2136,7 +2162,7 @@ PanelWindow {
                                 
                                 Column {
                                     anchors.left: parent.left
-                                    anchors.leftMargin: 16
+                                    anchors.leftMargin: 20
                                     anchors.verticalCenter: parent.verticalCenter
                                     spacing: 4
                                     
@@ -2144,9 +2170,9 @@ PanelWindow {
                                         text: appItem.appName
                                         font.pixelSize: 15
                                         font.family: "JetBrains Mono"
-                                        font.weight: Font.Medium
+                                        font.weight: selectedIndex === index ? Font.Bold : Font.Medium
                                         font.letterSpacing: 0.1
-                                        color: selectedIndex === index ? colorText : (appItemMouseArea.containsMouse ? colorText : ((sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#d0d0d0"))
+                                        color: selectedIndex === index ? colorText : (appItemMouseArea.containsMouse ? colorText : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"))
                                     }
 
                                     Text {
@@ -2156,6 +2182,7 @@ PanelWindow {
                                         font.weight: Font.Normal
                                         font.letterSpacing: 0.1
                                         color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
+                                        opacity: selectedIndex === index ? 0.85 : (appItemMouseArea.containsMouse ? 0.75 : 0.6)
                                         visible: appItem.appComment && appItem.appComment.length > 0
                                     }
                                 }
@@ -2194,7 +2221,7 @@ PanelWindow {
             ListView {
                 id: packagesOptionsList
                 anchors.fill: parent
-                anchors.margins: 18
+                anchors.margins: 20
                 visible: currentMode === 1 && currentPackageMode === -1
                 clip: true
                 z: 1
@@ -2221,47 +2248,47 @@ PanelWindow {
                     id: packageOptionItem
                     width: packagesOptionsList.width
                     height: 64
-                    color: selectedIndex === index ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (packageOptionItemMouseArea.containsMouse ? colorSecondary : "transparent")
+                    color: selectedIndex === index ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (packageOptionItemMouseArea.containsMouse ? ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : "transparent")
                     radius: 0
-                    scale: (selectedIndex === index || packageOptionItemMouseArea.containsMouse) ? 1.01 : 1.0
+                    scale: (selectedIndex === index || packageOptionItemMouseArea.containsMouse) ? 1.015 : 1.0
                     
                     Behavior on color {
                         ColorAnimation { 
-                            duration: 180
-                            easing.type: Easing.OutQuart
+                            duration: 200
+                            easing.type: Easing.OutCubic
                         }
                     }
                     
                     Behavior on scale {
                         NumberAnimation {
-                            duration: 180
-                            easing.type: Easing.OutQuart
+                            duration: 200
+                            easing.type: Easing.OutCubic
                         }
                     }
                     
                     Row {
                         anchors.left: parent.left
-                        anchors.leftMargin: 18
+                        anchors.leftMargin: 20
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: 14
+                        spacing: 16
                         
                         Text {
                             text: model.icon || ""
-                            font.pixelSize: 20
+                            font.pixelSize: 22
                             color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                             anchors.verticalCenter: parent.verticalCenter
                         }
                         
                         Column {
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: 5
+                        spacing: 4
                         
                         Text {
                             text: model.name || "Unknown"
                                 font.pixelSize: 15
                             font.family: "JetBrains Mono"
-                            font.weight: Font.Medium
-                            color: selectedIndex === index ? colorText : (packageOptionItemMouseArea.containsMouse ? colorText : ((sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#cccccc"))
+                            font.weight: selectedIndex === index ? Font.Bold : Font.Medium
+                            color: selectedIndex === index ? colorText : (packageOptionItemMouseArea.containsMouse ? colorText : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"))
                         }
                         
                         Text {
@@ -2269,6 +2296,7 @@ PanelWindow {
                                 font.pixelSize: 12
                             font.family: "JetBrains Mono"
                             color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
+                            opacity: selectedIndex === index ? 0.85 : (packageOptionItemMouseArea.containsMouse ? 0.75 : 0.6)
                             }
                         }
                     }
@@ -2311,7 +2339,7 @@ PanelWindow {
             ListView {
                 id: installSourceList
                 anchors.fill: parent
-                anchors.margins: 18
+                anchors.margins: 20
                 visible: currentMode === 1 && currentPackageMode === 0
                 clip: true
                 z: 1
@@ -2324,34 +2352,34 @@ PanelWindow {
                 delegate: Rectangle {
                     id: installSourceItem
                     width: installSourceList.width
-                    height: 60
-                    color: selectedIndex === index ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (installSourceItemMouseArea.containsMouse ? colorSecondary : "transparent")
+                    height: 64
+                    color: selectedIndex === index ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (installSourceItemMouseArea.containsMouse ? ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : "transparent")
                     radius: 0
-                    scale: (selectedIndex === index || installSourceItemMouseArea.containsMouse) ? 1.02 : 1.0
+                    scale: (selectedIndex === index || installSourceItemMouseArea.containsMouse) ? 1.015 : 1.0
                     
                     Behavior on color {
                         ColorAnimation { 
-                            duration: 180
-                            easing.type: Easing.OutQuart
+                            duration: 200
+                            easing.type: Easing.OutCubic
                         }
                     }
                     
                     Behavior on scale {
                         NumberAnimation {
-                            duration: 180
-                            easing.type: Easing.OutQuart
+                            duration: 200
+                            easing.type: Easing.OutCubic
                         }
                     }
                     
                     Row {
                         anchors.left: parent.left
-                        anchors.leftMargin: 15
+                        anchors.leftMargin: 20
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: 11
+                        spacing: 16
                         
                         Text {
                             text: model.icon || ""
-                            font.pixelSize: 18
+                            font.pixelSize: 22
                             color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                             anchors.verticalCenter: parent.verticalCenter
                         }
@@ -2362,17 +2390,18 @@ PanelWindow {
                             
                             Text {
                                 text: model.name || "Unknown"
-                                font.pixelSize: 14
+                                font.pixelSize: 15
                                 font.family: "JetBrains Mono"
-                                font.weight: Font.Medium
-                                color: selectedIndex === index ? colorText : ((sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#cccccc")
+                                font.weight: selectedIndex === index ? Font.Bold : Font.Medium
+                                color: selectedIndex === index ? colorText : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
                             }
                             
                             Text {
                                 text: model.description || ""
-                                font.pixelSize: 11
+                                font.pixelSize: 12
                                 font.family: "JetBrains Mono"
                                 color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
+                                opacity: selectedIndex === index ? 0.85 : (installSourceItemMouseArea.containsMouse ? 0.75 : 0.6)
                             }
                         }
                     }
@@ -2422,7 +2451,7 @@ PanelWindow {
             Item {
                 id: pacmanSearchMode
                 anchors.fill: parent
-                anchors.margins: 18
+                anchors.margins: 20
                 visible: currentMode === 1 && currentPackageMode === 1
                 
                 Column {
@@ -2445,7 +2474,7 @@ PanelWindow {
                         TextInput {
                             id: pacmanSearchInput
                             anchors.fill: parent
-                            anchors.margins: 15
+                            anchors.margins: 20
                             font.pixelSize: 14
                             font.family: "JetBrains Mono"
                             color: colorText
@@ -2528,22 +2557,22 @@ PanelWindow {
                         delegate: Rectangle {
                             id: packageItem
                             width: pacmanPackagesList.width
-                            height: 54
-                            color: selectedIndex === index ? colorPrimary : (packageItemMouseArea.containsMouse ? colorSecondary : "transparent")
+                            height: 64
+                            color: selectedIndex === index ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (packageItemMouseArea.containsMouse ? ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : "transparent")
                             radius: 0
                             scale: (selectedIndex === index || packageItemMouseArea.containsMouse) ? 1.01 : 1.0
                             
                             Behavior on color {
                         ColorAnimation { 
-                            duration: 180
-                            easing.type: Easing.OutQuart
+                            duration: 200
+                            easing.type: Easing.OutCubic
                         }
                     }
                     
                     Behavior on scale {
                         NumberAnimation {
-                            duration: 180
-                            easing.type: Easing.OutQuart
+                            duration: 200
+                            easing.type: Easing.OutCubic
                         }
                             }
                             
@@ -2552,23 +2581,24 @@ PanelWindow {
                             
                             Column {
                                 anchors.left: parent.left
-                                anchors.leftMargin: 15
+                                anchors.leftMargin: 20
                                 anchors.verticalCenter: parent.verticalCenter
                                 spacing: 4
                                 
                                 Text {
                                     text: packageItem.packageName
-                                    font.pixelSize: 14
+                                    font.pixelSize: 15
                                     font.family: "JetBrains Mono"
-                                    font.weight: Font.Medium
-                                    color: selectedIndex === index ? colorText : ((sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#cccccc")
+                                    font.weight: selectedIndex === index ? Font.Bold : Font.Medium
+                                    color: selectedIndex === index ? colorText : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
                                 }
                                 
                                 Text {
                                     text: packageItem.packageDescription
-                                    font.pixelSize: 11
+                                    font.pixelSize: 12
                                     font.family: "JetBrains Mono"
                                     color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
+                                    opacity: selectedIndex === index ? 0.85 : (packageItemMouseArea.containsMouse ? 0.75 : 0.6)
                                     visible: packageItem.packageDescription && packageItem.packageDescription.length > 0
                                 }
                             }
@@ -2602,7 +2632,7 @@ PanelWindow {
             Item {
                 id: aurSearchMode
                 anchors.fill: parent
-                anchors.margins: 18
+                anchors.margins: 20
                 visible: currentMode === 1 && currentPackageMode === 2
                 
                 Column {
@@ -2625,7 +2655,7 @@ PanelWindow {
                         TextInput {
                             id: aurSearchInput
                             anchors.fill: parent
-                            anchors.margins: 15
+                            anchors.margins: 20
                             font.pixelSize: 14
                             font.family: "JetBrains Mono"
                             color: colorText
@@ -2708,22 +2738,22 @@ PanelWindow {
                         delegate: Rectangle {
                             id: aurPackageItem
                             width: aurPackagesList.width
-                            height: 54
-                            color: selectedIndex === index ? colorPrimary : (aurPackageItemMouseArea.containsMouse ? colorSecondary : "transparent")
+                            height: 64
+                            color: selectedIndex === index ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (aurPackageItemMouseArea.containsMouse ? ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : "transparent")
                             radius: 0
                             scale: (selectedIndex === index || aurPackageItemMouseArea.containsMouse) ? 1.01 : 1.0
                             
                             Behavior on color {
                         ColorAnimation { 
-                            duration: 180
-                            easing.type: Easing.OutQuart
+                            duration: 200
+                            easing.type: Easing.OutCubic
                         }
                     }
                     
                     Behavior on scale {
                         NumberAnimation {
-                            duration: 180
-                            easing.type: Easing.OutQuart
+                            duration: 200
+                            easing.type: Easing.OutCubic
                         }
                             }
                             
@@ -2732,23 +2762,24 @@ PanelWindow {
                             
                             Column {
                                 anchors.left: parent.left
-                                anchors.leftMargin: 15
+                                anchors.leftMargin: 20
                                 anchors.verticalCenter: parent.verticalCenter
                                 spacing: 4
                                 
                                 Text {
                                     text: aurPackageItem.packageName
-                                    font.pixelSize: 14
+                                    font.pixelSize: 15
                                     font.family: "JetBrains Mono"
-                                    font.weight: Font.Medium
-                                    color: selectedIndex === index ? colorText : ((sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#cccccc")
+                                    font.weight: selectedIndex === index ? Font.Bold : Font.Medium
+                                    color: selectedIndex === index ? colorText : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
                                 }
                                 
                                 Text {
                                     text: aurPackageItem.packageDescription
-                                    font.pixelSize: 11
+                                    font.pixelSize: 12
                                     font.family: "JetBrains Mono"
                                     color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
+                                    opacity: selectedIndex === index ? 0.85 : (aurPackageItemMouseArea.containsMouse ? 0.75 : 0.6)
                                     visible: aurPackageItem.packageDescription && aurPackageItem.packageDescription.length > 0
                                 }
                             }
@@ -2782,7 +2813,7 @@ PanelWindow {
             ListView {
                 id: removeSourceList
                 anchors.fill: parent
-                anchors.margins: 18
+                anchors.margins: 20
                 visible: currentMode === 1 && currentPackageMode === 3
                 clip: true
                 z: 1
@@ -2795,34 +2826,34 @@ PanelWindow {
                 delegate: Rectangle {
                     id: removeSourceItem
                     width: removeSourceList.width
-                    height: 60
-                    color: selectedIndex === index ? colorPrimary : (removeSourceItemMouseArea.containsMouse ? colorSecondary : "transparent")
+                    height: 64
+                    color: selectedIndex === index ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (removeSourceItemMouseArea.containsMouse ? ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : "transparent")
                     radius: 0
-                    scale: (selectedIndex === index || removeSourceItemMouseArea.containsMouse) ? 1.02 : 1.0
+                    scale: (selectedIndex === index || removeSourceItemMouseArea.containsMouse) ? 1.015 : 1.0
                     
                     Behavior on color {
                         ColorAnimation { 
-                            duration: 180
-                            easing.type: Easing.OutQuart
+                            duration: 200
+                            easing.type: Easing.OutCubic
                         }
                     }
                     
                     Behavior on scale {
                         NumberAnimation {
-                            duration: 180
-                            easing.type: Easing.OutQuart
+                            duration: 200
+                            easing.type: Easing.OutCubic
                         }
                     }
                     
                     Row {
                         anchors.left: parent.left
-                        anchors.leftMargin: 15
+                        anchors.leftMargin: 20
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: 11
+                        spacing: 16
                         
                         Text {
                             text: model.icon || ""
-                            font.pixelSize: 18
+                            font.pixelSize: 22
                             color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                             anchors.verticalCenter: parent.verticalCenter
                         }
@@ -2833,17 +2864,18 @@ PanelWindow {
                             
                             Text {
                                 text: model.name || "Unknown"
-                                font.pixelSize: 14
+                                font.pixelSize: 15
                                 font.family: "JetBrains Mono"
-                                font.weight: Font.Medium
-                                color: selectedIndex === index ? colorText : ((sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#cccccc")
+                                font.weight: selectedIndex === index ? Font.Bold : Font.Medium
+                                color: selectedIndex === index ? colorText : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
                             }
                             
                             Text {
                                 text: model.description || ""
-                                font.pixelSize: 11
+                                font.pixelSize: 12
                                 font.family: "JetBrains Mono"
                                 color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
+                                opacity: selectedIndex === index ? 0.85 : (removeSourceItemMouseArea.containsMouse ? 0.75 : 0.6)
                             }
                         }
                     }
@@ -2895,7 +2927,7 @@ PanelWindow {
             Item {
                 id: removeSearchMode
                 anchors.fill: parent
-                anchors.margins: 18
+                anchors.margins: 20
                 visible: currentMode === 1 && currentPackageMode === 4
                 
                 Column {
@@ -2918,7 +2950,7 @@ PanelWindow {
                         TextInput {
                             id: removeSearchInput
                             anchors.fill: parent
-                            anchors.margins: 15
+                            anchors.margins: 20
                             font.pixelSize: 14
                             font.family: "JetBrains Mono"
                             color: colorText
@@ -3001,22 +3033,22 @@ PanelWindow {
                         delegate: Rectangle {
                             id: installedPackageItem
                             width: removePackagesList.width
-                            height: 54
-                            color: selectedIndex === index ? colorPrimary : (installedPackageItemMouseArea.containsMouse ? colorSecondary : "transparent")
+                            height: 64
+                            color: selectedIndex === index ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (installedPackageItemMouseArea.containsMouse ? ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : "transparent")
                             radius: 0
                             scale: (selectedIndex === index || installedPackageItemMouseArea.containsMouse) ? 1.01 : 1.0
                             
                             Behavior on color {
                         ColorAnimation { 
-                            duration: 180
-                            easing.type: Easing.OutQuart
+                            duration: 200
+                            easing.type: Easing.OutCubic
                         }
                     }
                     
                     Behavior on scale {
                         NumberAnimation {
-                            duration: 180
-                            easing.type: Easing.OutQuart
+                            duration: 200
+                            easing.type: Easing.OutCubic
                         }
                             }
                             
@@ -3025,23 +3057,24 @@ PanelWindow {
                             
                             Column {
                                 anchors.left: parent.left
-                                anchors.leftMargin: 15
+                                anchors.leftMargin: 20
                                 anchors.verticalCenter: parent.verticalCenter
                                 spacing: 4
                                 
                                 Text {
                                     text: installedPackageItem.packageName
-                                    font.pixelSize: 14
+                                    font.pixelSize: 15
                                     font.family: "JetBrains Mono"
-                                    font.weight: Font.Medium
-                                    color: selectedIndex === index ? colorText : ((sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#cccccc")
+                                    font.weight: selectedIndex === index ? Font.Bold : Font.Medium
+                                    color: selectedIndex === index ? colorText : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
                                 }
                                 
                                 Text {
                                     text: installedPackageItem.packageVersion
-                                    font.pixelSize: 11
+                                    font.pixelSize: 12
                                     font.family: "JetBrains Mono"
                                     color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
+                                    opacity: selectedIndex === index ? 0.85 : (installedPackageItemMouseArea.containsMouse ? 0.75 : 0.6)
                                     visible: installedPackageItem.packageVersion && installedPackageItem.packageVersion.length > 0
                                 }
                             }
@@ -3079,7 +3112,7 @@ PanelWindow {
             Item {
                 id: removeAurSearchMode
                 anchors.fill: parent
-                anchors.margins: 18
+                anchors.margins: 20
                 visible: currentMode === 1 && currentPackageMode === 5
                 
                 Column {
@@ -3102,7 +3135,7 @@ PanelWindow {
                         TextInput {
                             id: removeAurSearchInput
                             anchors.fill: parent
-                            anchors.margins: 15
+                            anchors.margins: 20
                             font.pixelSize: 14
                             font.family: "JetBrains Mono"
                             color: colorText
@@ -3205,7 +3238,7 @@ PanelWindow {
                             
                             Column {
                                 anchors.left: parent.left
-                                anchors.leftMargin: 15
+                                anchors.leftMargin: 20
                                 anchors.verticalCenter: parent.verticalCenter
                                 spacing: 4
                                 
@@ -3263,7 +3296,7 @@ PanelWindow {
                 ListView {
                     id: settingsList
                     anchors.fill: parent
-                    anchors.margins: 18
+                    anchors.margins: 20
                     visible: currentSettingsMode === -1
                     clip: true
                     
@@ -3275,55 +3308,55 @@ PanelWindow {
                     
                     delegate: Rectangle {
                         width: settingsList.width
-                        height: 60
-                        color: (selectedIndex === index) ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (settingsItemMouseArea.containsMouse ? ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : colorSecondary) : "transparent")
-                        scale: settingsItemMouseArea.containsMouse ? 1.02 : 1.0
+                        height: 64
+                        color: (selectedIndex === index) ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (settingsItemMouseArea.containsMouse ? ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : "transparent")
+                        scale: settingsItemMouseArea.containsMouse ? 1.015 : 1.0
                         
                         Behavior on color {
                             ColorAnimation {
-                                duration: 180
-                                easing.type: Easing.OutQuart
+                                duration: 200
+                                easing.type: Easing.OutCubic
                             }
                         }
                         
                         Behavior on scale {
                             NumberAnimation {
-                                duration: 180
-                                easing.type: Easing.OutQuart
+                                duration: 200
+                                easing.type: Easing.OutCubic
                             }
                         }
                         
                         Row {
-                            anchors.fill: parent
-                            anchors.margins: 12
-                            spacing: 12
+                            anchors.left: parent.left
+                            anchors.leftMargin: 20
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: 16
                             
                             Text {
                                 text: model.icon
-                                font.pixelSize: 24
+                                font.pixelSize: 22
                                 color: (selectedIndex === index) ? ((sharedData && sharedData.colorText) ? sharedData.colorText : colorText) : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
                                 anchors.verticalCenter: parent.verticalCenter
-                                width: 30
-                                horizontalAlignment: Text.AlignHCenter
                             }
                             
                             Column {
                                 anchors.verticalCenter: parent.verticalCenter
-                                spacing: 2
+                                spacing: 4
                                 
                                 Text {
                                     text: model.name
-                                    font.pixelSize: 14
+                                    font.pixelSize: 15
                                     font.family: "JetBrains Mono"
-                                    font.weight: Font.Medium
+                                    font.weight: selectedIndex === index ? Font.Bold : Font.Medium
                                     color: (selectedIndex === index) ? ((sharedData && sharedData.colorText) ? sharedData.colorText : colorText) : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
                                 }
                                 
                                 Text {
                                     text: model.description
-                                    font.pixelSize: 11
+                                    font.pixelSize: 12
                                     font.family: "JetBrains Mono"
                                     color: ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
+                                    opacity: selectedIndex === index ? 0.85 : (settingsItemMouseArea.containsMouse ? 0.75 : 0.6)
                                 }
                             }
                         }
@@ -3358,77 +3391,11 @@ PanelWindow {
                     anchors.fill: parent
                     visible: currentSettingsMode === 0
                     
-                    // Header
-                    Rectangle {
-                        id: wallpaperHeader
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        height: 50
-                        color: "transparent"
-                        
-                        Row {
-                            anchors.fill: parent
-                            anchors.margins: 12
-                            spacing: 12
-                            
-                            // Back button
-                            Rectangle {
-                                width: 30
-                                height: 30
-                                color: wallpaperBackMouseArea.containsMouse ? colorPrimary : "transparent"
-                                radius: 0
-                                anchors.verticalCenter: parent.verticalCenter
-                                
-                                Text {
-                                    text: "󰁍"
-                                    font.pixelSize: 18
-                                    color: colorText
-                                    anchors.centerIn: parent
-                                }
-                                
-                                MouseArea {
-                                    id: wallpaperBackMouseArea
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        currentSettingsMode = -1  // Back to Settings list
-                                        selectedIndex = 0
-                                    }
-                                }
-                            }
-                            
-                            Text {
-                                text: "Wallpaper"
-                                font.pixelSize: 18
-                                font.family: "JetBrains Mono"
-                                font.weight: Font.Bold
-                                color: colorText
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
-                            
-                            Text {
-                                text: "(" + wallpapersModel.count + " images)"
-                                font.pixelSize: 12
-                                font.family: "JetBrains Mono"
-                                color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
-                        }
-                    }
-                    
                     // Grid z tapetami
                     GridView {
                         id: wallpapersGrid
-                        anchors.top: wallpaperHeader.bottom
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.bottom: parent.bottom
-                        anchors.leftMargin: 18
-                        anchors.rightMargin: 18
-                        anchors.topMargin: 6
-                        anchors.bottomMargin: 12
+                        anchors.fill: parent
+                        anchors.margins: 20
                         cellWidth: Math.floor(width / 3)  // 3 tapety w rzędzie
                         cellHeight: 124  // 95 * 1.3 = 123.5, rounded to 124 (30% taller)
                         clip: true
@@ -3554,7 +3521,7 @@ PanelWindow {
                         
                         Row {
                             anchors.fill: parent
-                            anchors.margins: 12
+                            anchors.margins: 20
                             spacing: 12
                             
                             // Back button
@@ -3601,7 +3568,7 @@ PanelWindow {
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom
-                        anchors.margins: 18
+                        anchors.margins: 20
                         spacing: 16
                         
                         // Toggle switch
@@ -3728,7 +3695,7 @@ PanelWindow {
                                     width: parent.width - 24
                                     height: parent.height
                                     anchors.left: parent.left
-                                    anchors.leftMargin: 12
+                                    anchors.leftMargin: 20
                                     spacing: 12
                                     
                                     Text {
@@ -3837,66 +3804,14 @@ PanelWindow {
                     anchors.fill: parent
                     visible: currentSettingsMode === 3
                     
-                    // Header
-                    Rectangle {
-                        id: colorsMenuHeader
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        height: 50
-                        color: "transparent"
-                        
-                        Row {
-                            anchors.fill: parent
-                            anchors.margins: 12
-                            spacing: 12
-                            
-                            // Back button
-                            Rectangle {
-                                width: 30
-                                height: 30
-                                color: colorsMenuBackMouseArea.containsMouse ? colorPrimary : "transparent"
-                                radius: 0
-                                anchors.verticalCenter: parent.verticalCenter
-                                
-                                Text {
-                                    text: "󰁍"
-                                    font.pixelSize: 18
-                                    color: colorText
-                                    anchors.centerIn: parent
-                                }
-                                
-                                MouseArea {
-                                    id: colorsMenuBackMouseArea
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        currentSettingsMode = -1  // Back to Settings list
-                                        selectedIndex = 0
-                                    }
-                                }
-                            }
-                            
-                            Text {
-                                text: "Colors"
-                                font.pixelSize: 16
-                                font.family: "JetBrains Mono"
-                                font.weight: Font.Medium
-                                color: colorText
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
-                        }
-                    }
-                    
                     // Colors menu list
                     ListView {
                         id: colorsMenuList
-                        anchors.top: colorsMenuHeader.bottom
+                        anchors.fill: parent
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom
-                        anchors.margins: 18
+                        anchors.margins: 20
                         visible: true
                         clip: true
                         
@@ -3908,48 +3823,55 @@ PanelWindow {
                         
                         delegate: Rectangle {
                             width: colorsMenuList.width
-                            height: 60
-                            color: (selectedIndex === index) ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (colorsMenuMouseArea.containsMouse ? colorSecondary : "transparent")
-                            scale: colorsMenuMouseArea.containsMouse ? 1.02 : 1.0
+                            height: 64
+                            color: (selectedIndex === index) ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (colorsMenuMouseArea.containsMouse ? ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : "transparent")
+                            scale: colorsMenuMouseArea.containsMouse ? 1.01 : 1.0
+                            
+                            Behavior on color {
+                                ColorAnimation {
+                                    duration: 200
+                                    easing.type: Easing.OutCubic
+                                }
+                            }
                             
                             Behavior on scale {
                                 NumberAnimation {
-                                    duration: 150
-                                    easing.type: Easing.OutQuart
+                                    duration: 200
+                                    easing.type: Easing.OutCubic
                                 }
                             }
                             
                             Row {
-                                anchors.fill: parent
-                                anchors.margins: 12
-                                spacing: 12
+                                anchors.left: parent.left
+                                anchors.leftMargin: 20
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: 16
                                 
                                 Text {
                                     text: model.icon
-                                    font.pixelSize: 24
-                                    color: (selectedIndex === index) ? colorText : ((sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.4) : "#888888")
+                                    font.pixelSize: 22
+                                    color: (selectedIndex === index) ? colorText : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
                                     anchors.verticalCenter: parent.verticalCenter
-                                    width: 30
-                                    horizontalAlignment: Text.AlignHCenter
                                 }
                                 
                                 Column {
                                     anchors.verticalCenter: parent.verticalCenter
-                                    spacing: 2
+                                    spacing: 4
                                     
                                     Text {
                                         text: model.name
-                                        font.pixelSize: 14
+                                        font.pixelSize: 15
                                         font.family: "JetBrains Mono"
-                                        font.weight: Font.Medium
-                                        color: (selectedIndex === index) ? colorText : ((sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#cccccc")
+                                        font.weight: selectedIndex === index ? Font.Bold : Font.Medium
+                                        color: (selectedIndex === index) ? colorText : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
                                     }
                                     
                                     Text {
                                         text: model.description
-                                        font.pixelSize: 11
+                                        font.pixelSize: 12
                                         font.family: "JetBrains Mono"
                                         color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
+                                        opacity: selectedIndex === index ? 0.85 : (colorsMenuMouseArea.containsMouse ? 0.75 : 0.6)
                                     }
                                 }
                             }
@@ -3981,65 +3903,13 @@ PanelWindow {
                     enabled: true
                     z: 10
                     
-                    // Header
-                    Rectangle {
-                        id: presetsHeader
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        height: 50
-                        color: "transparent"
-                        
-                        Row {
-                            anchors.fill: parent
-                            anchors.margins: 12
-                            spacing: 12
-                            
-                            // Back button
-                            Rectangle {
-                                width: 30
-                                height: 30
-                                color: presetsBackMouseArea.containsMouse ? ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : "transparent"
-                                radius: 0
-                                anchors.verticalCenter: parent.verticalCenter
-                                
-                                Text {
-                                    text: "󰁍"
-                                    font.pixelSize: 18
-                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
-                                    anchors.centerIn: parent
-                                }
-                                
-                                MouseArea {
-                                    id: presetsBackMouseArea
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        currentSettingsMode = 3  // Back to Colors menu
-                                        selectedIndex = 0
-                                    }
-                                }
-                            }
-                            
-                            Text {
-                                text: "Presets"
-                                font.pixelSize: 16
-                                font.family: "JetBrains Mono"
-                                font.weight: Font.Medium
-                                color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
-                        }
-                    }
-                    
                     // Content
                     Flickable {
-                        anchors.top: presetsHeader.bottom
+                        anchors.fill: parent
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom
-                        anchors.margins: 18
+                        anchors.margins: 20
                         clip: true
                         contentHeight: colorPickerColumn.height
                         contentWidth: width
@@ -4098,14 +3968,14 @@ PanelWindow {
                                             
                                             Row {
                                                 anchors.fill: parent
-                                                anchors.margins: 12
+                                                anchors.margins: 20
                                                 spacing: 12
                                                 
                                                 // Duży preview kolorów
                                                 Column {
                                                     width: 50
                                                     anchors.verticalCenter: parent.verticalCenter
-                                                    spacing: 3
+                                                    spacing: 4
                                                     
                                                     Rectangle {
                                                         width: 50
@@ -4207,65 +4077,13 @@ PanelWindow {
                     enabled: true
                     z: 10
                     
-                    // Header
-                    Rectangle {
-                        id: customHexHeader
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        height: 50
-                        color: "transparent"
-                        
-                        Row {
-                            anchors.fill: parent
-                            anchors.margins: 12
-                            spacing: 12
-                            
-                            // Back button
-                            Rectangle {
-                                width: 30
-                                height: 30
-                                color: customHexBackMouseArea.containsMouse ? colorPrimary : "transparent"
-                                radius: 0
-                                anchors.verticalCenter: parent.verticalCenter
-                                
-                                Text {
-                                    text: "󰁍"
-                                    font.pixelSize: 18
-                                    color: colorText
-                                    anchors.centerIn: parent
-                                }
-                                
-                                MouseArea {
-                                    id: customHexBackMouseArea
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        currentSettingsMode = 3  // Back to Colors menu
-                                        selectedIndex = 0
-                                    }
-                                }
-                            }
-                            
-                            Text {
-                                text: "Custom HEX"
-                                font.pixelSize: 16
-                                font.family: "JetBrains Mono"
-                                font.weight: Font.Medium
-                                color: colorText
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
-                        }
-                    }
-                    
                     // Content
                     Flickable {
-                        anchors.top: customHexHeader.bottom
+                        anchors.fill: parent
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom
-                        anchors.margins: 18
+                        anchors.margins: 20
                         clip: true
                         contentHeight: customHexColumn.height
                         contentWidth: width

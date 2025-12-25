@@ -1,7 +1,8 @@
 {
-  "background": "#0a0a0a",
+  "background": "#000000",
   "primary": "#1f1f1f",
-  "secondary": "#151515",
+  "secondary": "#0f0f0f",
   "text": "#ffffff",
-  "accent": "#5dade2"
+  "accent": "#888888",
+  "lastWallpaper": "/home/artwik/Pictures/Wallpapers/wallhaven-95mwxx.jpg"
 }

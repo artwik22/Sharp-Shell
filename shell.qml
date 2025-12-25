@@ -92,6 +92,12 @@ ShellRoot {
                         if (json.secondary) sharedData.colorSecondary = json.secondary
                         if (json.text) sharedData.colorText = json.text
                         if (json.accent) sharedData.colorAccent = json.accent
+                        
+                        // Load last wallpaper if available
+                        if (json.lastWallpaper && json.lastWallpaper.length > 0) {
+                            root.currentWallpaperPath = json.lastWallpaper
+                            console.log("Loaded last wallpaper from colors.json:", json.lastWallpaper)
+                        }
                     } catch (e) {
                         console.log("Error parsing colors.json:", e)
                     }
