@@ -82,18 +82,12 @@ PanelWindow {
             // Zamyka się tylko przez skrót klawiszowy (toggleMenu)
         }
 
-        // Tło z gradientem
+        // Tło jednolite
         Rectangle {
             id: topMenuBackground
             anchors.fill: parent
             radius: 0
             color: (sharedData && sharedData.colorBackground) ? sharedData.colorBackground : "#111111"
-            
-            // Gradient tła
-            gradient: Gradient {
-                GradientStop { position: 0.0; color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#131313" }
-                GradientStop { position: 1.0; color: (sharedData && sharedData.colorBackground) ? sharedData.colorBackground : "#0d0d0d" }
-            }
             
             // Border z subtelnym efektem
             border.color: (sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#252525"
@@ -110,7 +104,7 @@ PanelWindow {
             id: topMenuTabBar
             width: parent.width
             height: 45
-            color: "#111111"
+            color: (sharedData && sharedData.colorBackground) ? sharedData.colorBackground : "#111111"
             radius: 0
             anchors.top: parent.top
             anchors.left: parent.left
@@ -132,9 +126,17 @@ PanelWindow {
                         id: topMenuTabItem
                         width: parent.width / 3
                         height: parent.height
-                        color: currentTab === index ? "#1e1e1e" : (topMenuTabItemMouseArea.containsMouse ? "#181818" : "#111111")
-                        border.color: "#252525"
-                        border.width: 1
+                        color: currentTab === index ? 
+                            ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") : 
+                            (topMenuTabItemMouseArea.containsMouse ? 
+                                ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#3a3a3a") : 
+                                ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#3a3a3a"))
+                        border.color: currentTab === index ?
+                            ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") :
+                            (topMenuTabItemMouseArea.containsMouse ?
+                                ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") :
+                                ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#2a2a2a"))
+                        border.width: currentTab === index ? 3 : (topMenuTabItemMouseArea.containsMouse ? 2 : 1)
                         radius: 0
                         scale: (topMenuTabItemMouseArea.containsMouse || currentTab === index) ? 1.02 : 1.0
                         
@@ -160,8 +162,12 @@ PanelWindow {
                             Text {
                                 id: topMenuTabIcon
                                 text: modelData.icon
-                                font.pixelSize: 17
-                                color: currentTab === index ? "#f5f5f5" : "#707070"
+                                font.pixelSize: 18
+                                color: currentTab === index ? 
+                                    ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff") : 
+                                    (topMenuTabItemMouseArea.containsMouse ?
+                                        ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") :
+                                        ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"))
                                 
                                 Behavior on color {
                                     ColorAnimation {
@@ -174,11 +180,15 @@ PanelWindow {
                             Text {
                                 id: topMenuTabLabel
                                 text: modelData.label
-                                font.pixelSize: 14
+                                font.pixelSize: 15
                                 font.family: "JetBrains Mono"
-                                font.weight: currentTab === index ? Font.DemiBold : Font.Medium
+                                font.weight: currentTab === index ? Font.Bold : Font.Medium
                                 font.letterSpacing: 0.2
-                                color: currentTab === index ? "#f5f5f5" : "#707070"
+                                color: currentTab === index ? 
+                                    ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff") : 
+                                    (topMenuTabItemMouseArea.containsMouse ?
+                                        ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") :
+                                        ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"))
                                 
                                 Behavior on color {
                                     ColorAnimation {
@@ -193,8 +203,8 @@ PanelWindow {
                             id: topMenuTabIndicator
                             anchors.bottom: parent.bottom
                             width: parent.width
-                            height: 2
-                            color: "#ffffff"
+                            height: 3
+                            color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
                             opacity: currentTab === index ? 1.0 : 0.0
                             
                             Behavior on opacity {
@@ -260,8 +270,8 @@ PanelWindow {
                         id: topMenuAlbumArtRect
                         width: 160
                         height: 160
-                        color: "#141414"
-                        border.color: "#1a1a1a"
+                        color: (sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#141414"
+                        border.color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1a1a1a"
                         border.width: 1
                         anchors.verticalCenter: parent.verticalCenter
                         opacity: (currentTab === 0) ? 1.0 : 0.0
@@ -304,7 +314,7 @@ PanelWindow {
                             anchors.centerIn: parent
                             text: "󰎆"
                             font.pixelSize: 43
-                            color: "#333333"
+                            color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                             visible: !mpArt
                         }
                     }
@@ -327,7 +337,7 @@ PanelWindow {
                                 font.family: "JetBrains Mono"
                                 font.weight: Font.DemiBold
                                 font.letterSpacing: 0.2
-                                color: "#f5f5f5"
+                                color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#f5f5f5"
                                 elide: Text.ElideRight
                                 width: parent.width
                             }
@@ -339,7 +349,7 @@ PanelWindow {
                                 font.family: "JetBrains Mono"
                                 font.weight: Font.Medium
                                 font.letterSpacing: 0.1
-                                color: "#a0a0a0"
+                                color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                 elide: Text.ElideRight
                                 width: parent.width
                             }
@@ -362,7 +372,7 @@ PanelWindow {
                                 id: topMenuProgressBarBg
                                 width: parent.width
                                 height: 4
-                                color: "#1e1e1e"
+                                color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1e1e1e"
                                 scale: topMenuProgressMouseArea.containsMouse ? 1.05 : 1.0
                                 
                                 Behavior on scale {
@@ -376,7 +386,7 @@ PanelWindow {
                                     id: topMenuProgressFill
                                     width: (mpLength > 0) ? (parent.width * (mpPosition / mpLength)) : 0
                                     height: parent.height
-                                    color: "#ffffff"
+                                    color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
                                     Behavior on width { 
                                         NumberAnimation { 
                                             duration: 300
@@ -406,7 +416,7 @@ PanelWindow {
                                     text: formatTime(mpPosition)
                                     font.pixelSize: 10
                                     font.family: "JetBrains Mono"
-                                    color: "#444444"
+                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                 }
                                 Item { width: parent.width - topMenuPosText.width - topMenuLengthText.width; height: 1 }
                                 Text {
@@ -414,7 +424,7 @@ PanelWindow {
                                     text: mpLength > 0 ? formatTime(mpLength) : "--:--"
                                     font.pixelSize: 10
                                     font.family: "JetBrains Mono"
-                                    color: "#444444"
+                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                 }
                             }
                         }
@@ -427,12 +437,23 @@ PanelWindow {
                             Rectangle {
                                 id: topMenuPrevBtn
                                 width: 45; height: 45
-                                color: topMenuPrevArea.containsMouse ? "#1e1e1e" : "#161616"
-                                border.color: "#252525"
+                                color: topMenuPrevArea.containsMouse ? 
+                                    ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") : 
+                                    ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#161616")
+                                border.color: topMenuPrevArea.containsMouse ? 
+                                    ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") :
+                                    ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#252525")
                                 border.width: 1
                                 scale: topMenuPrevArea.containsMouse ? 1.1 : 1.0
                                 
                                 Behavior on color {
+                                    ColorAnimation {
+                                        duration: 200
+                                        easing.type: Easing.OutCubic
+                                    }
+                                }
+                                
+                                Behavior on border.color {
                                     ColorAnimation {
                                         duration: 200
                                         easing.type: Easing.OutCubic
@@ -451,7 +472,9 @@ PanelWindow {
                                     text: "󰒮"; 
                                     anchors.centerIn: parent; 
                                     font.pixelSize: 23; 
-                                    color: topMenuPrevArea.containsMouse ? "#f5f5f5" : "#a0a0a0"
+                                    color: topMenuPrevArea.containsMouse ? 
+                                        ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff") : 
+                                        ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff")
                                     
                                     Behavior on color {
                                         ColorAnimation {
@@ -473,7 +496,9 @@ PanelWindow {
                             Rectangle {
                                 id: topMenuPlayPauseBtn
                                 width: 54; height: 45
-                                color: topMenuPlayArea.containsMouse ? "#e0e0e0" : "#ffffff"
+                                color: topMenuPlayArea.containsMouse ? 
+                                    ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") : 
+                                    ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
                                 scale: topMenuPlayArea.containsMouse ? 1.1 : 1.0
                                 
                                 Behavior on color {
@@ -495,7 +520,7 @@ PanelWindow {
                                     text: mpPlaying ? "󰏤" : "󰐊"
                                     anchors.centerIn: parent
                                     font.pixelSize: 25
-                                    color: "#0a0a0a"
+                                    color: (sharedData && sharedData.colorBackground) ? sharedData.colorBackground : "#0a0a0a"
                                     rotation: topMenuPlayArea.containsMouse ? 5 : 0
                                     
                                     Behavior on rotation {
@@ -518,16 +543,51 @@ PanelWindow {
                             Rectangle {
                                 id: topMenuNextBtn
                                 width: 45; height: 45
-                                color: topMenuNextArea.containsMouse ? "#1e1e1e" : "#161616"
-                                border.color: "#252525"
+                                color: topMenuNextArea.containsMouse ? 
+                                    ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") : 
+                                    ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#161616")
+                                border.color: topMenuNextArea.containsMouse ? 
+                                    ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") :
+                                    ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#252525")
                                 border.width: 1
+                                scale: topMenuNextArea.containsMouse ? 1.1 : 1.0
+                                
+                                Behavior on color {
+                                    ColorAnimation {
+                                        duration: 200
+                                        easing.type: Easing.OutCubic
+                                    }
+                                }
+                                
+                                Behavior on border.color {
+                                    ColorAnimation {
+                                        duration: 200
+                                        easing.type: Easing.OutCubic
+                                    }
+                                }
+                                
+                                Behavior on scale {
+                                    NumberAnimation {
+                                        duration: 200
+                                        easing.type: Easing.OutCubic
+                                    }
+                                }
 
                                 Text { 
                                     id: topMenuNextIcon
                                     text: "󰒭"; 
                                     anchors.centerIn: parent; 
                                     font.pixelSize: 23; 
-                                    color: "#a0a0a0" 
+                                    color: topMenuNextArea.containsMouse ? 
+                                        ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff") : 
+                                        ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff")
+                                    
+                                    Behavior on color {
+                                        ColorAnimation {
+                                            duration: 200
+                                            easing.type: Easing.OutCubic
+                                        }
+                                    }
                                 }
 
                                 MouseArea {
@@ -598,7 +658,7 @@ PanelWindow {
                                     font.family: "JetBrains Mono"
                                     font.weight: Font.Medium
                                     font.letterSpacing: 0.2
-                                    color: "#a0a0a0"
+                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                     width: 45
                                 }
 
@@ -606,13 +666,13 @@ PanelWindow {
                                     id: topMenuSystemStatBarBg
                                     width: parent.width - topMenuSystemStatName.width - topMenuSystemStatValue.width - 24
                                     height: 5
-                                    color: "#1e1e1e"
+                                    color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1e1e1e"
 
                                     Rectangle {
                                         id: topMenuSystemStatBarFill
                                         height: parent.height
                                         width: parent.width * (modelData.value / 100)
-                                        color: "#ffffff"
+                                        color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
                                         Behavior on width { NumberAnimation { duration: 400 } }
                                     }
                                 }
@@ -624,7 +684,7 @@ PanelWindow {
                                     font.family: "JetBrains Mono"
                                     font.weight: Font.Medium
                                     font.letterSpacing: 0.2
-                                    color: "#f5f5f5"
+                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#f5f5f5"
                                     width: 70
                                     horizontalAlignment: Text.AlignRight
                                 }
@@ -676,8 +736,12 @@ PanelWindow {
                             id: topMenuOptionBtn
                             width: 150
                             height: 150
-                            color: topMenuOptionArea.containsMouse ? "#1e1e1e" : "#111111"
-                            border.color: topMenuOptionArea.containsMouse ? "#ffffff" : "#252525"
+                            color: topMenuOptionArea.containsMouse ? 
+                                ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1e1e1e") : 
+                                ((sharedData && sharedData.colorBackground) ? sharedData.colorBackground : "#111111")
+                            border.color: topMenuOptionArea.containsMouse ? 
+                                ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") : 
+                                ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#252525")
                             border.width: 1
                             radius: 0
                             scale: topMenuOptionArea.containsMouse ? 1.05 : 1.0
@@ -723,7 +787,9 @@ PanelWindow {
                                     id: topMenuOptionIcon
                                     text: modelData.icon
                                     font.pixelSize: 45
-                                    color: topMenuOptionArea.containsMouse ? "#f5f5f5" : "#707070"
+                                    color: topMenuOptionArea.containsMouse ? 
+                                        ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") : 
+                                        ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     scale: topMenuOptionArea.containsMouse ? 1.1 : 1.0
                                     
@@ -749,7 +815,9 @@ PanelWindow {
                                     font.family: "JetBrains Mono"
                                     font.weight: Font.Medium
                                     font.letterSpacing: 0.2
-                                    color: topMenuOptionArea.containsMouse ? "#f5f5f5" : "#707070"
+                                    color: topMenuOptionArea.containsMouse ? 
+                                        ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") : 
+                                        ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
                                     anchors.horizontalCenter: parent.horizontalCenter
                                 }
                             }

@@ -78,6 +78,42 @@ PanelWindow {
         }
     }
     
+    // Synchronize colors from sharedData to local properties
+    Connections {
+        target: sharedData
+        enabled: sharedData !== null
+        
+        function onColorBackgroundChanged() {
+            if (sharedData && sharedData.colorBackground && sharedData.colorBackground !== colorBackground) {
+                colorBackground = sharedData.colorBackground
+            }
+        }
+        
+        function onColorPrimaryChanged() {
+            if (sharedData && sharedData.colorPrimary && sharedData.colorPrimary !== colorPrimary) {
+                colorPrimary = sharedData.colorPrimary
+            }
+        }
+        
+        function onColorSecondaryChanged() {
+            if (sharedData && sharedData.colorSecondary && sharedData.colorSecondary !== colorSecondary) {
+                colorSecondary = sharedData.colorSecondary
+            }
+        }
+        
+        function onColorTextChanged() {
+            if (sharedData && sharedData.colorText && sharedData.colorText !== colorText) {
+                colorText = sharedData.colorText
+            }
+        }
+        
+        function onColorAccentChanged() {
+            if (sharedData && sharedData.colorAccent && sharedData.colorAccent !== colorAccent) {
+                colorAccent = sharedData.colorAccent
+            }
+        }
+    }
+    
     // Initialize paths from environment
     function initializePaths() {
         // Get home directory from environment
@@ -161,6 +197,200 @@ PanelWindow {
         }
         saveColors()
         console.log("Colors saved and sharedData updated")
+    }
+    
+    // Color presets
+    function applyPreset(presetName) {
+        var preset = colorPresets[presetName]
+        if (!preset) {
+            console.log("Preset not found:", presetName)
+            return
+        }
+        
+        // Update all colors at once
+        colorBackground = preset.background
+        colorPrimary = preset.primary
+        colorSecondary = preset.secondary
+        colorText = preset.text
+        colorAccent = preset.accent
+        
+        // Update sharedData
+        if (sharedData) {
+            sharedData.colorBackground = preset.background
+            sharedData.colorPrimary = preset.primary
+            sharedData.colorSecondary = preset.secondary
+            sharedData.colorText = preset.text
+            sharedData.colorAccent = preset.accent
+        }
+        
+        // Save to file
+        saveColors()
+        
+        console.log("Applied preset:", presetName)
+    }
+    
+    property var colorPresets: {
+        "Dark": {
+            background: "#0a0a0a",
+            primary: "#3a3a3a",
+            secondary: "#2a2a2a",
+            text: "#ffffff",
+            accent: "#4a9eff"
+        },
+        "Ocean": {
+            background: "#0d1b26",
+            primary: "#3a4d5a",
+            secondary: "#2a3f4e",
+            text: "#ffffff",
+            accent: "#4fc3f7"
+        },
+        "Forest": {
+            background: "#0d1a0d",
+            primary: "#3a4a3a",
+            secondary: "#2a3a2a",
+            text: "#ffffff",
+            accent: "#66bb6a"
+        },
+        "Violet": {
+            background: "#1a0d26",
+            primary: "#4a3a5a",
+            secondary: "#3a2a4a",
+            text: "#ffffff",
+            accent: "#ab47bc"
+        },
+        "Crimson": {
+            background: "#1a0d0d",
+            primary: "#4a3a3a",
+            secondary: "#3a2a2a",
+            text: "#ffffff",
+            accent: "#ef5350"
+        },
+        "Amber": {
+            background: "#1a150d",
+            primary: "#4a453a",
+            secondary: "#3a352a",
+            text: "#ffffff",
+            accent: "#ffa726"
+        },
+        "Teal": {
+            background: "#0d1a1a",
+            primary: "#3a4a4a",
+            secondary: "#2a3a3a",
+            text: "#ffffff",
+            accent: "#26a69a"
+        },
+        "Rose": {
+            background: "#1a0d15",
+            primary: "#4a3a45",
+            secondary: "#3a2a35",
+            text: "#ffffff",
+            accent: "#ec407a"
+        },
+        "Sunset": {
+            background: "#1a150d",
+            primary: "#4a453a",
+            secondary: "#3a352a",
+            text: "#ffffff",
+            accent: "#ffb74d"
+        },
+        "Midnight": {
+            background: "#0a0d1a",
+            primary: "#3a3a4a",
+            secondary: "#2a2a3a",
+            text: "#ffffff",
+            accent: "#7986cb"
+        },
+        "Emerald": {
+            background: "#0d1a0d",
+            primary: "#3a4a3a",
+            secondary: "#2a3a2a",
+            text: "#ffffff",
+            accent: "#4caf50"
+        },
+        "Lavender": {
+            background: "#1a0d1a",
+            primary: "#4a3a4a",
+            secondary: "#3a2a3a",
+            text: "#ffffff",
+            accent: "#ba68c8"
+        },
+        "Sapphire": {
+            background: "#0d0d1a",
+            primary: "#3a3a4a",
+            secondary: "#2a2a3a",
+            text: "#ffffff",
+            accent: "#42a5f5"
+        },
+        "Coral": {
+            background: "#1a0d0d",
+            primary: "#4a2a2a",
+            secondary: "#3a1a1a",
+            text: "#ffffff",
+            accent: "#ff7043"
+        },
+        "Mint": {
+            background: "#0d1a0d",
+            primary: "#2a3a2a",
+            secondary: "#1a2a1a",
+            text: "#ffffff",
+            accent: "#26d0ce"
+        },
+        "Plum": {
+            background: "#1a0d1a",
+            primary: "#3a2a3a",
+            secondary: "#2a1a2a",
+            text: "#ffffff",
+            accent: "#9c27b0"
+        },
+        "Gold": {
+            background: "#1a150d",
+            primary: "#3a352a",
+            secondary: "#2a251a",
+            text: "#ffffff",
+            accent: "#ffc107"
+        },
+        "Slate": {
+            background: "#0d0d0d",
+            primary: "#2a2a2a",
+            secondary: "#1a1a1a",
+            text: "#ffffff",
+            accent: "#607d8b"
+        },
+        "Cherry": {
+            background: "#1a0a0a",
+            primary: "#3a2a2a",
+            secondary: "#2a1a1a",
+            text: "#ffffff",
+            accent: "#e91e63"
+        },
+        "Azure": {
+            background: "#0d1a26",
+            primary: "#2a3a4a",
+            secondary: "#1a2a3a",
+            text: "#ffffff",
+            accent: "#2196f3"
+        },
+        "Jade": {
+            background: "#0d1a0d",
+            primary: "#2a3a2a",
+            secondary: "#1a2a1a",
+            text: "#ffffff",
+            accent: "#00bcd4"
+        },
+        "Ruby": {
+            background: "#1a0a0a",
+            primary: "#3a2a2a",
+            secondary: "#2a1a1a",
+            text: "#ffffff",
+            accent: "#f44336"
+        },
+        "Indigo": {
+            background: "#0d0d1a",
+            primary: "#2a2a3a",
+            secondary: "#1a1a2a",
+            text: "#ffffff",
+            accent: "#3f51b5"
+        }
     }
     
     function isValidHexColor(hex) {
@@ -247,7 +477,7 @@ PanelWindow {
     property int currentPackageMode: -1  // -1 = Packages option selection, 0 = install source selection (Pacman/AUR), 1 = Pacman search, 2 = AUR search, 3 = remove source selection (Pacman/AUR), 4 = Pacman remove search, 5 = AUR remove search
     property int installSourceMode: -1  // -1 = selection, 0 = Pacman, 1 = AUR
     property int removeSourceMode: -1  // -1 = selection, 0 = Pacman, 1 = AUR
-    property int currentSettingsMode: -1  // -1 = settings categories, -2 = System settings list, -3 = SharpShell settings list, 0 = Wallpaper, 1 = Update, 2 = Bluetooth, 3 = Colors
+    property int currentSettingsMode: -1  // -1 = settings categories, -2 = System settings list, -3 = SharpShell settings list, 0 = Wallpaper, 2 = Bluetooth, 3 = Colors menu, 4 = Presets, 5 = Custom HEX
     property int currentSettingsCategory: -1  // -1 = categories, 0 = System, 1 = SharpShell
     
     // Color theme properties
@@ -1149,21 +1379,8 @@ PanelWindow {
             anchors.fill: parent
             radius: 0
             
-            // Subtelny gradient tła - od ciemniejszego do jaśniejszego
-            gradient: Gradient {
-                GradientStop { 
-                    position: 0.0
-                    color: Qt.darker(colorBackground, 1.1)
-                }
-                GradientStop { 
-                    position: 0.5
-                    color: colorBackground
-                }
-                GradientStop { 
-                    position: 1.0
-                    color: Qt.lighter(colorBackground, 1.05)
-                }
-            }
+            // Użyj sharedData.colorBackground jeśli dostępny - jednolite tło bez gradientu
+            color: (sharedData && sharedData.colorBackground) ? sharedData.colorBackground : colorBackground
         }
         
         // Obsługa klawiszy na kontenerze - przekieruj do TextInput tylko w trybie Launch App
@@ -1442,7 +1659,7 @@ PanelWindow {
                     }
                     event.accepted = true
                 } else if (currentMode === 1 && currentPackageMode === -1) {
-                    // W trybie Packages - wybierz opcję (Install/Remove)
+                    // W trybie Packages - wybierz opcję (Install/Remove/Update)
                     if (selectedIndex >= 0 && selectedIndex < packagesOptionsList.count) {
                         var pkgOption = packagesOptionsList.model.get(selectedIndex)
                         if (pkgOption.action === "install") {
@@ -1457,6 +1674,9 @@ PanelWindow {
                             currentPackageMode = 3
                             removeSourceMode = -1
                             selectedIndex = 0
+                        } else if (pkgOption.action === "update") {
+                            // Uruchom update systemu
+                            updateSystem()
                         }
                     }
                     event.accepted = true
@@ -1490,8 +1710,6 @@ PanelWindow {
                             loadWallpapers()
                             wallpaperSelectedIndex = 0  // Reset indeksu przy otwieraniu
                             wallpapersGrid.currentIndex = 0
-                        } else if (settingOption.settingId === 1) {
-                            updateSystem()
                         } else if (settingOption.settingId === 2) {
                             checkBluetoothStatus()
                         }
@@ -1653,7 +1871,7 @@ PanelWindow {
                     id: modeItem
                     width: modesList.width
                     height: 64
-                    color: selectedIndex === index ? colorPrimary : (modeItemMouseArea.containsMouse ? colorSecondary : "transparent")
+                    color: selectedIndex === index ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (modeItemMouseArea.containsMouse ? ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : colorSecondary) : "transparent")
                     radius: 0
                     scale: (selectedIndex === index || modeItemMouseArea.containsMouse) ? 1.01 : 1.0
                     
@@ -1680,7 +1898,7 @@ PanelWindow {
                     Text {
                         text: model.icon || ""
                         font.pixelSize: 20
-                        color: selectedIndex === index ? colorText : (modeItemMouseArea.containsMouse ? colorText : "#888888")
+                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                         anchors.verticalCenter: parent.verticalCenter
                     }
                     
@@ -1700,7 +1918,7 @@ PanelWindow {
                             text: model.description
                             font.pixelSize: 12
                             font.family: "JetBrains Mono"
-                            color: selectedIndex === index ? "#999999" : "#666666"
+                            color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                         }
                     }
                 }
@@ -1822,7 +2040,7 @@ PanelWindow {
                                     font.pixelSize: 15
                                     font.family: "JetBrains Mono"
                                     font.weight: Font.Medium
-                                    color: "#888888"
+                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                                     verticalAlignment: Text.AlignVCenter
                                     visible: searchInput.text.length === 0
                                     z: 5  // Za TextInput
@@ -1888,7 +2106,7 @@ PanelWindow {
                                 id: appItem
                                 width: appsList.width
                                 height: 56
-                                color: selectedIndex === index ? colorPrimary : (appItemMouseArea.containsMouse ? colorSecondary : "transparent")
+                                color: selectedIndex === index ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (appItemMouseArea.containsMouse ? colorSecondary : "transparent")
                                 radius: 0
                                 scale: (selectedIndex === index || appItemMouseArea.containsMouse) ? 1.01 : 1.0
                                 
@@ -1933,7 +2151,7 @@ PanelWindow {
                                         font.family: "JetBrains Mono"
                                         font.weight: Font.Normal
                                         font.letterSpacing: 0.1
-                                        color: selectedIndex === index ? "#999999" : "#888888"
+                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                                         visible: appItem.appComment && appItem.appComment.length > 0
                                     }
                                 }
@@ -1967,14 +2185,7 @@ PanelWindow {
                 }
             }
             
-            // Tryb 1: Packages - prosta lista
-            Rectangle {
-                id: packagesModeBg
-                anchors.fill: parent
-                visible: currentMode === 1
-                color: "#0f0f0f"
-                z: -1
-            }
+            // Tryb 1: Packages - prosta lista (tło usunięte - używa głównego tła)
             
             ListView {
                 id: packagesOptionsList
@@ -1995,6 +2206,7 @@ PanelWindow {
                     id: packagesModel
                     ListElement { name: "Install"; description: "Install packages"; action: "install"; icon: "󰐕" }
                     ListElement { name: "Remove"; description: "Remove packages"; action: "remove"; icon: "󰆐" }
+                    ListElement { name: "Update"; description: "Update system packages (pacman -Syyu)"; action: "update"; icon: "󰏕" }
                 }
                 
                 Component.onCompleted: {
@@ -2005,7 +2217,7 @@ PanelWindow {
                     id: packageOptionItem
                     width: packagesOptionsList.width
                     height: 64
-                    color: selectedIndex === index ? colorPrimary : (packageOptionItemMouseArea.containsMouse ? colorSecondary : "transparent")
+                    color: selectedIndex === index ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (packageOptionItemMouseArea.containsMouse ? colorSecondary : "transparent")
                     radius: 0
                     scale: (selectedIndex === index || packageOptionItemMouseArea.containsMouse) ? 1.01 : 1.0
                     
@@ -2032,7 +2244,7 @@ PanelWindow {
                         Text {
                             text: model.icon || ""
                             font.pixelSize: 20
-                            color: selectedIndex === index ? colorText : (packageOptionItemMouseArea.containsMouse ? colorText : "#888888")
+                            color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                             anchors.verticalCenter: parent.verticalCenter
                         }
                         
@@ -2052,7 +2264,7 @@ PanelWindow {
                             text: model.description || ""
                                 font.pixelSize: 12
                             font.family: "JetBrains Mono"
-                            color: selectedIndex === index ? "#999999" : "#666666"
+                            color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                             }
                         }
                     }
@@ -2082,6 +2294,9 @@ PanelWindow {
                                 removeSourceMode = -1
                                 selectedIndex = 0
                                 packagesOptionsList.currentIndex = -1
+                            } else if (model.action === "update") {
+                                // Uruchom update systemu
+                                updateSystem()
                             }
                         }
                     }
@@ -2106,7 +2321,7 @@ PanelWindow {
                     id: installSourceItem
                     width: installSourceList.width
                     height: 60
-                    color: selectedIndex === index ? colorPrimary : (installSourceItemMouseArea.containsMouse ? colorSecondary : "transparent")
+                    color: selectedIndex === index ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (installSourceItemMouseArea.containsMouse ? colorSecondary : "transparent")
                     radius: 0
                     scale: (selectedIndex === index || installSourceItemMouseArea.containsMouse) ? 1.02 : 1.0
                     
@@ -2133,7 +2348,7 @@ PanelWindow {
                         Text {
                             text: model.icon || ""
                             font.pixelSize: 18
-                            color: selectedIndex === index ? colorText : "#888888"
+                            color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                             anchors.verticalCenter: parent.verticalCenter
                         }
                         
@@ -2153,7 +2368,7 @@ PanelWindow {
                                 text: model.description || ""
                                 font.pixelSize: 11
                                 font.family: "JetBrains Mono"
-                                color: "#666666"
+                                color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                             }
                         }
                     }
@@ -2349,7 +2564,7 @@ PanelWindow {
                                     text: packageItem.packageDescription
                                     font.pixelSize: 11
                                     font.family: "JetBrains Mono"
-                                    color: "#666666"
+                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                                     visible: packageItem.packageDescription && packageItem.packageDescription.length > 0
                                 }
                             }
@@ -2372,7 +2587,7 @@ PanelWindow {
                         }
                         
                         highlight: Rectangle {
-                            color: "#2a2a2a"
+                            color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary
                             radius: 0
                         }
                     }
@@ -2529,7 +2744,7 @@ PanelWindow {
                                     text: aurPackageItem.packageDescription
                                     font.pixelSize: 11
                                     font.family: "JetBrains Mono"
-                                    color: "#666666"
+                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                                     visible: aurPackageItem.packageDescription && aurPackageItem.packageDescription.length > 0
                                 }
                             }
@@ -2552,7 +2767,7 @@ PanelWindow {
                         }
                         
                         highlight: Rectangle {
-                            color: "#2a2a2a"
+                            color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary
                             radius: 0
                         }
                     }
@@ -2604,7 +2819,7 @@ PanelWindow {
                         Text {
                             text: model.icon || ""
                             font.pixelSize: 18
-                            color: selectedIndex === index ? colorText : "#888888"
+                            color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                             anchors.verticalCenter: parent.verticalCenter
                         }
                         
@@ -2624,7 +2839,7 @@ PanelWindow {
                                 text: model.description || ""
                                 font.pixelSize: 11
                                 font.family: "JetBrains Mono"
-                                color: "#666666"
+                                color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                             }
                         }
                     }
@@ -2822,7 +3037,7 @@ PanelWindow {
                                     text: installedPackageItem.packageVersion
                                     font.pixelSize: 11
                                     font.family: "JetBrains Mono"
-                                    color: "#666666"
+                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                                     visible: installedPackageItem.packageVersion && installedPackageItem.packageVersion.length > 0
                                 }
                             }
@@ -2849,7 +3064,7 @@ PanelWindow {
                         }
                         
                         highlight: Rectangle {
-                            color: "#2a2a2a"
+                            color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary
                             radius: 0
                         }
                     }
@@ -3002,7 +3217,7 @@ PanelWindow {
                                     text: installedAurPackageItem.packageVersion
                                     font.pixelSize: 11
                                     font.family: "JetBrains Mono"
-                                    color: "#666666"
+                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                                     visible: installedAurPackageItem.packageVersion && installedAurPackageItem.packageVersion.length > 0
                                 }
                             }
@@ -3025,7 +3240,7 @@ PanelWindow {
                         }
                         
                         highlight: Rectangle {
-                            color: "#2a2a2a"
+                            color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary
                             radius: 0
                         }
                     }
@@ -3038,7 +3253,7 @@ PanelWindow {
                 anchors.fill: parent
                 visible: currentMode === 2
                 enabled: true
-                z: 5
+                z: 1
                 
                 // Lista kategorii ustawień
                 ListView {
@@ -3057,7 +3272,7 @@ PanelWindow {
                     delegate: Rectangle {
                         width: settingsCategoriesList.width
                         height: 60
-                        color: (selectedIndex === index) ? colorPrimary : (settingsCategoryMouseArea.containsMouse ? colorSecondary : "transparent")
+                        color: (selectedIndex === index) ? ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : (settingsCategoryMouseArea.containsMouse ? ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : colorSecondary) : "transparent")
                         scale: settingsCategoryMouseArea.containsMouse ? 1.02 : 1.0
                         
                         Behavior on scale {
@@ -3075,7 +3290,7 @@ PanelWindow {
                             Text {
                                 text: model.icon
                                 font.pixelSize: 24
-                                color: (selectedIndex === index) ? colorText : "#888888"
+                                color: (selectedIndex === index) ? ((sharedData && sharedData.colorText) ? sharedData.colorText : colorText) : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
                                 anchors.verticalCenter: parent.verticalCenter
                                 width: 30
                                 horizontalAlignment: Text.AlignHCenter
@@ -3090,14 +3305,14 @@ PanelWindow {
                                     font.pixelSize: 14
                                     font.family: "JetBrains Mono"
                                     font.weight: Font.Medium
-                                    color: (selectedIndex === index) ? colorText : "#cccccc"
+                                    color: (selectedIndex === index) ? ((sharedData && sharedData.colorText) ? sharedData.colorText : colorText) : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
                                 }
                                 
                                 Text {
                                     text: model.description
                                     font.pixelSize: 11
                                     font.family: "JetBrains Mono"
-                                    color: "#666666"
+                                    color: ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
                                 }
                             }
                         }
@@ -3240,14 +3455,13 @@ PanelWindow {
                     model: ListModel {
                         id: systemSettingsModel
                         ListElement { name: "Wallpaper"; description: "Change wallpaper with swww"; icon: "󰸉"; settingId: 0 }
-                        ListElement { name: "Update"; description: "Update system packages (pacman -Syyu)"; icon: "󰏕"; settingId: 1 }
                         ListElement { name: "Bluetooth"; description: "Manage Bluetooth devices"; icon: "󰂯"; settingId: 2 }
                     }
                     
                     delegate: Rectangle {
                         width: systemSettingsList.width
                         height: 60
-                        color: (selectedIndex === index) ? colorPrimary : (systemSettingsMouseArea.containsMouse ? colorSecondary : "transparent")
+                        color: (selectedIndex === index) ? ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : (systemSettingsMouseArea.containsMouse ? ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : colorSecondary) : "transparent")
                         scale: systemSettingsMouseArea.containsMouse ? 1.02 : 1.0
                         
                         Behavior on scale {
@@ -3265,7 +3479,7 @@ PanelWindow {
                             Text {
                                 text: model.icon
                                 font.pixelSize: 24
-                                color: (selectedIndex === index) ? colorText : "#888888"
+                                color: (selectedIndex === index) ? ((sharedData && sharedData.colorText) ? sharedData.colorText : colorText) : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
                                 anchors.verticalCenter: parent.verticalCenter
                                 width: 30
                                 horizontalAlignment: Text.AlignHCenter
@@ -3280,14 +3494,14 @@ PanelWindow {
                                     font.pixelSize: 14
                                     font.family: "JetBrains Mono"
                                     font.weight: Font.Medium
-                                    color: (selectedIndex === index) ? colorText : "#cccccc"
+                                    color: (selectedIndex === index) ? ((sharedData && sharedData.colorText) ? sharedData.colorText : colorText) : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
                                 }
                                 
                                 Text {
                                     text: model.description
                                     font.pixelSize: 11
                                     font.family: "JetBrains Mono"
-                                    color: "#666666"
+                                    color: ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
                                 }
                             }
                         }
@@ -3306,8 +3520,6 @@ PanelWindow {
                                 currentSettingsMode = model.settingId
                                 if (model.settingId === 0) {
                                     loadWallpapers()
-                                } else if (model.settingId === 1) {
-                                    updateSystem()
                                 } else if (model.settingId === 2) {
                                     checkBluetoothStatus()
                                 }
@@ -3335,7 +3547,7 @@ PanelWindow {
                     delegate: Rectangle {
                         width: sharpshellSettingsList.width
                         height: 60
-                        color: (selectedIndex === index) ? colorPrimary : (sharpshellSettingsMouseArea.containsMouse ? colorSecondary : "transparent")
+                        color: (selectedIndex === index) ? ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : (sharpshellSettingsMouseArea.containsMouse ? ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : colorSecondary) : "transparent")
                         scale: sharpshellSettingsMouseArea.containsMouse ? 1.02 : 1.0
                         
                         Behavior on scale {
@@ -3353,7 +3565,7 @@ PanelWindow {
                             Text {
                                 text: model.icon
                                 font.pixelSize: 24
-                                color: (selectedIndex === index) ? colorText : "#888888"
+                                color: (selectedIndex === index) ? ((sharedData && sharedData.colorText) ? sharedData.colorText : colorText) : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
                                 anchors.verticalCenter: parent.verticalCenter
                                 width: 30
                                 horizontalAlignment: Text.AlignHCenter
@@ -3368,14 +3580,14 @@ PanelWindow {
                                     font.pixelSize: 14
                                     font.family: "JetBrains Mono"
                                     font.weight: Font.Medium
-                                    color: (selectedIndex === index) ? colorText : "#cccccc"
+                                    color: (selectedIndex === index) ? ((sharedData && sharedData.colorText) ? sharedData.colorText : colorText) : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
                                 }
                                 
                                 Text {
                                     text: model.description
                                     font.pixelSize: 11
                                     font.family: "JetBrains Mono"
-                                    color: "#666666"
+                                    color: ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
                                 }
                             }
                         }
@@ -3393,7 +3605,8 @@ PanelWindow {
                             onClicked: {
                                 currentSettingsMode = model.settingId
                                 if (model.settingId === 3) {
-                                    // Colors - no action needed
+                                    // Colors - go to Colors menu (Presets/Custom HEX)
+                                    selectedIndex = 0
                                 }
                             }
                         }
@@ -3461,7 +3674,7 @@ PanelWindow {
                                 text: "(" + wallpapersModel.count + " images)"
                                 font.pixelSize: 12
                                 font.family: "JetBrains Mono"
-                                color: "#666666"
+                                color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                                 anchors.verticalCenter: parent.verticalCenter
                             }
                         }
@@ -3784,7 +3997,7 @@ PanelWindow {
                                     Text {
                                         text: "󰂱"
                                         font.pixelSize: 20
-                                        color: "#888888"
+                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                                     }
                                     
                                     Column {
@@ -3805,7 +4018,7 @@ PanelWindow {
                                             text: model.mac
                                             font.pixelSize: 10
                                             font.family: "JetBrains Mono"
-                                            color: "#666666"
+                                            color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                                         }
                                     }
                                     
@@ -3865,7 +4078,7 @@ PanelWindow {
                                 text: bluetoothEnabled ? "No devices found" : "Bluetooth is off"
                                 font.pixelSize: 14
                                 font.family: "JetBrains Mono"
-                                color: "#666666"
+                                color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                                 anchors.horizontalCenter: parent.horizontalCenter
                             }
                             
@@ -3881,17 +4094,15 @@ PanelWindow {
                     }
                 }
                 
-                // Colors picker
+                // Colors menu (Presets/Custom HEX selection)
                 Item {
-                    id: colorsPicker
+                    id: colorsMenu
                     anchors.fill: parent
                     visible: currentSettingsMode === 3
-                    enabled: true
-                    z: 10
                     
                     // Header
                     Rectangle {
-                        id: colorsHeader
+                        id: colorsMenuHeader
                         anchors.top: parent.top
                         anchors.left: parent.left
                         anchors.right: parent.right
@@ -3907,7 +4118,7 @@ PanelWindow {
                             Rectangle {
                                 width: 30
                                 height: 30
-                                color: colorsBackMouseArea.containsMouse ? colorPrimary : "transparent"
+                                color: colorsMenuBackMouseArea.containsMouse ? colorPrimary : "transparent"
                                 radius: 0
                                 anchors.verticalCenter: parent.verticalCenter
                                 
@@ -3919,7 +4130,7 @@ PanelWindow {
                                 }
                                 
                                 MouseArea {
-                                    id: colorsBackMouseArea
+                                    id: colorsMenuBackMouseArea
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
@@ -3942,18 +4153,419 @@ PanelWindow {
                         }
                     }
                     
-                    // Content
-                    Column {
-                        anchors.top: colorsHeader.bottom
+                    // Colors menu list
+                    ListView {
+                        id: colorsMenuList
+                        anchors.top: colorsMenuHeader.bottom
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom
                         anchors.margins: 18
-                        spacing: 16
+                        visible: true
                         clip: true
+                        
+                        model: ListModel {
+                            id: colorsMenuModel
+                            ListElement { name: "Presets"; description: "Choose from color presets"; icon: "󰏘"; settingId: 4 }
+                            ListElement { name: "Custom HEX"; description: "Edit colors manually"; icon: "󰆍"; settingId: 5 }
+                        }
+                        
+                        delegate: Rectangle {
+                            width: colorsMenuList.width
+                            height: 60
+                            color: (selectedIndex === index) ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (colorsMenuMouseArea.containsMouse ? colorSecondary : "transparent")
+                            scale: colorsMenuMouseArea.containsMouse ? 1.02 : 1.0
+                            
+                            Behavior on scale {
+                                NumberAnimation {
+                                    duration: 150
+                                    easing.type: Easing.OutCubic
+                                }
+                            }
+                            
+                            Row {
+                                anchors.fill: parent
+                                anchors.margins: 12
+                                spacing: 12
+                                
+                                Text {
+                                    text: model.icon
+                                    font.pixelSize: 24
+                                    color: (selectedIndex === index) ? colorText : "#888888"
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: 30
+                                    horizontalAlignment: Text.AlignHCenter
+                                }
+                                
+                                Column {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    spacing: 2
+                                    
+                                    Text {
+                                        text: model.name
+                                        font.pixelSize: 14
+                                        font.family: "JetBrains Mono"
+                                        font.weight: Font.Medium
+                                        color: (selectedIndex === index) ? colorText : "#cccccc"
+                                    }
+                                    
+                                    Text {
+                                        text: model.description
+                                        font.pixelSize: 11
+                                        font.family: "JetBrains Mono"
+                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
+                                    }
+                                }
+                            }
+                            
+                            MouseArea {
+                                id: colorsMenuMouseArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                
+                                onEntered: {
+                                    selectedIndex = index
+                                }
+                                
+                                onClicked: {
+                                    currentSettingsMode = model.settingId
+                                    selectedIndex = 0
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Presets picker
+                Item {
+                    id: presetsPicker
+                    anchors.fill: parent
+                    visible: currentSettingsMode === 4
+                    enabled: true
+                    z: 10
+                    
+                    // Header
+                    Rectangle {
+                        id: presetsHeader
+                        anchors.top: parent.top
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        height: 50
+                        color: "transparent"
+                        
+                        Row {
+                            anchors.fill: parent
+                            anchors.margins: 12
+                            spacing: 12
+                            
+                            // Back button
+                            Rectangle {
+                                width: 30
+                                height: 30
+                                color: presetsBackMouseArea.containsMouse ? ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : "transparent"
+                                radius: 0
+                                anchors.verticalCenter: parent.verticalCenter
+                                
+                                Text {
+                                    text: "󰁍"
+                                    font.pixelSize: 18
+                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
+                                    anchors.centerIn: parent
+                                }
+                                
+                                MouseArea {
+                                    id: presetsBackMouseArea
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        currentSettingsMode = 3  // Back to Colors menu
+                                        selectedIndex = 0
+                                    }
+                                }
+                            }
+                            
+                            Text {
+                                text: "Presets"
+                                font.pixelSize: 16
+                                font.family: "JetBrains Mono"
+                                font.weight: Font.Medium
+                                color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+                        }
+                    }
+                    
+                    // Content
+                    Flickable {
+                        anchors.top: presetsHeader.bottom
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        anchors.margins: 18
+                        clip: true
+                        contentHeight: colorPickerColumn.height
+                        contentWidth: width
                         
                         // Color picker items
                         Column {
+                            id: colorPickerColumn
+                            width: parent.width
+                            spacing: 16
+                            
+                            // Presets section
+                            Column {
+                                width: parent.width
+                                spacing: 12
+                                
+                                Text {
+                                    text: "Choose a preset"
+                                    font.pixelSize: 15
+                                    font.family: "JetBrains Mono"
+                                    font.weight: Font.Medium
+                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
+                                    opacity: 0.8
+                                }
+                                
+                                // Presets grid - 2 kolumny dla lepszego layoutu
+                                Grid {
+                                    width: parent.width
+                                    columns: 2
+                                    spacing: 12
+                                    
+                                    Repeater {
+                                        model: ["Dark", "Ocean", "Forest", "Violet", "Crimson", "Amber", "Teal", "Rose", "Sunset", "Midnight", "Emerald", "Lavender", "Sapphire", "Coral", "Mint", "Plum", "Gold", "Slate", "Cherry", "Azure", "Jade", "Ruby", "Indigo"]
+                                        
+                                        Rectangle {
+                                            width: (parent.width - 12) / 2
+                                            height: 90
+                                            color: presetMouseArea.containsMouse ? 
+                                                ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : 
+                                                ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : colorSecondary)
+                                            radius: 0
+                                            border.width: presetMouseArea.containsMouse ? 3 : 2
+                                            border.color: presetMouseArea.containsMouse ?
+                                                ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) :
+                                                ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary)
+                                            
+                                            Behavior on color {
+                                                ColorAnimation {
+                                                    duration: 150
+                                                    easing.type: Easing.OutCubic
+                                                }
+                                            }
+                                            
+                                            Behavior on border.color {
+                                                ColorAnimation {
+                                                    duration: 150
+                                                    easing.type: Easing.OutCubic
+                                                }
+                                            }
+                                            
+                                            Behavior on border.width {
+                                                NumberAnimation {
+                                                    duration: 150
+                                                    easing.type: Easing.OutCubic
+                                                }
+                                            }
+                                            
+                                            scale: presetMouseArea.containsMouse ? 1.03 : 1.0
+                                            
+                                            Behavior on scale {
+                                                NumberAnimation {
+                                                    duration: 150
+                                                    easing.type: Easing.OutCubic
+                                                }
+                                            }
+                                            
+                                            Row {
+                                                anchors.fill: parent
+                                                anchors.margins: 12
+                                                spacing: 12
+                                                
+                                                // Duży preview kolorów
+                                                Column {
+                                                    width: 50
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    spacing: 3
+                                                    
+                                                    Rectangle {
+                                                        width: 50
+                                                        height: 12
+                                                        radius: 0
+                                                        color: {
+                                                            var preset = appLauncherRoot.colorPresets[modelData]
+                                                            return preset ? preset.background : "#000000"
+                                                        }
+                                                        border.width: 1
+                                                        border.color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary
+                                                    }
+                                                    Rectangle {
+                                                        width: 50
+                                                        height: 12
+                                                        radius: 0
+                                                        color: {
+                                                            var preset = appLauncherRoot.colorPresets[modelData]
+                                                            return preset ? preset.primary : "#000000"
+                                                        }
+                                                        border.width: 1
+                                                        border.color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary
+                                                    }
+                                                    Rectangle {
+                                                        width: 50
+                                                        height: 12
+                                                        radius: 0
+                                                        color: {
+                                                            var preset = appLauncherRoot.colorPresets[modelData]
+                                                            return preset ? preset.secondary : "#000000"
+                                                        }
+                                                        border.width: 1
+                                                        border.color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary
+                                                    }
+                                                    Rectangle {
+                                                        width: 50
+                                                        height: 12
+                                                        radius: 0
+                                                        color: {
+                                                            var preset = appLauncherRoot.colorPresets[modelData]
+                                                            return preset ? preset.text : "#000000"
+                                                        }
+                                                        border.width: 1
+                                                        border.color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary
+                                                    }
+                                                    Rectangle {
+                                                        width: 50
+                                                        height: 12
+                                                        radius: 0
+                                                        color: {
+                                                            var preset = appLauncherRoot.colorPresets[modelData]
+                                                            return preset ? preset.accent : "#000000"
+                                                        }
+                                                        border.width: 1
+                                                        border.color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary
+                                                    }
+                                                }
+                                                
+                                                // Nazwa i opis
+                                                Column {
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    spacing: 4
+                                                    width: parent.width - 50 - 12
+                                                    
+                                                    Text {
+                                                        text: modelData
+                                                        font.pixelSize: 16
+                                                        font.family: "JetBrains Mono"
+                                                        font.weight: Font.Bold
+                                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
+                                                    }
+                                                    
+                                                    Text {
+                                                        text: {
+                                                            var preset = appLauncherRoot.colorPresets[modelData]
+                                                            if (!preset) return ""
+                                                            return preset.background + " • " + preset.accent
+                                                        }
+                                                        font.pixelSize: 11
+                                                        font.family: "JetBrains Mono"
+                                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
+                                                        opacity: 0.6
+                                                    }
+                                                }
+                                            }
+                                            
+                                            MouseArea {
+                                                id: presetMouseArea
+                                                anchors.fill: parent
+                                                hoverEnabled: true
+                                                cursorShape: Qt.PointingHandCursor
+                                                onClicked: {
+                                                    appLauncherRoot.applyPreset(modelData)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Custom HEX picker
+                Item {
+                    id: customHexPicker
+                    anchors.fill: parent
+                    visible: currentSettingsMode === 5
+                    enabled: true
+                    z: 10
+                    
+                    // Header
+                    Rectangle {
+                        id: customHexHeader
+                        anchors.top: parent.top
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        height: 50
+                        color: "transparent"
+                        
+                        Row {
+                            anchors.fill: parent
+                            anchors.margins: 12
+                            spacing: 12
+                            
+                            // Back button
+                            Rectangle {
+                                width: 30
+                                height: 30
+                                color: customHexBackMouseArea.containsMouse ? colorPrimary : "transparent"
+                                radius: 0
+                                anchors.verticalCenter: parent.verticalCenter
+                                
+                                Text {
+                                    text: "󰁍"
+                                    font.pixelSize: 18
+                                    color: colorText
+                                    anchors.centerIn: parent
+                                }
+                                
+                                MouseArea {
+                                    id: customHexBackMouseArea
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        currentSettingsMode = 3  // Back to Colors menu
+                                        selectedIndex = 0
+                                    }
+                                }
+                            }
+                            
+                            Text {
+                                text: "Custom HEX"
+                                font.pixelSize: 16
+                                font.family: "JetBrains Mono"
+                                font.weight: Font.Medium
+                                color: colorText
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+                        }
+                    }
+                    
+                    // Content
+                    Flickable {
+                        anchors.top: customHexHeader.bottom
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        anchors.margins: 18
+                        clip: true
+                        contentHeight: customHexColumn.height
+                        contentWidth: width
+                        
+                        // Color picker items
+                        Column {
+                            id: customHexColumn
                             width: parent.width
                             spacing: 8
                             
@@ -4020,7 +4632,7 @@ PanelWindow {
                                         radius: 0
                                         anchors.verticalCenter: parent.verticalCenter
                                         border.width: 2
-                                        border.color: colorInput1.activeFocus ? colorAccent : colorSecondary
+                                        border.color: colorInput1.activeFocus ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : colorSecondary
                                         
                                         Behavior on color {
                                             ColorAnimation {
@@ -4191,7 +4803,7 @@ PanelWindow {
                                         radius: 0
                                         anchors.verticalCenter: parent.verticalCenter
                                         border.width: 2
-                                        border.color: colorInput2.activeFocus ? colorAccent : colorSecondary
+                                        border.color: colorInput2.activeFocus ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : colorSecondary
                                         
                                         Behavior on color {
                                             ColorAnimation {
@@ -4270,6 +4882,16 @@ PanelWindow {
                                             Keys.onEnterPressed: editingFinished()
                                             Keys.onReturnPressed: editingFinished()
                                         }
+                                        
+                                        Connections {
+                                            target: appLauncherRoot
+                                            function onColorPrimaryChanged() {
+                                                if (!colorInput2.isEditing && colorInput2.savedValue !== colorPrimary) {
+                                                    colorInput2.text = colorPrimary
+                                                    colorInput2.savedValue = colorPrimary
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                                 
@@ -4344,7 +4966,7 @@ PanelWindow {
                                         radius: 0
                                         anchors.verticalCenter: parent.verticalCenter
                                         border.width: 2
-                                        border.color: colorInput3.activeFocus ? colorAccent : colorSecondary
+                                        border.color: colorInput3.activeFocus ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : colorSecondary
                                         
                                         Behavior on color {
                                             ColorAnimation {
@@ -4423,6 +5045,16 @@ PanelWindow {
                                             Keys.onEnterPressed: editingFinished()
                                             Keys.onReturnPressed: editingFinished()
                                         }
+                                        
+                                        Connections {
+                                            target: appLauncherRoot
+                                            function onColorSecondaryChanged() {
+                                                if (!colorInput3.isEditing && colorInput3.savedValue !== colorSecondary) {
+                                                    colorInput3.text = colorSecondary
+                                                    colorInput3.savedValue = colorSecondary
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                                 
@@ -4497,7 +5129,7 @@ PanelWindow {
                                         radius: 0
                                         anchors.verticalCenter: parent.verticalCenter
                                         border.width: 2
-                                        border.color: colorInput4.activeFocus ? colorAccent : colorSecondary
+                                        border.color: colorInput4.activeFocus ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : colorSecondary
                                         
                                         Behavior on color {
                                             ColorAnimation {
@@ -4576,6 +5208,16 @@ PanelWindow {
                                             Keys.onEnterPressed: editingFinished()
                                             Keys.onReturnPressed: editingFinished()
                                         }
+                                        
+                                        Connections {
+                                            target: appLauncherRoot
+                                            function onColorTextChanged() {
+                                                if (!colorInput4.isEditing && colorInput4.savedValue !== colorText) {
+                                                    colorInput4.text = colorText
+                                                    colorInput4.savedValue = colorText
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                                 
@@ -4587,7 +5229,7 @@ PanelWindow {
                                 }
                             }
                             
-                            // Accent
+                            // Focus
                             Rectangle {
                                 width: parent.width
                                 height: 70
@@ -4609,7 +5251,7 @@ PanelWindow {
                                     Rectangle {
                                         width: 44
                                         height: 44
-                                        color: colorAccent
+                                        color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent
                                         radius: 0
                                         anchors.verticalCenter: parent.verticalCenter
                                         border.width: 2
@@ -4622,7 +5264,7 @@ PanelWindow {
                                         width: 120
                                         
                                         Text {
-                                            text: "Accent"
+                                            text: "Focus"
                                             font.pixelSize: 15
                                             font.family: "JetBrains Mono"
                                             font.weight: Font.Medium
@@ -4650,7 +5292,7 @@ PanelWindow {
                                         radius: 0
                                         anchors.verticalCenter: parent.verticalCenter
                                         border.width: 2
-                                        border.color: colorInput5.activeFocus ? colorAccent : colorSecondary
+                                        border.color: colorInput5.activeFocus ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : colorSecondary
                                         
                                         Behavior on color {
                                             ColorAnimation {
@@ -4728,6 +5370,16 @@ PanelWindow {
                                             
                                             Keys.onEnterPressed: editingFinished()
                                             Keys.onReturnPressed: editingFinished()
+                                        }
+                                        
+                                        Connections {
+                                            target: appLauncherRoot
+                                            function onColorAccentChanged() {
+                                                if (!colorInput5.isEditing && colorInput5.savedValue !== colorAccent) {
+                                                    colorInput5.text = colorAccent
+                                                    colorInput5.savedValue = colorAccent
+                                                }
+                                            }
                                         }
                                     }
                                 }

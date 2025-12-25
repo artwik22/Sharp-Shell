@@ -94,19 +94,13 @@ PanelWindow {
             }
         }
 
-        // Tło z gradientem
+        // Tło jednolite
         Rectangle {
             id: volumeSliderBackground
             anchors.fill: parent
             anchors.rightMargin: 0
             radius: 0
             color: (sharedData && sharedData.colorBackground) ? sharedData.colorBackground : "#111111"
-            
-            // Gradient tła
-            gradient: Gradient {
-                GradientStop { position: 0.0; color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#131313" }
-                GradientStop { position: 1.0; color: (sharedData && sharedData.colorBackground) ? sharedData.colorBackground : "#0d0d0d" }
-            }
         }
         
         // Border tylko z lewej strony
@@ -152,7 +146,7 @@ PanelWindow {
                     anchors.centerIn: parent
                     width: 5
                     height: parent.height
-                    color: (sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#1e1e1e"
+                    color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#3a3a3a"
                     radius: 0
                 }
 
@@ -163,7 +157,7 @@ PanelWindow {
                     anchors.horizontalCenter: sliderTrack.horizontalCenter
                     width: sliderTrack.width
                     height: sliderTrack.height * (volumeValue / 100)
-                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                    color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
                     radius: 0
                     
                     Behavior on height {

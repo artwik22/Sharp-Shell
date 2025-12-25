@@ -49,7 +49,7 @@ PanelWindow {
                 font.pixelSize: 20
                 font.family: "JetBrains Mono"
                 font.weight: Font.Bold
-                color: "#ffffff"
+                color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                 horizontalAlignment: Text.AlignHCenter
             }
             
@@ -59,7 +59,7 @@ PanelWindow {
                 font.pixelSize: 20
                 font.family: "JetBrains Mono"
                 font.weight: Font.Bold
-                color: "#ffffff"
+                color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                 horizontalAlignment: Text.AlignHCenter
             }
         }
@@ -89,7 +89,7 @@ PanelWindow {
         Column {
             id: sidePanelWorkspaceColumn
             spacing: 9
-            width: 5
+            width: 4
             visible: true
             anchors.centerIn: parent
                 
@@ -98,7 +98,7 @@ PanelWindow {
                 
                 Item {
                     id: workspaceItem
-                    width: 5
+                    width: 4
                     height: workspaceLine.height
                     anchors.horizontalCenter: parent.horizontalCenter
                     
@@ -123,13 +123,13 @@ PanelWindow {
                     Rectangle {
                         id: workspaceLine
                         anchors.centerIn: parent
-                        width: workspaceItem.isActive ? 6 : 4
-                        height: workspaceItem.isActive ? 36 : workspaceItem.hasWindows ? 20 : 12
+                        width: workspaceItem.isActive ? 4 : 3
+                        height: workspaceItem.isActive ? 40 : workspaceItem.hasWindows ? 34 : 30
                         color: workspaceItem.isActive ? 
-                            ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff") : 
+                            ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") : 
                             workspaceItem.hasWindows ? 
-                            ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#777777") : 
-                            ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#3a3a3a")
+                            ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#3a3a3a") : 
+                            ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#2a2a2a")
                         
                         Behavior on width {
                             NumberAnimation { 
@@ -347,11 +347,11 @@ PanelWindow {
                     
                     // Ensure we have at least some values
                     if (values.length > 0) {
-                        // Use sharedData colors if available
+                        // Use sharedData colors if available - wszystkie odcienie z theme
+                        var colorAccent = (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
                         var colorText = (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
-                        var colorLight = (sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#d0d0d0"
-                        var colorMedium = "#999999"
-                        var colorDark = "#5a5a5a"
+                        var colorPrimary = (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#3a3a3a"
+                        var colorSecondary = (sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#2a2a2a"
                         
                         for (var i = 0; i < 36; i++) {
                             var val = 0
@@ -363,13 +363,17 @@ PanelWindow {
                                 visualizerBarsRepeater.itemAt(i).visualizerBarValue = normalizedWidth
                                 var intensity = val / 100
                                 if (intensity > 0.7) {
-                                    visualizerBarsRepeater.itemAt(i).color = colorText
+                                    // Najwyższe wartości - accent color (najjaśniejszy, kolorowy)
+                                    visualizerBarsRepeater.itemAt(i).color = colorAccent
                                 } else if (intensity > 0.4) {
-                                    visualizerBarsRepeater.itemAt(i).color = colorLight
+                                    // Średnie wartości - text color (jasny)
+                                    visualizerBarsRepeater.itemAt(i).color = colorText
                                 } else if (intensity > 0.1) {
-                                    visualizerBarsRepeater.itemAt(i).color = colorMedium
+                                    // Niskie wartości - primary color (średni)
+                                    visualizerBarsRepeater.itemAt(i).color = colorPrimary
                                 } else {
-                                    visualizerBarsRepeater.itemAt(i).color = colorDark
+                                    // Bardzo niskie wartości - secondary color (ciemniejszy)
+                                    visualizerBarsRepeater.itemAt(i).color = colorSecondary
                                 }
                             }
                         }

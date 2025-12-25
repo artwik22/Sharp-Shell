@@ -1,7 +1,7 @@
 {
-  "background": "#0A0A0A",
-  "primary": "#1a1a1a",
-  "secondary": "#141414",
+  "background": "#0a0d1a",
+  "primary": "#3a3a4a",
+  "secondary": "#2a2a3a",
   "text": "#ffffff",
-  "accent": "#4a9eff"
+  "accent": "#7986cb"
 }
