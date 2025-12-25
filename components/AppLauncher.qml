@@ -68,6 +68,7 @@ PanelWindow {
         initializePaths()
         loadProjectPath()
         loadApps()
+        detectWallpaperTool()  // Detect available wallpaper tool
         if (sharedData) {
             // Load colors from sharedData if available
             colorBackground = sharedData.colorBackground || colorBackground
@@ -557,9 +558,66 @@ PanelWindow {
         xhr.send()
     }
     
+    // Wallpaper tool detection
+    property string wallpaperTool: ""  // Will be detected: "swww", "wbg", "hyprpaper", or ""
+    
+    function detectWallpaperTool() {
+        // Check which wallpaper tool is available
+        Qt.createQmlObject('import Quickshell.Io; import QtQuick; Process { command: ["sh", "-c", "which swww > /dev/null 2>&1 && echo swww > /tmp/quickshell_wallpaper_tool || which wbg > /dev/null 2>&1 && echo wbg > /tmp/quickshell_wallpaper_tool || which hyprpaper > /dev/null 2>&1 && echo hyprpaper > /tmp/quickshell_wallpaper_tool || echo none > /tmp/quickshell_wallpaper_tool"]; running: true }', appLauncherRoot)
+        Qt.createQmlObject("import QtQuick; Timer { interval: 200; running: true; repeat: false; onTriggered: appLauncherRoot.readWallpaperTool() }", appLauncherRoot)
+    }
+    
+    function readWallpaperTool() {
+        var xhr = new XMLHttpRequest()
+        xhr.open("GET", "file:///tmp/quickshell_wallpaper_tool")
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                var tool = xhr.responseText.trim()
+                wallpaperTool = tool
+                console.log("Detected wallpaper tool:", wallpaperTool)
+            }
+        }
+        xhr.send()
+    }
+    
     function setWallpaper(wallpaperPath) {
-        console.log("Setting wallpaper:", wallpaperPath)
-        Qt.createQmlObject('import Quickshell.Io; import QtQuick; Process { command: ["swww", "img", "' + wallpaperPath + '", "--transition-type", "fade", "--transition-duration", "1"]; running: true }', appLauncherRoot)
+        console.log("Setting wallpaper via Quickshell:", wallpaperPath)
+        
+        // Use Quickshell's built-in wallpaper system (like Caelestia Shell)
+        // Set wallpaper directly in sharedData or root component
+        if (sharedData) {
+            // Try to find the root ShellRoot component to set wallpaper
+            var rootComponent = appLauncherRoot.parent
+            while (rootComponent && rootComponent.objectName !== "shellRoot") {
+                rootComponent = rootComponent.parent
+            }
+            
+            // If we can't find root, try to set it via sharedData property
+            // We'll use a different approach - set it in the shell.qml root
+            // For now, we'll use a file-based approach to communicate with shell.qml
+            var escapedPath = wallpaperPath.replace(/"/g, '\\"')
+            Qt.createQmlObject('import Quickshell.Io; import QtQuick; Process { command: ["sh", "-c", "echo \\"' + escapedPath + '\\" > /tmp/quickshell_wallpaper_path"]; running: true }', appLauncherRoot)
+            
+            // Also try to set it directly if we have access to parent
+            if (rootComponent && rootComponent.currentWallpaperPath !== undefined) {
+                rootComponent.currentWallpaperPath = wallpaperPath
+            }
+        }
+        
+        // Fallback: use external tools if Quickshell method doesn't work
+        var escapedPath = wallpaperPath.replace(/'/g, "\\'").replace(/"/g, '\\"')
+        
+        if (wallpaperTool === "swww") {
+            // Use swww with fade transition
+            Qt.createQmlObject('import Quickshell.Io; import QtQuick; Process { command: ["swww", "img", "' + escapedPath + '", "--transition-type", "fade", "--transition-duration", "1"]; running: true }', appLauncherRoot)
+        } else if (wallpaperTool === "wbg") {
+            // Use wbg (simpler, no transitions)
+            Qt.createQmlObject('import Quickshell.Io; import QtQuick; Process { command: ["wbg", "' + escapedPath + '"]; running: true }', appLauncherRoot)
+        } else if (wallpaperTool === "hyprpaper") {
+            // Use hyprpaper (Hyprland-specific)
+            // Get monitor name from hyprctl and set wallpaper
+            Qt.createQmlObject('import Quickshell.Io; import QtQuick; Process { command: ["sh", "-c", "MONITOR=$(hyprctl monitors -j | jq -r \\"[0].name\\" 2>/dev/null || echo \\"eDP-1\\"); hyprctl hyprpaper preload \\"' + escapedPath + '\\" && hyprctl hyprpaper wallpaper \\"$MONITOR,\\"' + escapedPath + '\\"\\""]; running: true }', appLauncherRoot)
+        }
     }
     
     function updateSystem() {

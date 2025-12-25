@@ -152,6 +152,36 @@ ShellRoot {
         }
     }
     
+    // Current wallpaper path - shared across all screens
+    property string currentWallpaperPath: ""
+    
+    // Timer do monitorowania zmiany tapety
+    Timer {
+        id: wallpaperCheckTimer
+        interval: 200  // Sprawdzaj co 200ms
+        running: true
+        repeat: true
+        
+        onTriggered: {
+            var xhr = new XMLHttpRequest()
+            xhr.open("GET", "file:///tmp/quickshell_wallpaper_path")
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200 || xhr.status === 0) {
+                        var path = xhr.responseText.trim()
+                        if (path && path.length > 0 && path !== root.currentWallpaperPath) {
+                            root.currentWallpaperPath = path
+                            console.log("Wallpaper changed to:", path)
+                            // Usuń plik po przetworzeniu
+                            Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh', '-c', 'rm -f /tmp/quickshell_wallpaper_path']; running: true }", root)
+                        }
+                    }
+                }
+            }
+            xhr.send()
+        }
+    }
+    
     Variants {
         model: Quickshell.screens
         
@@ -159,6 +189,13 @@ ShellRoot {
             Item {
                 id: screenContainer
                 required property var modelData
+                
+                // Wallpaper background - jeden na ekran
+                WallpaperBackground {
+                    id: wallpaperInstance
+                    screen: modelData
+                    currentWallpaper: root.currentWallpaperPath
+                }
                 
                 // Panel boczny (SidePanel) - jeden na ekran
                 SidePanel {

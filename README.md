@@ -13,7 +13,9 @@ A modern, beautiful, and highly customizable shell/launcher system for Quickshel
 - **Keyboard Navigation**: Full arrow key support
 - **Smooth Animations**: Beautiful transitions and hover effects
 - **Package Management**: Install/remove packages via Pacman and AUR
-- **Settings Panel**: Customize wallpaper and system updates
+- **Settings Panel**: Customize wallpaper, colors, and system updates
+- **Color Presets**: 24 beautiful color themes to choose from
+- **Custom Colors**: Edit HEX values for complete customization
 
 ### 📊 Top Menu
 - **Media Player Control**: Play, pause, skip tracks with visual feedback
@@ -28,20 +30,26 @@ A modern, beautiful, and highly customizable shell/launcher system for Quickshel
 - **Modern Design**: Clean, minimal interface
 
 ### 🖼️ Wallpaper Management
+- **Native Quickshell Integration**: Set wallpapers directly through Quickshell (no external tools required!)
 - **Visual Grid**: Browse wallpapers in a beautiful grid layout
 - **Quick Preview**: Hover effects for easy selection
-- **Swww Integration**: Seamless wallpaper switching
+- **Smooth Transitions**: Fade animations when changing wallpapers
+- **Multi-Screen Support**: Automatic synchronization across all screens
+- **Fallback Support**: Optional support for swww, wbg, and hyprpaper
 - **Dynamic Layout**: Auto-adjusting grid with smooth animations
 
 ## 📋 Requirements
 
+### Required
 - **Quickshell** - QML-based shell system
 - **Wayland Compositor** - Tested with Hyprland
-- **swww** - Wallpaper management
-- **cava** - Audio visualizer
-- **playerctl** - Media player control
-- **pactl** - PulseAudio volume control
-- **bluetoothctl** - Bluetooth management
+
+### Optional (for additional features)
+- **cava** - Audio visualizer (for side panel visualization)
+- **playerctl** - Media player control (for top menu media controls)
+- **pactl** - PulseAudio volume control (for volume slider)
+- **bluetoothctl** - Bluetooth management (for Bluetooth controls)
+- **swww**, **wbg**, or **hyprpaper** - External wallpaper tools (optional fallback, native Quickshell wallpaper system works without them!)
 
 
 ## 🛠️ Installation
@@ -115,6 +123,7 @@ sharpshell/
 │   ├── TopMenu.qml           # Top menu bar
 │   ├── SidePanel.qml         # Side panel with visualizer
 │   ├── VolumeSlider.qml      # Volume control component
+│   ├── WallpaperBackground.qml # Native wallpaper background (Quickshell)
 │   ├── Utils.qml             # Utility functions
 │   ├── TopEdgeDetector.qml   # Top edge detection
 │   └── RightEdgeDetector.qml # Right edge detection
@@ -134,8 +143,14 @@ sharpshell/
 
 ### Colors and Styling
 
+SharpShell includes a powerful color customization system:
+
+- **24 Color Presets**: Choose from beautiful pre-made themes (Dark, Ocean, Forest, Violet, Crimson, Amber, Teal, Rose, Sunset, Midnight, Emerald, Lavender, Sapphire, Coral, Mint, Plum, Gold, Monochrome, Cherry, Azure, Jade, Ruby, Indigo)
+- **Custom HEX Colors**: Edit individual color values (Background, Primary, Secondary, Text, Focus/Accent)
+- **Live Preview**: See changes instantly as you edit
+- **Persistent Settings**: Colors are saved to `~/.config/sharpshell/colors.json`
+
 Edit the QML files in `components/` to customize:
-- Color schemes (dark theme by default)
 - Font sizes and families
 - Border radius and spacing
 - Animation durations and easing
@@ -163,6 +178,8 @@ To change, edit in `AppLauncher.qml`:
 property string wallpapersPath: "/your/custom/path"
 ```
 
+**Note**: SharpShell uses native Quickshell wallpaper system (no external tools required!). The wallpaper is set via `WallpaperBackground.qml` component using `WlrLayer.Background`. If you prefer external tools, SharpShell will automatically detect and use `swww`, `wbg`, or `hyprpaper` if available.
+
 ### Audio Visualizer
 
 The visualizer uses `cava` with automatic configuration. To customize, edit `scripts/start-cava.sh`.
@@ -189,7 +206,8 @@ Scripts support both Pacman and AUR (via `yay` or `paru`). Make sure you have an
 
 - Check wallpapers directory exists
 - Verify file permissions
-- Ensure `swww` is installed and configured
+- Wallpapers work natively through Quickshell (no external tools needed!)
+- If using external tools, ensure `swww`, `wbg`, or `hyprpaper` is installed
 
 ### Keyboard Focus Issues
 
@@ -212,7 +230,8 @@ Contributions are welcome! Feel free to:
 
 - Built with [Quickshell](https://github.com/Quickshell/Quickshell)
 - Audio visualization powered by [cava](https://github.com/karlstav/cava)
-- Wallpaper management via [swww](https://github.com/Horus645/swww)
+- Wallpaper system inspired by [Caelestia Shell](https://github.com/caelestia-dots/shell)
+- Optional wallpaper tools: [swww](https://github.com/Horus645/swww), [wbg](https://github.com/djpohly/wbg), [hyprpaper](https://github.com/hyprwm/hyprpaper)
 
 ---
 
