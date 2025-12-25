@@ -119,7 +119,7 @@ ShellRoot {
     
     // Funkcja otwierania ustawień - można rozszerzyć
     function openSettings() {
-        // Otwiera TopMenu
+        // Otwiera Dashboard
         sharedData.menuVisible = true
     }
     
@@ -230,10 +230,10 @@ ShellRoot {
         }
     }
     
-    // TopMenu - jeden globalny (nie per-ekran)
+    // Dashboard - jeden globalny (nie per-ekran)
     // Pokazuje się gdy myszka najedzie na górną krawędź ekranu
-    TopMenu {
-        id: topMenuInstance
+    Dashboard {
+        id: dashboardInstance
         sharedData: root.sharedData
     }
     

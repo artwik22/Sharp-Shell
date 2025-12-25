@@ -17,11 +17,15 @@ A modern, beautiful, and highly customizable shell/launcher system for Quickshel
 - **Color Presets**: 24 beautiful color themes to choose from
 - **Custom Colors**: Edit HEX values for complete customization
 
-### 📊 Top Menu
-- **Media Player Control**: Play, pause, skip tracks with visual feedback
-- **System Stats**: Real-time CPU, RAM, and GPU monitoring
-- **System Options**: Power off, reboot controls
-- **Smooth Tab Navigation**: Animated transitions between sections
+### 📊 Dashboard
+- **Modern Dashboard Interface**: Beautiful translucent dashboard with rounded corners
+- **Tab Navigation**: Dashboard, Media, Performance, and Workspaces tabs
+- **Weather Display**: Current temperature and conditions
+- **System Information**: OS info, uptime, and system stats
+- **Calendar View**: Large date display with monthly calendar grid
+- **Resource Monitoring**: Real-time CPU, RAM, and Disk usage with vertical bars
+- **Media Player Control**: Play, pause, skip tracks with album art and visual feedback
+- **Pastel Color Scheme**: Soft cream and rose color palette
 
 ### 🎨 Side Panel
 - **Audio Visualizer**: Real-time audio visualization with cava
@@ -120,7 +124,7 @@ sharpshell/
 ├── shell.qml                 # Main entry point
 ├── components/
 │   ├── AppLauncher.qml       # Application launcher
-│   ├── TopMenu.qml           # Top menu bar
+│   ├── Dashboard.qml         # Dashboard with tabs and cards
 │   ├── SidePanel.qml         # Side panel with visualizer
 │   ├── VolumeSlider.qml      # Volume control component
 │   ├── WallpaperBackground.qml # Native wallpaper background (Quickshell)
@@ -159,7 +163,7 @@ Edit the QML files in `components/` to customize:
 
 - **Launcher Size**: Modify `implicitWidth` and `implicitHeight` in `AppLauncher.qml`
 - **Wallpaper Grid**: Adjust `cellWidth` and `cellHeight` in wallpaper picker
-- **Menu Size**: Change dimensions in `TopMenu.qml`
+- **Dashboard Size**: Change dimensions in `Dashboard.qml`
 
 ### Behavior
 
