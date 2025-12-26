@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
@@ -95,8 +96,7 @@ PanelWindow {
                         model: [
                             { icon: "󰕮", label: "Dashboard" },
                             { icon: "󰎆", label: "Media" },
-                            { icon: "󰻠", label: "Performance" },
-                            { icon: "󰊓", label: "Workspaces" }
+                            { icon: "󰻠", label: "Performance" }
                         ]
                         
                         Rectangle {
@@ -232,11 +232,27 @@ PanelWindow {
                     anchors.fill: parent
                     visible: currentTab === 0
                     opacity: currentTab === 0 ? 1.0 : 0.0
+                    x: currentTab === 0 ? 0 : (currentTab < 0 ? -parent.width * 0.3 : parent.width * 0.3)
+                    scale: currentTab === 0 ? 1.0 : 0.95
                     
                     Behavior on opacity {
                         NumberAnimation { 
-                            duration: 300
-                            easing.type: Easing.OutQuart
+                            duration: 400
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                    
+                    Behavior on x {
+                        NumberAnimation {
+                            duration: 400
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                    
+                    Behavior on scale {
+                        NumberAnimation {
+                            duration: 400
+                            easing.type: Easing.OutCubic
                         }
                     }
                     
@@ -313,8 +329,9 @@ PanelWindow {
                                 spacing: 12
                                 
                                 Text {
-                                    text: "🎩"
+                                    text: "󰣇"
                                     font.pixelSize: 40
+                                    font.family: "JetBrains Mono Nerd Font"
                                     color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                 }
                                 
@@ -830,11 +847,27 @@ PanelWindow {
                     anchors.fill: parent
                     visible: currentTab === 1
                     opacity: currentTab === 1 ? 1.0 : 0.0
+                    x: currentTab === 1 ? 0 : (currentTab < 1 ? -parent.width * 0.3 : parent.width * 0.3)
+                    scale: currentTab === 1 ? 1.0 : 0.95
                     
                     Behavior on opacity {
                         NumberAnimation { 
-                            duration: 300
-                            easing.type: Easing.OutQuart
+                            duration: 400
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                    
+                    Behavior on x {
+                        NumberAnimation {
+                            duration: 400
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                    
+                    Behavior on scale {
+                        NumberAnimation {
+                            duration: 400
+                            easing.type: Easing.OutCubic
                         }
                     }
                     
@@ -1147,53 +1180,443 @@ PanelWindow {
                     anchors.fill: parent
                     visible: currentTab === 2
                     opacity: currentTab === 2 ? 1.0 : 0.0
+                    x: currentTab === 2 ? 0 : (currentTab < 2 ? -parent.width * 0.3 : parent.width * 0.3)
+                    scale: currentTab === 2 ? 1.0 : 0.95
                     
                     Behavior on opacity {
                         NumberAnimation { 
-                            duration: 300
-                            easing.type: Easing.OutQuart
+                            duration: 400
+                            easing.type: Easing.OutCubic
                         }
                     }
                     
-                    // Performance tab content (can be expanded)
-                    Text {
-                        anchors.centerIn: parent
-                        text: "Performance Tab"
-                        font.pixelSize: 30
-                        font.family: "JetBrains Mono"
-                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                    Behavior on x {
+                        NumberAnimation {
+                            duration: 400
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                    
+                    Behavior on scale {
+                        NumberAnimation {
+                            duration: 400
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                    
+                    // Performance tab content - GridLayout jak w Dashboard
+                    GridLayout {
+                        anchors.fill: parent
+                        anchors.margins: 12
+                        columns: 2
+                        rows: 3
+                        columnSpacing: 12
+                        rowSpacing: 12
+                        
+                        // CPU Card
+                        Rectangle {
+                            Layout.column: 0
+                            Layout.row: 0
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            Layout.minimumHeight: 140
+                            radius: 0
+                            color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1a1a1a"
+                            
+                            Column {
+                                anchors.fill: parent
+                                anchors.margins: 16
+                                spacing: 12
+                                
+                                Row {
+                                    width: parent.width
+                                    spacing: 10
+                                    
+                                    Text {
+                                        text: "󰻠"
+                                        font.pixelSize: 24
+                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                    }
+                                    
+                                    Column {
+                                        spacing: 4
+                                        
+                                        Text {
+                                            text: "CPU"
+                                            font.pixelSize: 16
+                                            font.family: "JetBrains Mono"
+                                            font.weight: Font.Bold
+                                            color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                        }
+                                        
+                                        Text {
+                                            text: cpuUsageValue + "%"
+                                            font.pixelSize: 28
+                                            font.family: "JetBrains Mono"
+                                            font.weight: Font.Bold
+                                            color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                        }
+                                    }
+                                }
+                                
+                                Rectangle {
+                                    width: parent.width
+                                    height: 12
+                                    radius: 0
+                                    color: (sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#141414"
+                                    
+                                    Rectangle {
+                                        anchors.left: parent.left
+                                        width: parent.width * (cpuUsageValue / 100)
+                                        height: parent.height
+                                        radius: 0
+                                        color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                        
+                                        Behavior on width {
+                                            NumberAnimation {
+                                                duration: 400
+                                                easing.type: Easing.OutCubic
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                Text {
+                                    text: "Temperature: " + cpuTempValue + "°C"
+                                    font.pixelSize: 12
+                                    font.family: "JetBrains Mono"
+                                    color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
+                                }
+                            }
+                        }
+                        
+                        // RAM Card
+                        Rectangle {
+                            Layout.column: 1
+                            Layout.row: 0
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            Layout.minimumHeight: 140
+                            radius: 0
+                            color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1a1a1a"
+                            
+                            Column {
+                                anchors.fill: parent
+                                anchors.margins: 16
+                                spacing: 12
+                                
+                                Row {
+                                    width: parent.width
+                                    spacing: 10
+                                    
+                                    Text {
+                                        text: "󰍛"
+                                        font.pixelSize: 24
+                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                    }
+                                    
+                                    Column {
+                                        spacing: 4
+                                        
+                                        Text {
+                                            text: "RAM"
+                                            font.pixelSize: 16
+                                            font.family: "JetBrains Mono"
+                                            font.weight: Font.Bold
+                                            color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                        }
+                                        
+                                        Text {
+                                            text: ramUsageValue + "%"
+                                            font.pixelSize: 28
+                                            font.family: "JetBrains Mono"
+                                            font.weight: Font.Bold
+                                            color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                        }
+                                    }
+                                }
+                                
+                                Rectangle {
+                                    width: parent.width
+                                    height: 12
+                                    radius: 0
+                                    color: (sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#141414"
+                                    
+                                    Rectangle {
+                                        anchors.left: parent.left
+                                        width: parent.width * (ramUsageValue / 100)
+                                        height: parent.height
+                                        radius: 0
+                                        color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                        
+                                        Behavior on width {
+                                            NumberAnimation {
+                                                duration: 400
+                                                easing.type: Easing.OutCubic
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                Text {
+                                    text: "Available: " + Math.round((100 - ramUsageValue) / 100 * ramTotalGB) + "GB / " + ramTotalGB + "GB"
+                                    font.pixelSize: 12
+                                    font.family: "JetBrains Mono"
+                                    color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
+                                }
+                            }
+                        }
+                        
+                        // GPU Card
+                        Rectangle {
+                            Layout.column: 0
+                            Layout.row: 1
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            Layout.minimumHeight: 140
+                            radius: 0
+                            color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1a1a1a"
+                            
+                            Column {
+                                anchors.fill: parent
+                                anchors.margins: 16
+                                spacing: 12
+                                
+                                Row {
+                                    width: parent.width
+                                    spacing: 10
+                                    
+                                    Text {
+                                        text: "󰾲"
+                                        font.pixelSize: 24
+                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                    }
+                                    
+                                    Column {
+                                        spacing: 4
+                                        
+                                        Text {
+                                            text: "GPU"
+                                            font.pixelSize: 16
+                                            font.family: "JetBrains Mono"
+                                            font.weight: Font.Bold
+                                            color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                        }
+                                        
+                                        Text {
+                                            text: gpuUsageValue + "%"
+                                            font.pixelSize: 28
+                                            font.family: "JetBrains Mono"
+                                            font.weight: Font.Bold
+                                            color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                        }
+                                    }
+                                }
+                                
+                                Rectangle {
+                                    width: parent.width
+                                    height: 12
+                                    radius: 0
+                                    color: (sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#141414"
+                                    
+                                    Rectangle {
+                                        anchors.left: parent.left
+                                        width: parent.width * (gpuUsageValue / 100)
+                                        height: parent.height
+                                        radius: 0
+                                        color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                        
+                                        Behavior on width {
+                                            NumberAnimation {
+                                                duration: 400
+                                                easing.type: Easing.OutCubic
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                Text {
+                                    text: "Temperature: " + gpuTempValue + "°C"
+                                    font.pixelSize: 12
+                                    font.family: "JetBrains Mono"
+                                    color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
+                                }
+                            }
+                        }
+                        
+                        // Top Processes Card
+                        Rectangle {
+                            Layout.column: 1
+                            Layout.row: 1
+                            Layout.rowSpan: 2
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            radius: 0
+                            color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1a1a1a"
+                            
+                            Column {
+                                anchors.fill: parent
+                                anchors.margins: 16
+                                spacing: 12
+                                
+                                Text {
+                                    text: "󰨳 Top Processes"
+                                    font.pixelSize: 16
+                                    font.family: "JetBrains Mono"
+                                    font.weight: Font.Bold
+                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                }
+                                
+                                Column {
+                                    width: parent.width
+                                    spacing: 8
+                                    
+                                    Repeater {
+                                        model: topProcessesModel.length > 0 ? topProcessesModel.slice(0, 8) : []
+                                        
+                                        Row {
+                                            width: parent.width
+                                            spacing: 10
+                                            
+                                            Text {
+                                                text: (index + 1) + "."
+                                                font.pixelSize: 12
+                                                font.family: "JetBrains Mono"
+                                                color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
+                                                width: 25
+                                            }
+                                            
+                                            Text {
+                                                text: modelData.name.length > 20 ? modelData.name.substring(0, 20) + "..." : modelData.name
+                                                font.pixelSize: 12
+                                                font.family: "JetBrains Mono"
+                                                color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                                width: parent.width - 120
+                                            }
+                                            
+                                            Text {
+                                                text: modelData.cpu + "%"
+                                                font.pixelSize: 12
+                                                font.family: "JetBrains Mono"
+                                                font.weight: Font.Bold
+                                                color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                                width: 45
+                                            }
+                                            
+                                            Text {
+                                                text: modelData.mem + "%"
+                                                font.pixelSize: 12
+                                                font.family: "JetBrains Mono"
+                                                color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
+                                                width: 45
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Disk Usage Card
+                        Rectangle {
+                            Layout.column: 0
+                            Layout.row: 2
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            radius: 0
+                            color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1a1a1a"
+                            
+                            Column {
+                                anchors.fill: parent
+                                anchors.margins: 16
+                                spacing: 12
+                                
+                                Text {
+                                    text: "󰋼 Disk Usage"
+                                    font.pixelSize: 16
+                                    font.family: "JetBrains Mono"
+                                    font.weight: Font.Bold
+                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                }
+                                
+                                Column {
+                                    width: parent.width
+                                    spacing: 10
+                                    
+                                    Repeater {
+                                        model: diskUsageModel.length > 0 ? diskUsageModel.slice(0, 4) : []
+                                        
+                                        Column {
+                                            width: parent.width
+                                            spacing: 6
+                                            
+                                            Row {
+                                                width: parent.width
+                                                spacing: 10
+                                                
+                                                Text {
+                                                    text: modelData.mount
+                                                    font.pixelSize: 12
+                                                    font.family: "JetBrains Mono"
+                                                    font.weight: Font.Bold
+                                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                                    width: 60
+                                                }
+                                                
+                                                Text {
+                                                    text: modelData.usage + "%"
+                                                    font.pixelSize: 12
+                                                    font.family: "JetBrains Mono"
+                                                    font.weight: Font.Bold
+                                                    color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                                    width: 45
+                                                }
+                                                
+                                                Item { width: parent.width - 120; height: 1 }
+                                                
+                                                Text {
+                                                    text: modelData.used + " / " + modelData.total
+                                                    font.pixelSize: 11
+                                                    font.family: "JetBrains Mono"
+                                                    color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
+                                                }
+                                            }
+                                            
+                                            Rectangle {
+                                                width: parent.width
+                                                height: 6
+                                                radius: 0
+                                                color: (sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#141414"
+                                                
+                                                Rectangle {
+                                                    anchors.left: parent.left
+                                                    width: parent.width * (modelData.usage / 100)
+                                                    height: parent.height
+                                                    radius: 0
+                                                    color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                                    
+                                                    Behavior on width {
+                                                        NumberAnimation {
+                                                            duration: 400
+                                                            easing.type: Easing.OutCubic
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 
-                // ============ TAB 3: WORKSPACES ============
-                Item {
-                    id: workspacesTab
-                    anchors.fill: parent
-                    visible: currentTab === 3
-                    opacity: currentTab === 3 ? 1.0 : 0.0
-                    
-                    Behavior on opacity {
-                        NumberAnimation { 
-                            duration: 300
-                            easing.type: Easing.OutQuart
-                        }
-                    }
-                    
-                    // Workspaces tab content (can be expanded)
-                    Text {
-                        anchors.centerIn: parent
-                        text: "Workspaces Tab"
-                        font.pixelSize: 30
-                        font.family: "JetBrains Mono"
-                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
-                    }
-                }
             }
         }
     }
 
     // ============ PROPERTIES ============
     property int ramUsageValue: 0
+    property int ramTotalGB: 16  // Will be calculated
     property int cpuUsageValue: 0
     property int gpuUsageValue: 0
     property int cpuTempValue: 0
@@ -1212,6 +1635,10 @@ PanelWindow {
     // Weather properties
     property string weatherTemp: "15°C"
     property string weatherCondition: "Clear"
+    
+    // Performance tab models
+    property var diskUsageModel: []
+    property var topProcessesModel: []
     
     // Cava visualizer properties
     property var cavaValues: []
@@ -1477,7 +1904,10 @@ PanelWindow {
                         if (lines[i].startsWith("MemTotal:")) memTotal = parseInt(lines[i].match(/\d+/)[0])
                         else if (lines[i].startsWith("MemAvailable:")) memAvailable = parseInt(lines[i].match(/\d+/)[0])
                     }
-                    if (memTotal > 0) ramUsageValue = 100 - Math.round((memAvailable / memTotal) * 100)
+                    if (memTotal > 0) {
+                        ramUsageValue = 100 - Math.round((memAvailable / memTotal) * 100)
+                        ramTotalGB = Math.round(memTotal / 1024 / 1024)  // Convert from KB to GB
+                    }
                 }
             }
             xhr.send()
@@ -1532,29 +1962,8 @@ PanelWindow {
         running: true
         function readGpu() {
             // Read GPU usage using nvidia-smi (primary) or radeontop (fallback)
-            Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh','-c','nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -d \" \" > /tmp/quickshell_gpu_usage']; running: true }", dashboardRoot)
-            Qt.createQmlObject("import QtQuick; Timer { interval: 500; running: true; repeat: false; onTriggered: dashboardRoot.tryRadeontop() }", dashboardRoot)
-        }
-        
-        function tryRadeontop() {
-            // Check if nvidia-smi result is valid, if not try radeontop
-            var xhr = new XMLHttpRequest()
-            xhr.open("GET", "file:///tmp/quickshell_gpu_usage")
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === XMLHttpRequest.DONE) {
-                    var text = xhr.responseText.trim()
-                    var usage = parseInt(text)
-                    if (isNaN(usage) || usage < 0 || usage > 100) {
-                        // nvidia-smi failed, try radeontop
-                        Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh','-c','timeout 1 radeontop -l 1 -d - 2>/dev/null | tail -1 | awk \"{print int(\\$2)}\" > /tmp/quickshell_gpu_usage || echo 0 > /tmp/quickshell_gpu_usage']; running: true }", dashboardRoot)
-                        Qt.createQmlObject("import QtQuick; Timer { interval: 1200; running: true; repeat: false; onTriggered: dashboardRoot.readGpuData() }", dashboardRoot)
-                    } else {
-                        // nvidia-smi succeeded, read it now
-                        readGpuData()
-                    }
-                }
-            }
-            xhr.send()
+            Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh','-c','nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -d \" \" > /tmp/quickshell_gpu_usage || (timeout 1 radeontop -l 1 -d - 2>/dev/null | tail -1 | awk \"{print int(\\$2)}\" > /tmp/quickshell_gpu_usage) || echo 0 > /tmp/quickshell_gpu_usage']; running: true }", dashboardRoot)
+            Qt.createQmlObject("import QtQuick; Timer { interval: 800; running: true; repeat: false; onTriggered: dashboardRoot.readGpuData() }", dashboardRoot)
         }
         
         function readGpuData() {
@@ -1594,6 +2003,149 @@ PanelWindow {
         running: true
         onTriggered: updateWeather()
         Component.onCompleted: updateWeather()
+    }
+    
+    // ============ PERFORMANCE TAB FUNCTIONS ============
+    function updateDiskUsage() {
+        Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh','-c','df -h | grep -E \"^/dev\" | awk \"{print \\$6 \\\"|\\\" \\$2 \\\"|\\\" \\$3 \\\"|\\\" \\$5}\" | head -5 > /tmp/quickshell_disk_usage 2>/dev/null || echo > /tmp/quickshell_disk_usage']; running: true }", dashboardRoot)
+        Qt.createQmlObject("import QtQuick; Timer { interval: 500; running: true; repeat: false; onTriggered: dashboardRoot.readDiskUsage() }", dashboardRoot)
+    }
+    
+    function readDiskUsage() {
+        var xhr = new XMLHttpRequest()
+        xhr.open("GET", "file:///tmp/quickshell_disk_usage")
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                var lines = xhr.responseText.split("\n")
+                var disks = []
+                for (var i = 0; i < lines.length; i++) {
+                    if (lines[i].trim()) {
+                        var parts = lines[i].split("|")
+                        if (parts.length >= 4) {
+                            var usageStr = parts[3].replace("%", "")
+                            var usage = parseInt(usageStr) || 0
+                            disks.push({
+                                mount: parts[0],
+                                total: parts[1],
+                                used: parts[2],
+                                usage: usage
+                            })
+                        }
+                    }
+                }
+                diskUsageModel = disks
+            }
+        }
+        xhr.send()
+    }
+    
+    function updateTopProcesses() {
+        Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh','-c','ps aux --sort=-%cpu 2>/dev/null | tail -n +2 | head -8 | awk \"{print \\$11 \\\"|\\\" \\$3 \\\"|\\\" \\$4}\" > /tmp/quickshell_top_processes 2>/dev/null || echo > /tmp/quickshell_top_processes']; running: true }", dashboardRoot)
+        Qt.createQmlObject("import QtQuick; Timer { interval: 600; running: true; repeat: false; onTriggered: dashboardRoot.readTopProcesses() }", dashboardRoot)
+    }
+    
+    function readTopProcesses() {
+        var xhr = new XMLHttpRequest()
+        xhr.open("GET", "file:///tmp/quickshell_top_processes")
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                var lines = xhr.responseText.split("\n")
+                var processes = []
+                for (var i = 0; i < lines.length; i++) {
+                    var line = lines[i].trim()
+                    if (line && !line.startsWith("COMMAND")) {
+                        var parts = line.split("|")
+                        if (parts.length >= 3 && parts[0] && parts[0] !== "ps") {
+                            var name = parts[0].split("/").pop()
+                            if (name && name.length > 0) {
+                                var cpu = parseFloat(parts[1])
+                                var mem = parseFloat(parts[2])
+                                if (!isNaN(cpu) && !isNaN(mem)) {
+                                    processes.push({
+                                        name: name,
+                                        cpu: cpu.toFixed(1),
+                                        mem: mem.toFixed(1)
+                                    })
+                                }
+                            }
+                        }
+                    }
+                }
+                topProcessesModel = processes
+            }
+        }
+        xhr.send()
+    }
+    
+    function updateCpuTemp() {
+        Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh','-c','(sensors 2>/dev/null | grep -i \"cpu\" | grep -oE \"[0-9]+\\.[0-9]+\" | head -1 | cut -d. -f1 > /tmp/quickshell_cpu_temp) || (cat /sys/class/thermal/thermal_zone*/temp 2>/dev/null | head -1 | awk \"{print int(\\$1/1000)}\" > /tmp/quickshell_cpu_temp) || echo 0 > /tmp/quickshell_cpu_temp']; running: true }", dashboardRoot)
+        Qt.createQmlObject("import QtQuick; Timer { interval: 500; running: true; repeat: false; onTriggered: dashboardRoot.readCpuTemp() }", dashboardRoot)
+    }
+    
+    function readCpuTemp() {
+        var xhr = new XMLHttpRequest()
+        xhr.open("GET", "file:///tmp/quickshell_cpu_temp")
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                var temp = parseInt(xhr.responseText.trim())
+                if (!isNaN(temp)) cpuTempValue = temp
+            }
+        }
+        xhr.send()
+    }
+    
+    function updateGpuTemp() {
+        Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh','-c','(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits 2>/dev/null | head -1 > /tmp/quickshell_gpu_temp) || (sensors 2>/dev/null | grep -i \"gpu\\|radeon\\|amdgpu\" | grep -oE \"[0-9]+\\.[0-9]+\" | head -1 | cut -d. -f1 > /tmp/quickshell_gpu_temp) || echo 0 > /tmp/quickshell_gpu_temp']; running: true }", dashboardRoot)
+        Qt.createQmlObject("import QtQuick; Timer { interval: 500; running: true; repeat: false; onTriggered: dashboardRoot.readGpuTemp() }", dashboardRoot)
+    }
+    
+    function readGpuTemp() {
+        var xhr = new XMLHttpRequest()
+        xhr.open("GET", "file:///tmp/quickshell_gpu_temp")
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                var temp = parseInt(xhr.responseText.trim())
+                if (!isNaN(temp)) gpuTempValue = temp
+            }
+        }
+        xhr.send()
+    }
+    
+    // Performance timers
+    Timer {
+        id: diskUsageTimer
+        interval: 5000
+        repeat: true
+        running: true
+        onTriggered: updateDiskUsage()
+        Component.onCompleted: updateDiskUsage()
+    }
+    
+    Timer {
+        id: topProcessesTimer
+        interval: 3000
+        repeat: true
+        running: true
+        onTriggered: updateTopProcesses()
+        Component.onCompleted: updateTopProcesses()
+    }
+    
+    Timer {
+        id: cpuTempTimer
+        interval: 5000
+        repeat: true
+        running: true
+        onTriggered: updateCpuTemp()
+        Component.onCompleted: updateCpuTemp()
+    }
+    
+    Timer {
+        id: gpuTempTimer
+        interval: 5000
+        repeat: true
+        running: true
+        onTriggered: updateGpuTemp()
+        Component.onCompleted: updateGpuTemp()
     }
     
     // ============ CAVA VISUALIZER FUNCTIONS ============

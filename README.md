@@ -1,60 +1,121 @@
 # 🚀 SharpShell
 
-A modern, beautiful, and highly customizable shell/launcher system for Quickshell with full Wayland support. Features smooth animations, intuitive navigation, and powerful system integration.
+<div align="center">
 
-![SharpShell](https://img.shields.io/badge/SharpShell-QML-blue)
-![Quickshell](https://img.shields.io/badge/Quickshell-Compatible-green)
-![Wayland](https://img.shields.io/badge/Wayland-Supported-purple)
+**A modern, beautiful, and highly customizable shell/launcher system for Quickshell with full Wayland support**
+
+[![Quickshell](https://img.shields.io/badge/Quickshell-Compatible-00D9FF?style=for-the-badge&logo=qt)](https://github.com/Quickshell/Quickshell)
+[![Wayland](https://img.shields.io/badge/Wayland-Supported-FF6B6B?style=for-the-badge&logo=wayland)](https://wayland.freedesktop.org/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
+[![QML](https://img.shields.io/badge/QML-5.15+-FF6B9D?style=for-the-badge&logo=qt)](https://www.qt.io/)
+
+*Features smooth animations, intuitive navigation, and powerful system integration*
+
+</div>
+
+---
+
+## 📑 Table of Contents
+
+- [✨ Features](#-features)
+  - [🎯 Application Launcher](#-application-launcher)
+  - [📊 Dashboard](#-dashboard)
+  - [🎨 Side Panel](#-side-panel)
+  - [🖼️ Wallpaper Management](#️-wallpaper-management)
+- [📋 Requirements](#-requirements)
+- [🛠️ Installation](#️-installation)
+- [🎮 Usage](#-usage)
+- [📁 Project Structure](#-project-structure)
+- [🎨 Customization](#-customization)
+- [🔧 Configuration](#-configuration)
+- [🐛 Troubleshooting](#-troubleshooting)
+- [📝 License](#-license)
+- [🤝 Contributing](#-contributing)
+
+---
 
 ## ✨ Features
 
 ### 🎯 Application Launcher
-- **Fast Search**: Real-time filtering of applications
-- **Keyboard Navigation**: Full arrow key support
-- **Smooth Animations**: Beautiful transitions and hover effects
-- **Package Management**: Install/remove packages via Pacman and AUR
-- **Settings Panel**: Customize wallpaper, colors, and system updates
-- **Color Presets**: 24 beautiful color themes to choose from
-- **Custom Colors**: Edit HEX values for complete customization
+
+| Feature | Description |
+|---------|-------------|
+| 🔍 **Fast Search** | Real-time filtering of applications |
+| ⌨️ **Keyboard Navigation** | Full arrow key support with smooth navigation |
+| 🎬 **Smooth Animations** | Beautiful transitions and hover effects |
+| 📦 **Package Management** | Install/remove packages via Pacman and AUR |
+| ⚙️ **Settings Panel** | Customize wallpaper, colors, and system updates |
+| 🎨 **24 Color Presets** | Beautiful pre-made themes to choose from |
+| 🖌️ **Custom Colors** | Edit HEX values for complete customization |
 
 ### 📊 Dashboard
-- **Modern Dashboard Interface**: Beautiful translucent dashboard with rounded corners
-- **Tab Navigation**: Dashboard, Media, Performance, and Workspaces tabs
-- **Weather Display**: Current temperature and conditions
-- **System Information**: OS info, uptime, and system stats
-- **Calendar View**: Large date display with monthly calendar grid
-- **Resource Monitoring**: Real-time CPU, RAM, and Disk usage with vertical bars
-- **Media Player Control**: Play, pause, skip tracks with album art and visual feedback
-- **Pastel Color Scheme**: Soft cream and rose color palette
+
+A comprehensive system dashboard with multiple tabs and real-time monitoring.
+
+#### Dashboard Tab
+- 🌤️ **Weather Display** - Current temperature and conditions with weather icons
+- 🐧 **System Information** - OS info, uptime, and system stats with Linux icon
+- 📅 **Calendar View** - Large date display with monthly calendar grid
+- 📈 **Resource Monitoring** - Real-time CPU, RAM, and GPU usage with animated vertical bars
+- 🎵 **Media Player Control** - Play, pause, skip tracks with album art and track information
+
+#### Media Tab
+- 🎵 **Media Player** - Full-featured media player with album art and controls
+- 🎨 **Audio Visualizer** - Real-time Cava visualizer spanning the entire width with dimmed background
+
+#### Performance Tab
+- 💻 **Resource Cards** - Detailed CPU, RAM, and GPU monitoring with horizontal progress bars and temperatures
+- 💾 **Disk Usage** - Real-time disk space monitoring for multiple partitions
+- 🔥 **Top Processes** - Live view of top resource-consuming processes with CPU and memory usage
+
+**Additional Features:**
+- ✨ Smooth animated tab switching with slide and zoom effects
+- 🎨 Seamless color scheme integration with shared theme system
+- 🔄 Real-time updates for all system metrics
 
 ### 🎨 Side Panel
-- **Audio Visualizer**: Real-time audio visualization with cava
-- **Volume Control**: Adjust system volume with visual slider
-- **Bluetooth Control**: Toggle Bluetooth on/off
-- **Modern Design**: Clean, minimal interface
+
+- 🎵 **Audio Visualizer** - Real-time audio visualization with cava
+- 🔊 **Volume Control** - Adjust system volume with visual slider
+- 📶 **Bluetooth Control** - Toggle Bluetooth on/off
+- 🎨 **Modern Design** - Clean, minimal interface
 
 ### 🖼️ Wallpaper Management
-- **Native Quickshell Integration**: Set wallpapers directly through Quickshell (no external tools required!)
-- **Visual Grid**: Browse wallpapers in a beautiful grid layout
-- **Quick Preview**: Hover effects for easy selection
-- **Smooth Transitions**: Fade animations when changing wallpapers
-- **Multi-Screen Support**: Automatic synchronization across all screens
-- **Fallback Support**: Optional support for swww, wbg, and hyprpaper
-- **Dynamic Layout**: Auto-adjusting grid with smooth animations
+
+- ✅ **Native Quickshell Integration** - Set wallpapers directly through Quickshell (no external tools required!)
+- 🖼️ **Visual Grid** - Browse wallpapers in a beautiful grid layout
+- 👁️ **Quick Preview** - Hover effects for easy selection
+- 🎬 **Smooth Transitions** - Fade animations when changing wallpapers
+- 🖥️ **Multi-Screen Support** - Automatic synchronization across all screens
+- 🔄 **Fallback Support** - Optional support for swww, wbg, and hyprpaper
+- 📐 **Dynamic Layout** - Auto-adjusting grid with smooth animations
+
+---
 
 ## 📋 Requirements
 
 ### Required
-- **Quickshell** - QML-based shell system
-- **Wayland Compositor** - Tested with Hyprland
+
+| Component | Description |
+|-----------|-------------|
+| **Quickshell** | QML-based shell system |
+| **Wayland Compositor** | Tested with Hyprland |
 
 ### Optional (for additional features)
-- **cava** - Audio visualizer (for side panel visualization)
-- **playerctl** - Media player control (for top menu media controls)
-- **pactl** - PulseAudio volume control (for volume slider)
-- **bluetoothctl** - Bluetooth management (for Bluetooth controls)
-- **swww**, **wbg**, or **hyprpaper** - External wallpaper tools (optional fallback, native Quickshell wallpaper system works without them!)
 
+| Tool | Purpose |
+|------|---------|
+| `cava` | Audio visualizer (for side panel and Dashboard Media tab visualization) |
+| `playerctl` | Media player control (for Dashboard media controls) |
+| `pactl` | PulseAudio volume control (for volume slider) |
+| `bluetoothctl` | Bluetooth management (for Bluetooth controls) |
+| `nvidia-smi` or `radeontop` | GPU monitoring (for Dashboard GPU usage display) |
+| `sensors` | Hardware temperature monitoring (for CPU/GPU temperature display) |
+| `swww`, `wbg`, or `hyprpaper` | External wallpaper tools (optional fallback) |
+
+> **Note:** Native Quickshell wallpaper system works without external tools!
+
+---
 
 ## 🛠️ Installation
 
@@ -88,34 +149,41 @@ Create the wallpapers directory (or change the path in `AppLauncher.qml`):
 mkdir -p ~/Pictures/Wallpapers
 ```
 
+---
+
 ## 🎮 Usage
 
 ### Keyboard Shortcuts Configuration
 
-**Important**: You need to bind keyboard shortcuts in your Wayland compositor (e.g., Hyprland) to launch the scripts. Add these bindings to your compositor config:
+> **Important:** You need to bind keyboard shortcuts in your Wayland compositor (e.g., Hyprland) to launch the scripts.
 
-**For Hyprland** (`~/.config/hyprland/hyprland.conf`):
+#### For Hyprland (`~/.config/hyprland/hyprland.conf`)
+
 ```ini
 # Open Launcher
 bind = SUPER, R, exec, ~/.config/sharpshell/open-launcher.sh
 
-# Toggle Top Menu
+# Toggle Dashboard
 bind = SUPER, M, exec, ~/.config/sharpshell/toggle-menu.sh
 ```
 
-**For other compositors**: Configure similar bindings to execute the scripts from `~/.config/sharpshell/`.
+#### For other compositors
 
-### Keyboard Shortcuts (Inside Launcher/Menu)
+Configure similar bindings to execute the scripts from `~/.config/sharpshell/`.
 
-- **Open Launcher**: Use your configured shortcut (e.g., `Super+R`)
-- **Toggle Top Menu**: Use your configured shortcut (e.g., `Super+M`)
-- **Navigate**: Arrow keys (`↑`, `↓`, `←`, `→`)
-- **Select**: `Enter` or `Space`
-- **Search**: Start typing to filter
-- **Escape**: Close launcher/menu
+### Keyboard Shortcuts (Inside Launcher/Dashboard)
 
-### Navigation
+| Action | Shortcut |
+|--------|----------|
+| **Open Launcher** | `Super+R` (or your configured shortcut) |
+| **Toggle Dashboard** | `Super+M` (or your configured shortcut) |
+| **Navigate** | Arrow keys (`↑`, `↓`, `←`, `→`) |
+| **Select** | `Enter` or `Space` |
+| **Search** | Start typing to filter (in launcher) |
+| **Tab Navigation** | Click tabs or use mouse to switch between Dashboard, Media, and Performance tabs |
+| **Close** | `Escape` |
 
+---
 
 ## 📁 Project Structure
 
@@ -143,16 +211,21 @@ sharpshell/
 └── run.sh                   # Main runner script
 ```
 
+---
+
 ## 🎨 Customization
 
 ### Colors and Styling
 
 SharpShell includes a powerful color customization system:
 
-- **24 Color Presets**: Choose from beautiful pre-made themes (Dark, Ocean, Forest, Violet, Crimson, Amber, Teal, Rose, Sunset, Midnight, Emerald, Lavender, Sapphire, Coral, Mint, Plum, Gold, Monochrome, Cherry, Azure, Jade, Ruby, Indigo)
+- **24 Color Presets**: Choose from beautiful pre-made themes
+  - Dark, Ocean, Forest, Violet, Crimson, Amber, Teal, Rose, Sunset, Midnight, Emerald, Lavender, Sapphire, Coral, Mint, Plum, Gold, Monochrome, Cherry, Azure, Jade, Ruby, Indigo
 - **Custom HEX Colors**: Edit individual color values (Background, Primary, Secondary, Text, Focus/Accent)
 - **Live Preview**: See changes instantly as you edit
 - **Persistent Settings**: Colors are saved to `~/.config/sharpshell/colors.json`
+
+#### Customizing QML Files
 
 Edit the QML files in `components/` to customize:
 - Font sizes and families
@@ -161,9 +234,14 @@ Edit the QML files in `components/` to customize:
 
 ### Layout and Sizing
 
-- **Launcher Size**: Modify `implicitWidth` and `implicitHeight` in `AppLauncher.qml`
-- **Wallpaper Grid**: Adjust `cellWidth` and `cellHeight` in wallpaper picker
-- **Dashboard Size**: Change dimensions in `Dashboard.qml`
+| Component | Customization |
+|-----------|---------------|
+| **Launcher Size** | Modify `implicitWidth` and `implicitHeight` in `AppLauncher.qml` |
+| **Wallpaper Grid** | Adjust `cellWidth` and `cellHeight` in wallpaper picker |
+| **Dashboard Size** | Change dimensions in `Dashboard.qml` (default: 840x420) |
+| **Tab Content** | Customize card layouts and sizes in respective tab sections |
+| **Resource Bars** | Adjust bar heights and animation speeds |
+| **Media Player** | Modify album art size and control button dimensions |
 
 ### Behavior
 
@@ -171,64 +249,99 @@ Edit the QML files in `components/` to customize:
 - **Hover Effects**: Modify `scale` values in hover handlers
 - **Keyboard Shortcuts**: Configure in your compositor settings
 
+---
+
 ## 🔧 Configuration
 
 ### Wallpapers Path
 
-Default path: `~/Pictures/Wallpapers`
+**Default path:** `~/Pictures/Wallpapers`
 
 To change, edit in `AppLauncher.qml`:
+
 ```qml
 property string wallpapersPath: "/your/custom/path"
 ```
 
-**Note**: SharpShell uses native Quickshell wallpaper system (no external tools required!). The wallpaper is set via `WallpaperBackground.qml` component using `WlrLayer.Background`. If you prefer external tools, SharpShell will automatically detect and use `swww`, `wbg`, or `hyprpaper` if available.
+> **Note:** SharpShell uses native Quickshell wallpaper system (no external tools required!). The wallpaper is set via `WallpaperBackground.qml` component using `WlrLayer.Background`. If you prefer external tools, SharpShell will automatically detect and use `swww`, `wbg`, or `hyprpaper` if available.
 
 ### Audio Visualizer
 
-The visualizer uses `cava` with automatic configuration. To customize, edit `scripts/start-cava.sh`.
+The visualizer uses `cava` with automatic configuration. To customize, edit `scripts/start-cava.sh`. The Dashboard Media tab includes a full-width Cava visualizer that works alongside the side panel visualizer.
+
+### GPU Monitoring
+
+The Dashboard automatically detects and uses the appropriate GPU monitoring tool:
+
+| GPU Vendor | Tool Used |
+|------------|-----------|
+| **NVIDIA** | `nvidia-smi` to query GPU utilization |
+| **AMD** | `radeontop` to query GPU utilization |
+| **Intel** | `intel_gpu_top` to query GPU utilization |
+
+> Falls back gracefully if no compatible tool is found.
 
 ### Package Management
 
 Scripts support both Pacman and AUR (via `yay` or `paru`). Make sure you have an AUR helper installed.
 
+---
+
 ## 🐛 Troubleshooting
 
 ### Launcher Not Appearing
 
-- Check Quickshell configuration
-- Verify `shell.qml` path is correct
-- Check keyboard shortcut binding
+- ✅ Check Quickshell configuration
+- ✅ Verify `shell.qml` path is correct
+- ✅ Check keyboard shortcut binding
 
 ### Visualizer Not Working
 
-- Ensure `cava` is installed: `sudo pacman -S cava`
-- Check if `/tmp/quickshell_cava` is being created
-- Verify PulseAudio is running
+- ✅ Ensure `cava` is installed: `sudo pacman -S cava`
+- ✅ Check if `/tmp/quickshell_cava` is being created
+- ✅ Verify PulseAudio is running
+- ✅ For Dashboard Media tab visualizer, ensure cava is running via the side panel or start it manually
+
+### GPU Monitoring Not Working
+
+| GPU Type | Solution |
+|----------|----------|
+| **NVIDIA** | Ensure `nvidia-smi` is available (usually comes with nvidia drivers) |
+| **AMD** | Install `radeontop`: `sudo pacman -S radeontop` |
+| **Intel** | Install `intel-gpu-tools`: `sudo pacman -S intel-gpu-tools` |
+
+> The Dashboard will automatically detect and use the appropriate tool.
 
 ### Wallpapers Not Loading
 
-- Check wallpapers directory exists
-- Verify file permissions
-- Wallpapers work natively through Quickshell (no external tools needed!)
-- If using external tools, ensure `swww`, `wbg`, or `hyprpaper` is installed
+- ✅ Check wallpapers directory exists
+- ✅ Verify file permissions
+- ✅ Wallpapers work natively through Quickshell (no external tools needed!)
+- ✅ If using external tools, ensure `swww`, `wbg`, or `hyprpaper` is installed
 
 ### Keyboard Focus Issues
 
-- Try clicking on the launcher window
-- Check Wayland compositor focus settings
+- ✅ Try clicking on the launcher window
+- ✅ Check Wayland compositor focus settings
+
+---
 
 ## 📝 License
 
-MIT License - feel free to use, modify, and distribute.
+This project is licensed under the **MIT License** - feel free to use, modify, and distribute.
+
+---
 
 ## 🤝 Contributing
 
 Contributions are welcome! Feel free to:
-- Report bugs
-- Suggest features
-- Submit pull requests
-- Improve documentation
+
+- 🐛 Report bugs
+- 💡 Suggest features
+- 🔀 Submit pull requests
+- 📖 Improve documentation
+
+---
 
 ## 🙏 Acknowledgments
 
@@ -239,4 +352,10 @@ Contributions are welcome! Feel free to:
 
 ---
 
+<div align="center">
+
 **Made with ❤️ for the Linux community**
+
+[⭐ Star this repo](https://github.com/artwik22/sharpshell) • [🐛 Report Bug](https://github.com/artwik22/sharpshell/issues) • [💡 Request Feature](https://github.com/artwik22/sharpshell/issues)
+
+</div>

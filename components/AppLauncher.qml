@@ -138,6 +138,8 @@ PanelWindow {
                     wallpapersPath = "/tmp/Pictures/Wallpapers"
                     console.log("Using fallback paths")
                 }
+                // Load wallpapers immediately after path is initialized
+                loadWallpapers()
             }
         }
         xhr.send()
