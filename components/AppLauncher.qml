@@ -375,11 +375,11 @@ PanelWindow {
             accent: "#ffd54f"
         },
         "Monochrome": {
-            background: "#000000",
-            primary: "#1f1f1f",
-            secondary: "#0f0f0f",
-            text: "#ffffff",
-            accent: "#888888"
+            background: "#0a0a0a",
+            primary: "#1e1e1e",
+            secondary: "#141414",
+            text: "#e8e8e8",
+            accent: "#b0b0b0"
         },
         "Cherry": {
             background: "#1a0a0a",
@@ -503,7 +503,7 @@ PanelWindow {
     property var apps: []
     property int selectedIndex: 0
     property string searchText: ""
-    property int currentMode: -1  // -1 = mode selection, 0 = Launch App, 1 = Packages, 2 = Settings
+    property int currentMode: -1  // -1 = mode selection, 0 = Launcher, 1 = Packages, 2 = Settings
     property int currentPackageMode: -1  // -1 = Packages option selection, 0 = install source selection (Pacman/AUR), 1 = Pacman search, 2 = AUR search, 3 = remove source selection (Pacman/AUR), 4 = Pacman remove search, 5 = AUR remove search
     property int installSourceMode: -1  // -1 = selection, 0 = Pacman, 1 = AUR
     property int removeSourceMode: -1  // -1 = selection, 0 = Pacman, 1 = AUR
@@ -800,10 +800,99 @@ PanelWindow {
         Qt.createQmlObject("import QtQuick; Timer { interval: 1000; running: true; repeat: false; onTriggered: appLauncherRoot.getBluetoothDevices() }", appLauncherRoot)
     }
     
+    // Function to search in Firefox
+    function searchInFirefox(query) {
+        if (!query || query.trim() === "") {
+            return
+        }
+        var searchQuery = query.trim()
+        // Escape special characters for shell
+        var escapedQuery = searchQuery.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\$/g, '\\$').replace(/`/g, '\\`')
+        // Open Firefox with DuckDuckGo search
+        Qt.createQmlObject('import Quickshell.Io; import QtQuick; Process { command: ["sh", "-c", "firefox --new-tab \\"https://duckduckgo.com/?q=' + encodeURIComponent(searchQuery) + '\\""]; running: true }', appLauncherRoot)
+        // Close launcher
+        if (sharedData) {
+            sharedData.launcherVisible = false
+        }
+    }
+    
+    // Function to execute command
+    function executeCommand(command) {
+        if (!command || command.trim() === "") {
+            return
+        }
+        var cmd = command.trim()
+        // Escape special characters for shell
+        var escapedCmd = cmd.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\$/g, '\\$').replace(/`/g, '\\`')
+        // Execute command in terminal (using default terminal emulator)
+        Qt.createQmlObject('import Quickshell.Io; import QtQuick; Process { command: ["sh", "-c", "alacritty -e sh -c \\"' + escapedCmd + '; read -p \\"Press Enter to close...\\"\\" || kitty -e sh -c \\"' + escapedCmd + '; read -p \\"Press Enter to close...\\"\\" || xterm -e sh -c \\"' + escapedCmd + '; read -p \\"Press Enter to close...\\"\\" || gnome-terminal -- sh -c \\"' + escapedCmd + '; read -p \\"Press Enter to close...\\"\\""]; running: true }', appLauncherRoot)
+        // Close launcher
+        if (sharedData) {
+            sharedData.launcherVisible = false
+        }
+    }
+    
+    // Function to calculate expression
+    function calculateExpression(expression) {
+        if (!expression || expression.trim() === "") {
+            return null
+        }
+        try {
+            // Remove "=" prefix if present
+            var expr = expression.trim()
+            if (expr.startsWith("=")) {
+                expr = expr.substring(1).trim()
+            }
+            
+            // Replace common math symbols
+            expr = expr.replace(/×/g, '*').replace(/÷/g, '/').replace(/π/g, 'Math.PI').replace(/e/g, 'Math.E')
+            
+            // Evaluate expression using JavaScript eval (safe for math expressions)
+            // Note: In production, you might want to use a proper math parser
+            var result = eval(expr)
+            
+            // Format result
+            if (typeof result === 'number') {
+                // Round to reasonable precision
+                if (result % 1 === 0) {
+                    return result.toString()
+                } else {
+                    return result.toFixed(10).replace(/\.?0+$/, '')
+                }
+            }
+            return result.toString()
+        } catch (e) {
+            console.log("Calculation error:", e)
+            return null
+        }
+    }
+    
+    // Property to store calculation result
+    property string calculationResult: ""
+    
     // Function to filter applications
     function filterApps() {
         filteredApps.clear()
         var search = (searchText || "").toLowerCase().trim()
+        
+        // If search starts with "!", "@", or "=", don't filter apps - show empty list
+        if (search.startsWith("!") || search.startsWith("@") || search.startsWith("=")) {
+            // If it's a calculation, try to calculate
+            if (search.startsWith("=")) {
+                var expr = searchText.trim()
+                var result = calculateExpression(expr)
+                if (result !== null) {
+                    calculationResult = result
+                } else {
+                    calculationResult = ""
+                }
+            } else {
+                calculationResult = ""
+            }
+            return
+        }
+        
+        calculationResult = ""
         
         // If there are no applications, do nothing
         if (apps.length === 0) {
@@ -1893,7 +1982,7 @@ PanelWindow {
             }
             
             model: ListModel {
-                ListElement { name: "Launch App"; description: "Launch applications"; mode: 0; icon: "󰈙" }
+                ListElement { name: "Launcher"; description: "Launch applications and search"; mode: 0; icon: "󰈙" }
                 ListElement { name: "Packages"; description: "Manage packages"; mode: 1; icon: "󰏖" }
                 ListElement { name: "Settings"; description: "Configure launcher"; mode: 2; icon: "󰒓" }
             }
@@ -2048,7 +2137,32 @@ PanelWindow {
                                             }
                                             event.accepted = true
                                         } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                                            if (filteredApps.count > 0 && selectedIndex >= 0 && selectedIndex < filteredApps.count) {
+                                            // If search starts with "!", search in Firefox
+                                            if (searchText && searchText.trim().startsWith("!")) {
+                                                var query = searchText.trim().substring(1) // Remove "!"
+                                                if (query.length > 0) {
+                                                    searchInFirefox(query)
+                                                }
+                                            } else if (searchText && searchText.trim().startsWith("@")) {
+                                                // If search starts with "@", execute command
+                                                var cmd = searchText.trim().substring(1) // Remove "@"
+                                                if (cmd.length > 0) {
+                                                    executeCommand(cmd)
+                                                }
+                                            } else if (searchText && searchText.trim().startsWith("=")) {
+                                                // If search starts with "=", copy result to clipboard
+                                                var expr = searchText.trim()
+                                                var result = calculateExpression(expr)
+                                                if (result !== null) {
+                                                    // Copy result to clipboard
+                                                    var escapedResult = result.replace(/"/g, '\\"').replace(/\$/g, '\\$').replace(/`/g, '\\`')
+                                                    Qt.createQmlObject('import Quickshell.Io; import QtQuick; Process { command: ["sh", "-c", "echo -n \\"' + escapedResult + '\\" | wl-copy"]; running: true }', appLauncherRoot)
+                                                    // Close launcher
+                                                    if (sharedData) {
+                                                        sharedData.launcherVisible = false
+                                                    }
+                                                }
+                                            } else if (filteredApps.count > 0 && selectedIndex >= 0 && selectedIndex < filteredApps.count) {
                                                 var app = filteredApps.get(selectedIndex)
                                                 if (app && app.exec) {
                                                     launchApp(app)
@@ -2068,7 +2182,7 @@ PanelWindow {
                                 Text {
                                     anchors.fill: searchInput
                                     anchors.margins: 0
-                                    text: "Search applications..."
+                                    text: "Search applications... (! web, @ command, = calc)"
                                     font.pixelSize: 15
                                     font.family: "JetBrains Mono"
                                     font.weight: Font.Medium
@@ -2076,6 +2190,40 @@ PanelWindow {
                                     verticalAlignment: Text.AlignVCenter
                                     visible: searchInput.text.length === 0
                                     z: 5  // Za TextInput
+                                }
+                                
+                                // Calculation result display
+                                Text {
+                                    anchors.right: indicatorIcon.left
+                                    anchors.rightMargin: 10
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: calculationResult ? "= " + calculationResult : ""
+                                    font.pixelSize: 15
+                                    font.family: "JetBrains Mono"
+                                    font.weight: Font.Bold
+                                    color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                    visible: calculationResult !== "" && searchInput.text.trim().startsWith("=")
+                                    z: 6
+                                }
+                                
+                                // Indicator for different modes
+                                Text {
+                                    id: indicatorIcon
+                                    anchors.right: parent.right
+                                    anchors.rightMargin: 20
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: {
+                                        var txt = searchInput.text.trim()
+                                        if (txt.startsWith("@")) return "󰆍"
+                                        if (txt.startsWith("=")) return "󰬍"
+                                        if (txt.startsWith("!")) return "󰈹"
+                                        return ""
+                                    }
+                                    font.pixelSize: 16
+                                    font.family: "JetBrains Mono Nerd Font"
+                                    color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                    visible: searchInput.text.trim().startsWith("!") || searchInput.text.trim().startsWith("@") || searchInput.text.trim().startsWith("=")
+                                    z: 6
                                 }
                             }
                             

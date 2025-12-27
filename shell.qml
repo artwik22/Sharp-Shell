@@ -128,6 +128,13 @@ ShellRoot {
         sharedData.launcherVisible = !sharedData.launcherVisible
     }
     
+    // Funkcja otwierania clipboard managera
+    function openClipboardManager() {
+        if (clipboardManagerInstance) {
+            clipboardManagerInstance.clipboardVisible = !clipboardManagerInstance.clipboardVisible
+        }
+    }
+    
     // Timer do monitorowania pliku poleceń dla skrótów klawiszowych z Hyprland
     Timer {
         id: commandCheckTimer
@@ -211,6 +218,8 @@ ShellRoot {
                     lockScreenFunction: root.lockScreen
                     settingsFunction: root.openSettings
                     launcherFunction: root.openLauncher
+                    clipboardManagerFunction: root.openClipboardManager
+                    clipboardManagerInstance: clipboardManagerInstance
                 }
                 
                 // Wykrywacz górnej krawędzi - wykrywa najechanie myszką
@@ -249,6 +258,18 @@ ShellRoot {
     // Pokazuje się gdy myszka najedzie na prawą krawędź ekranu
     VolumeSlider {
         id: volumeSliderInstance
+        sharedData: root.sharedData
+    }
+    
+    // ClipboardManager - menedżer schowka
+    ClipboardManager {
+        id: clipboardManagerInstance
+        sharedData: root.sharedData
+    }
+    
+    // NotificationPanel - panel powiadomień w prawym górnym rogu
+    NotificationPanel {
+        id: notificationPanelInstance
         sharedData: root.sharedData
     }
 }

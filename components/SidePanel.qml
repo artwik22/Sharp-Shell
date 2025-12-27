@@ -244,6 +244,74 @@ PanelWindow {
             }
         }
         
+        // Clipboard Manager Button - pod visualizerem
+        Rectangle {
+            id: clipboardButton
+            width: 28
+            height: 28
+            radius: 0
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 8
+            color: clipboardButtonArea.containsMouse ? 
+                ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") : 
+                ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#141414")
+            
+            Behavior on color {
+                ColorAnimation {
+                    duration: 200
+                    easing.type: Easing.OutQuart
+                }
+            }
+            
+            property real buttonScale: clipboardButtonArea.pressed ? 0.9 : (clipboardButtonArea.containsMouse ? 1.1 : 1.0)
+            
+            Behavior on buttonScale {
+                NumberAnimation {
+                    duration: 150
+                    easing.type: Easing.OutQuart
+                }
+            }
+            
+            scale: buttonScale
+            
+            Text {
+                text: "󰨸"
+                font.pixelSize: 16
+                font.family: "JetBrains Mono Nerd Font"
+                color: clipboardButtonArea.containsMouse ? 
+                    ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff") : 
+                    ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff")
+                anchors.centerIn: parent
+                
+                Behavior on color {
+                    ColorAnimation {
+                        duration: 200
+                        easing.type: Easing.OutQuart
+                    }
+                }
+            }
+            
+            MouseArea {
+                id: clipboardButtonArea
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                hoverEnabled: true
+                onClicked: {
+                    console.log("Clipboard button clicked")
+                    if (clipboardManagerFunction) {
+                        console.log("Calling clipboardManagerFunction")
+                        clipboardManagerFunction()
+                    } else if (clipboardManagerInstance) {
+                        console.log("Using clipboardManagerInstance directly")
+                        clipboardManagerInstance.clipboardVisible = !clipboardManagerInstance.clipboardVisible
+                    } else {
+                        console.log("clipboardManagerFunction and clipboardManagerInstance are both null!")
+                    }
+                }
+            }
+        }
+        
         // Music Visualizer - PIONOWY na dole panelu (poziome paski ułożone w kolumnie)
         Column {
             id: musicVisualizerColumn
@@ -251,8 +319,8 @@ PanelWindow {
             width: 24  // Szerokość pasków
             visible: true
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 15
+            anchors.bottom: clipboardButton.top
+            anchors.bottomMargin: 8
             
             Repeater {
                 id: visualizerBarsRepeater
@@ -291,6 +359,8 @@ PanelWindow {
     property var lockScreenFunction
     property var settingsFunction
     property var launcherFunction
+    property var clipboardManagerFunction: null
+    property var clipboardManagerInstance: null
     
     // --- Music Visualizer ---
     property var cavaValues: []

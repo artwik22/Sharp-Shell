@@ -36,13 +36,16 @@
 
 ## ✨ Features
 
-### 🎯 Application Launcher
+### 🎯 Launcher
 
 | Feature | Description |
 |---------|-------------|
 | 🔍 **Fast Search** | Real-time filtering of applications |
 | ⌨️ **Keyboard Navigation** | Full arrow key support with smooth navigation |
 | 🎬 **Smooth Animations** | Beautiful transitions and hover effects |
+| 🌐 **Web Search** | Type `!` followed by your query to search on DuckDuckGo |
+| 💻 **Command Execution** | Type `@` followed by a command to execute it in terminal |
+| 🧮 **Calculator** | Type `=` followed by a math expression to calculate and copy result |
 | 📦 **Package Management** | Install/remove packages via Pacman and AUR |
 | ⚙️ **Settings Panel** | Customize wallpaper, colors, and system updates |
 | 🎨 **24 Color Presets** | Beautiful pre-made themes to choose from |
@@ -78,6 +81,7 @@ A comprehensive system dashboard with multiple tabs and real-time monitoring.
 - 🎵 **Audio Visualizer** - Real-time audio visualization with cava
 - 🔊 **Volume Control** - Adjust system volume with visual slider
 - 📶 **Bluetooth Control** - Toggle Bluetooth on/off
+- 📋 **Clipboard Manager** - View and manage clipboard history with persistent storage
 - 🎨 **Modern Design** - Clean, minimal interface
 
 ### 🖼️ Wallpaper Management
@@ -180,6 +184,9 @@ Configure similar bindings to execute the scripts from `~/.config/sharpshell/`.
 | **Navigate** | Arrow keys (`↑`, `↓`, `←`, `→`) |
 | **Select** | `Enter` or `Space` |
 | **Search** | Start typing to filter (in launcher) |
+| **Web Search** | Type `!` followed by query, then press `Enter` |
+| **Execute Command** | Type `@` followed by command, then press `Enter` |
+| **Calculate** | Type `=` followed by expression, then press `Enter` (copies result to clipboard) |
 | **Tab Navigation** | Click tabs or use mouse to switch between Dashboard, Media, and Performance tabs |
 | **Close** | `Escape` |
 
@@ -191,9 +198,10 @@ Configure similar bindings to execute the scripts from `~/.config/sharpshell/`.
 sharpshell/
 ├── shell.qml                 # Main entry point
 ├── components/
-│   ├── AppLauncher.qml       # Application launcher
+│   ├── AppLauncher.qml       # Application launcher with web search, commands, and calculator
 │   ├── Dashboard.qml         # Dashboard with tabs and cards
-│   ├── SidePanel.qml         # Side panel with visualizer
+│   ├── SidePanel.qml         # Side panel with visualizer and clipboard manager
+│   ├── ClipboardManager.qml  # Clipboard history manager
 │   ├── VolumeSlider.qml      # Volume control component
 │   ├── WallpaperBackground.qml # Native wallpaper background (Quickshell)
 │   ├── Utils.qml             # Utility functions

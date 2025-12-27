@@ -265,209 +265,254 @@ PanelWindow {
                         rowSpacing: 12
                         
                         // Weather Card (Top Left)
-                        Rectangle {
+                        Item {
                             Layout.column: 0
                             Layout.row: 0
                             Layout.fillWidth: true
                             Layout.fillHeight: true
                             Layout.minimumWidth: 140
                             Layout.minimumHeight: 105
-                            radius: 0
-                            color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1a1a1a"
                             
-                            RowLayout {
+                            // Shadow
+                            Rectangle {
                                 anchors.fill: parent
-                                anchors.margins: 12
-                                spacing: 8
-                                
-                                Text {
-                                    text: "☀️"
-                                    font.pixelSize: 52
-                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
-                                    Layout.alignment: Qt.AlignVCenter
-                                    Layout.preferredWidth: 60
-                                }
-                                
-                                Column {
-                                    Layout.fillWidth: true
-                                    Layout.alignment: Qt.AlignVCenter
-                                    spacing: 4
+                                anchors.topMargin: 3
+                                anchors.leftMargin: 3
+                                color: "#000000"
+                                opacity: 0.15
+                                z: 0
+                            }
+                            
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: 0
+                                color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1a1a1a"
+                                z: 1
+                            
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.margins: 12
+                                    spacing: 8
                                     
                                     Text {
-                                        text: weatherTemp
-                                        font.pixelSize: 28
-                                        font.weight: Font.Bold
-                                        font.family: "JetBrains Mono"
+                                        text: "☀️"
+                                        font.pixelSize: 52
                                         color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                        Layout.alignment: Qt.AlignVCenter
+                                        Layout.preferredWidth: 60
                                     }
                                     
-                                    Text {
-                                        text: weatherCondition
-                                        font.pixelSize: 12
-                                        font.family: "JetBrains Mono"
-                                        color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
-                                        elide: Text.ElideRight
+                                    Column {
+                                        Layout.fillWidth: true
+                                        Layout.alignment: Qt.AlignVCenter
+                                        spacing: 4
+                                        
+                                        Text {
+                                            text: weatherTemp
+                                            font.pixelSize: 28
+                                            font.weight: Font.Bold
+                                            font.family: "JetBrains Mono"
+                                            color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                        }
+                                        
+                                        Text {
+                                            text: weatherCondition
+                                            font.pixelSize: 12
+                                            font.family: "JetBrains Mono"
+                                            color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
+                                            elide: Text.ElideRight
+                                        }
                                     }
                                 }
                             }
                         }
                         
                         // System Info Card (Top Middle)
-                        Rectangle {
+                        Item {
                             Layout.column: 1
                             Layout.row: 0
                             Layout.fillWidth: true
                             Layout.fillHeight: true
                             Layout.minimumWidth: 140
                             Layout.minimumHeight: 105
-                            radius: 0
-                            color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1a1a1a"
                             
-                            RowLayout {
+                            // Shadow
+                            Rectangle {
                                 anchors.fill: parent
-                                anchors.margins: 12
-                                spacing: 12
-                                
-                                Text {
-                                    text: "󰣇"
-                                    font.pixelSize: 40
-                                    font.family: "JetBrains Mono Nerd Font"
-                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
-                                }
-                                
-                                Column {
-                                    Layout.fillWidth: true
-                                    spacing: 4
+                                anchors.topMargin: 3
+                                anchors.leftMargin: 3
+                                color: "#000000"
+                                opacity: 0.15
+                                z: 0
+                            }
+                            
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: 0
+                                color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1a1a1a"
+                                z: 1
+                            
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.margins: 12
+                                    spacing: 12
                                     
                                     Text {
-                                        text: "A: Arch Linux"
-                                        font.pixelSize: 14
-                                        font.family: "JetBrains Mono"
+                                        text: "󰣇"
+                                        font.pixelSize: 40
+                                        font.family: "JetBrains Mono Nerd Font"
                                         color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                     }
                                     
-                                    Text {
-                                        text: "󰨳: Hyprland"
-                                        font.pixelSize: 14
-                                        font.family: "JetBrains Mono"
-                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
-                                    }
-                                    
-                                    Text {
-                                        id: uptimeText
-                                        text: "󰥔: up 1 hour, 23 minutes"
-                                        font.pixelSize: 14
-                                        font.family: "JetBrains Mono"
-                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                    Column {
+                                        Layout.fillWidth: true
+                                        spacing: 4
+                                        
+                                        Text {
+                                            text: "A: Arch Linux"
+                                            font.pixelSize: 14
+                                            font.family: "JetBrains Mono"
+                                            color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                        }
+                                        
+                                        Text {
+                                            text: "󰨳: Hyprland"
+                                            font.pixelSize: 14
+                                            font.family: "JetBrains Mono"
+                                            color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                        }
+                                        
+                                        Text {
+                                            id: uptimeText
+                                            text: "󰥔: up 1 hour, 23 minutes"
+                                            font.pixelSize: 14
+                                            font.family: "JetBrains Mono"
+                                            color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                        }
                                     }
                                 }
                             }
                         }
                         
                         // Date/Calendar Card (Left/Center, spans 2 rows)
-                        Rectangle {
+                        Item {
                             Layout.column: 0
                             Layout.row: 1
                             Layout.columnSpan: 2
                             Layout.fillWidth: true
                             Layout.fillHeight: true
                             Layout.minimumHeight: 210
-                            radius: 0
-                            color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1a1a1a"
                             
-                            RowLayout {
+                            // Shadow
+                            Rectangle {
                                 anchors.fill: parent
-                                anchors.margins: 20
-                                spacing: 20
-                                
-                                // Large Date Display
-                                Column {
-                                    Layout.preferredWidth: 100
-                                    Layout.alignment: Qt.AlignVCenter
-                                    spacing: 2
+                                anchors.topMargin: 3
+                                anchors.leftMargin: 3
+                                color: "#000000"
+                                opacity: 0.15
+                                z: 0
+                            }
+                            
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: 0
+                                color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1a1a1a"
+                                z: 1
+                            
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.margins: 20
+                                    spacing: 20
                                     
-                                    Item {
-                                        width: 1
-                                        height: 1
-                                    }
-                                    
-                                    Text {
-                                        id: dayNumber
-                                        text: "21"
-                                        font.pixelSize: 68
-                                        font.weight: Font.Bold
-                                        font.family: "JetBrains Mono"
-                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
-                                        anchors.horizontalCenter: parent.horizontalCenter
-                                    }
-                                    
-                                    Text {
-                                        id: monthNumber
-                                        text: "06"
-                                        font.pixelSize: 68
-                                        font.weight: Font.Bold
-                                        font.family: "JetBrains Mono"
-                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
-                                        anchors.horizontalCenter: parent.horizontalCenter
-                                    }
-                                    
-                                    Item {
-                                        width: 1
-                                        height: 1
-                                    }
-                                }
-                                
-                                // Calendar Grid
-                                Column {
-                                    Layout.fillWidth: true
-                                    spacing: 8
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    
-                                    // Day headers
-                                    Row {
-                                        spacing: 8
-                                        anchors.horizontalCenter: parent.horizontalCenter
+                                    // Large Date Display
+                                    Column {
+                                        Layout.preferredWidth: 100
+                                        Layout.alignment: Qt.AlignVCenter
+                                        spacing: 2
                                         
-                                        Repeater {
-                                            model: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-                                            Text {
-                                                text: modelData
-                                                font.pixelSize: 11
-                                                font.family: "JetBrains Mono"
-                                                color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
-                                                width: 24
-                                                horizontalAlignment: Text.AlignHCenter
-                                            }
+                                        Item {
+                                            width: 1
+                                            height: 1
+                                        }
+                                        
+                                        Text {
+                                            id: dayNumber
+                                            text: "21"
+                                            font.pixelSize: 68
+                                            font.weight: Font.Bold
+                                            font.family: "JetBrains Mono"
+                                            color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                            anchors.horizontalCenter: parent.horizontalCenter
+                                        }
+                                        
+                                        Text {
+                                            id: monthNumber
+                                            text: "06"
+                                            font.pixelSize: 68
+                                            font.weight: Font.Bold
+                                            font.family: "JetBrains Mono"
+                                            color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                            anchors.horizontalCenter: parent.horizontalCenter
+                                        }
+                                        
+                                        Item {
+                                            width: 1
+                                            height: 1
                                         }
                                     }
                                     
-                                    // Calendar grid
-                                    Grid {
-                                        columns: 7
-                                        spacing: 6
-                                        anchors.horizontalCenter: parent.horizontalCenter
+                                    // Calendar Grid
+                                    Column {
+                                        Layout.fillWidth: true
+                                        spacing: 8
+                                        anchors.verticalCenter: parent.verticalCenter
                                         
-                                        Repeater {
-                                            model: calendarDays
+                                        // Day headers
+                                        Row {
+                                            spacing: 8
+                                            anchors.horizontalCenter: parent.horizontalCenter
                                             
-                                            Rectangle {
-                                                width: 24
-                                                height: 24
-                                                radius: 0
-                                                color: modelData.isToday ? 
-                                                    ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") : 
-                                                    "transparent"
-                                                
+                                            Repeater {
+                                                model: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
                                                 Text {
-                                                    text: modelData.day
-                                                    font.pixelSize: 12
+                                                    text: modelData
+                                                    font.pixelSize: 11
                                                     font.family: "JetBrains Mono"
+                                                    color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
+                                                    width: 24
+                                                    horizontalAlignment: Text.AlignHCenter
+                                                }
+                                            }
+                                        }
+                                        
+                                        // Calendar grid
+                                        Grid {
+                                            columns: 7
+                                            spacing: 6
+                                            anchors.horizontalCenter: parent.horizontalCenter
+                                            
+                                            Repeater {
+                                                model: calendarDays
+                                                
+                                                Rectangle {
+                                                    width: 24
+                                                    height: 24
+                                                    radius: 0
                                                     color: modelData.isToday ? 
-                                                        ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff") : 
-                                                        (modelData.isCurrentMonth ? 
+                                                        ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") : 
+                                                        "transparent"
+                                                    
+                                                    Text {
+                                                        text: modelData.day
+                                                        font.pixelSize: 12
+                                                        font.family: "JetBrains Mono"
+                                                        color: modelData.isToday ? 
                                                             ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff") : 
-                                                            ((sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.5) : "#888888"))
-                                                    anchors.centerIn: parent
+                                                            (modelData.isCurrentMonth ? 
+                                                                ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff") : 
+                                                                ((sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.5) : "#888888"))
+                                                        anchors.centerIn: parent
+                                                    }
                                                 }
                                             }
                                         }
@@ -477,88 +522,103 @@ PanelWindow {
                         }
                         
                         // Resource Usage Card (Right of Calendar, spans 2 rows)
-                        Rectangle {
+                        Item {
                             Layout.column: 2
                             Layout.row: 0
                             Layout.rowSpan: 2
                             Layout.fillWidth: true
                             Layout.fillHeight: true
                             Layout.minimumWidth: 120
-                            radius: 0
-                            color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1a1a1a"
                             
-                            Row {
+                            // Shadow
+                            Rectangle {
                                 anchors.fill: parent
-                                anchors.margins: 15
-                                spacing: 12
-                                
-                                Repeater {
-                                    model: [
-                                        { label: "CPU", value: cpuUsageValue, icon: "󰻠" },
-                                        { label: "RAM", value: ramUsageValue, icon: "󰍛" },
-                                        { label: "GPU", value: gpuUsageValue, icon: "󰾲" }
-                                    ]
+                                anchors.topMargin: 3
+                                anchors.leftMargin: 3
+                                color: "#000000"
+                                opacity: 0.15
+                                z: 0
+                            }
+                            
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: 0
+                                color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1a1a1a"
+                                z: 1
+                            
+                                Row {
+                                    anchors.fill: parent
+                                    anchors.margins: 15
+                                    spacing: 12
                                     
-                                    Column {
-                                        width: (parent.width - 24) / 3
-                                        height: parent.height
-                                        spacing: 8
+                                    Repeater {
+                                        model: [
+                                            { label: "CPU", value: cpuUsageValue, icon: "󰻠" },
+                                            { label: "RAM", value: ramUsageValue, icon: "󰍛" },
+                                            { label: "GPU", value: gpuUsageValue, icon: "󰾲" }
+                                        ]
                                         
-                                        Text {
-                                            text: modelData.icon
-                                            font.pixelSize: 20
-                                            color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
-                                            anchors.horizontalCenter: parent.horizontalCenter
-                                        }
-                                        
-                                        Text {
-                                            text: modelData.label
-                                            font.pixelSize: 13
-                                            font.family: "JetBrains Mono"
-                                            color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
-                                            anchors.horizontalCenter: parent.horizontalCenter
-                                        }
-                                        
-                                        Text {
-                                            text: modelData.value + "%"
-                                            font.pixelSize: 16
-                                            font.family: "JetBrains Mono"
-                                            font.weight: Font.Bold
-                                            color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
-                                            anchors.horizontalCenter: parent.horizontalCenter
-                                        }
-                                        
-                                        Item {
-                                            width: parent.width
-                                            height: parent.height - 80
+                                        Column {
+                                            width: (parent.width - 24) / 3
+                                            height: parent.height
+                                            spacing: 8
                                             
-                                            Rectangle {
-                                                anchors.bottom: parent.bottom
+                                            Text {
+                                                text: modelData.icon
+                                                font.pixelSize: 20
+                                                color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                                 anchors.horizontalCenter: parent.horizontalCenter
+                                            }
+                                            
+                                            Text {
+                                                text: modelData.label
+                                                font.pixelSize: 13
+                                                font.family: "JetBrains Mono"
+                                                color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                                anchors.horizontalCenter: parent.horizontalCenter
+                                            }
+                                            
+                                            Text {
+                                                text: modelData.value + "%"
+                                                font.pixelSize: 16
+                                                font.family: "JetBrains Mono"
+                                                font.weight: Font.Bold
+                                                color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                                anchors.horizontalCenter: parent.horizontalCenter
+                                            }
+                                            
+                                            Item {
                                                 width: parent.width
-                                                height: parent.height
-                                                radius: 0
-                                                color: (sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#141414"
+                                                height: parent.height - 80
                                                 
                                                 Rectangle {
                                                     anchors.bottom: parent.bottom
                                                     anchors.horizontalCenter: parent.horizontalCenter
                                                     width: parent.width
-                                                    height: parent.height * (modelData.value / 100)
+                                                    height: parent.height
                                                     radius: 0
-                                                    color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                                    color: (sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#141414"
                                                     
-                                                    Behavior on height {
-                                                        NumberAnimation {
-                                                            duration: 600
-                                                            easing.type: Easing.OutCubic
+                                                    Rectangle {
+                                                        anchors.bottom: parent.bottom
+                                                        anchors.horizontalCenter: parent.horizontalCenter
+                                                        width: parent.width
+                                                        height: parent.height * (modelData.value / 100)
+                                                        radius: 0
+                                                        color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                                        
+                                                        Behavior on height {
+                                                            NumberAnimation {
+                                                                duration: 600
+                                                                easing.type: Easing.OutCubic
+                                                            }
                                                         }
-                                                    }
-                                                    
-                                                    Behavior on color {
-                                                        ColorAnimation {
-                                                            duration: 400
-                                                            easing.type: Easing.InOutQuad
+                                                        
+                                                        Behavior on color {
+                                                            ColorAnimation {
+                                                                duration: 400
+                                                                easing.type: Easing.InOutQuad
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -570,189 +630,125 @@ PanelWindow {
                         }
                         
                         // Media Player Card (Right)
-                        Rectangle {
+                        Item {
                             Layout.column: 3
                             Layout.row: 0
                             Layout.rowSpan: 2
                             Layout.fillWidth: true
                             Layout.fillHeight: true
                             Layout.minimumWidth: 175
-                            radius: 0
-                            color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1a1a1a"
                             
-                            Column {
+                            // Shadow
+                            Rectangle {
                                 anchors.fill: parent
-                                anchors.margins: 16
-                                spacing: 16
-                                
-                                // Album Art
-                                Rectangle {
-                                    width: 180
-                                    height: 180
-                                    radius: 0
-                                    color: (sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#141414"
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                    
-                                    Image {
-                                        id: mediaAlbumArt
-                                        anchors.fill: parent
-                                        anchors.margins: 1
-                                        fillMode: Image.PreserveAspectCrop
-                                        source: mpArt ? mpArt : ""
-                                        asynchronous: true
-                                        cache: false
-                                        opacity: source ? 1.0 : 0.0
-                                        
-                                        Behavior on opacity {
-                                            NumberAnimation {
-                                                duration: 400
-                                                easing.type: Easing.OutQuart
-                                            }
-                                        }
-                                    }
-                                    
-                                    Text {
-                                        text: "󰎆"
-                                        font.pixelSize: 60
-                                        anchors.centerIn: parent
-                                        visible: !mpArt
-                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
-                                    }
-                                }
-                                
-                                // Track Info
+                                anchors.topMargin: 3
+                                anchors.leftMargin: 3
+                                color: "#000000"
+                                opacity: 0.15
+                                z: 0
+                            }
+                            
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: 0
+                                color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1a1a1a"
+                                z: 1
+                            
                                 Column {
-                                    width: parent.width
-                                    spacing: 6
+                                    anchors.fill: parent
+                                    anchors.margins: 16
+                                    spacing: 16
                                     
-                                    Text {
-                                        id: mediaTitle
-                                        text: mpTitle ? mpTitle : "Nothing playing"
-                                        font.pixelSize: 18
-                                        font.family: "JetBrains Mono"
-                                        font.weight: Font.Bold
-                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
-                                        elide: Text.ElideRight
-                                        width: parent.width
-                                        horizontalAlignment: Text.AlignHCenter
-                                    }
-                                    
-                                    Text {
-                                        id: mediaArtist
-                                        text: mpArtist ? mpArtist : "—"
-                                        font.pixelSize: 16
-                                        font.family: "JetBrains Mono"
-                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
-                                        elide: Text.ElideRight
-                                        width: parent.width
-                                        horizontalAlignment: Text.AlignHCenter
-                                    }
-                                    
-                                    Text {
-                                        id: mediaAlbum
-                                        text: mpAlbum ? mpAlbum : "—"
-                                        font.pixelSize: 15
-                                        font.family: "JetBrains Mono"
-                                        color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
-                                        elide: Text.ElideRight
-                                        width: parent.width
-                                        horizontalAlignment: Text.AlignHCenter
-                                    }
-                                }
-                                
-                                // Controls
-                                Row {
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                    spacing: 12
-                                    
+                                    // Album Art
                                     Rectangle {
-                                        id: prevButton
-                                        width: 40
-                                        height: 40
+                                        width: 180
+                                        height: 180
                                         radius: 0
-                                        color: prevArea.containsMouse ? 
-                                            ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") : 
-                                            ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#161616")
+                                        color: (sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#141414"
+                                        anchors.horizontalCenter: parent.horizontalCenter
                                         
-                                        property real buttonScale: prevArea.pressed ? 0.9 : (prevArea.containsMouse ? 1.1 : 1.0)
-                                        
-                                        Behavior on color {
-                                            ColorAnimation {
-                                                duration: 200
-                                                easing.type: Easing.OutQuart
-                                            }
-                                        }
-                                        
-                                        Behavior on buttonScale {
-                                            NumberAnimation {
-                                                duration: 150
-                                                easing.type: Easing.OutQuart
-                                            }
-                                        }
-                                        
-                                        scale: buttonScale
-                                        
-                                        Text {
-                                            text: "󰒮"
-                                            font.pixelSize: 22
-                                            anchors.centerIn: parent
-                                            color: prevArea.containsMouse ? 
-                                                ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff") : 
-                                                ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff")
-                                            
-                                            Behavior on color {
-                                                ColorAnimation {
-                                                    duration: 200
-                                                    easing.type: Easing.OutQuart
-                                                }
-                                            }
-                                        }
-                                        
-                                        MouseArea {
-                                            id: prevArea
+                                        Image {
+                                            id: mediaAlbumArt
                                             anchors.fill: parent
-                                            cursorShape: Qt.PointingHandCursor
-                                            hoverEnabled: true
-                                            onClicked: {
-                                                playerPrev()
+                                            anchors.margins: 1
+                                            fillMode: Image.PreserveAspectCrop
+                                            source: mpArt ? mpArt : ""
+                                            asynchronous: true
+                                            cache: false
+                                            opacity: source ? 1.0 : 0.0
+                                            
+                                            Behavior on opacity {
+                                                NumberAnimation {
+                                                    duration: 400
+                                                    easing.type: Easing.OutQuart
+                                                }
                                             }
+                                        }
+                                        
+                                        Text {
+                                            text: "󰎆"
+                                            font.pixelSize: 60
+                                            anchors.centerIn: parent
+                                            visible: !mpArt
+                                            color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                         }
                                     }
                                     
-                                    Rectangle {
-                                        id: playButton
-                                        width: 50
-                                        height: 40
-                                        radius: 0
-                                        color: playArea.containsMouse ? 
-                                            ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") : 
-                                            ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
-                                        
-                                        property real buttonScale: playArea.pressed ? 0.9 : (playArea.containsMouse ? 1.1 : 1.0)
-                                        
-                                        Behavior on color {
-                                            ColorAnimation {
-                                                duration: 200
-                                                easing.type: Easing.OutQuart
-                                            }
-                                        }
-                                        
-                                        Behavior on buttonScale {
-                                            NumberAnimation {
-                                                duration: 150
-                                                easing.type: Easing.OutQuart
-                                            }
-                                        }
-                                        
-                                        scale: buttonScale
+                                    // Track Info
+                                    Column {
+                                        width: parent.width
+                                        spacing: 6
                                         
                                         Text {
-                                            text: mpPlaying ? "󰏤" : "󰐊"
-                                            font.pixelSize: 24
-                                            anchors.centerIn: parent
-                                            color: playArea.containsMouse ? 
-                                                ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff") : 
-                                                ((sharedData && sharedData.colorBackground) ? sharedData.colorBackground : "#0a0a0a")
+                                            id: mediaTitle
+                                            text: mpTitle ? mpTitle : "Nothing playing"
+                                            font.pixelSize: 18
+                                            font.family: "JetBrains Mono"
+                                            font.weight: Font.Bold
+                                            color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                            elide: Text.ElideRight
+                                            width: parent.width
+                                            horizontalAlignment: Text.AlignHCenter
+                                        }
+                                        
+                                        Text {
+                                            id: mediaArtist
+                                            text: mpArtist ? mpArtist : "—"
+                                            font.pixelSize: 16
+                                            font.family: "JetBrains Mono"
+                                            color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                            elide: Text.ElideRight
+                                            width: parent.width
+                                            horizontalAlignment: Text.AlignHCenter
+                                        }
+                                        
+                                        Text {
+                                            id: mediaAlbum
+                                            text: mpAlbum ? mpAlbum : "—"
+                                            font.pixelSize: 15
+                                            font.family: "JetBrains Mono"
+                                            color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
+                                            elide: Text.ElideRight
+                                            width: parent.width
+                                            horizontalAlignment: Text.AlignHCenter
+                                        }
+                                    }
+                                    
+                                    // Controls
+                                    Row {
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        spacing: 12
+                                        
+                                        Rectangle {
+                                            id: prevButton
+                                            width: 40
+                                            height: 40
+                                            radius: 0
+                                            color: prevArea.containsMouse ? 
+                                                ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") : 
+                                                ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#161616")
+                                            
+                                            property real buttonScale: prevArea.pressed ? 0.9 : (prevArea.containsMouse ? 1.1 : 1.0)
                                             
                                             Behavior on color {
                                                 ColorAnimation {
@@ -761,61 +757,52 @@ PanelWindow {
                                                 }
                                             }
                                             
-                                            rotation: playArea.pressed ? 5 : 0
-                                            
-                                            Behavior on rotation {
+                                            Behavior on buttonScale {
                                                 NumberAnimation {
                                                     duration: 150
                                                     easing.type: Easing.OutQuart
                                                 }
                                             }
-                                        }
-                                        
-                                        MouseArea {
-                                            id: playArea
-                                            anchors.fill: parent
-                                            cursorShape: Qt.PointingHandCursor
-                                            hoverEnabled: true
-                                            onClicked: {
-                                                playerPlayPause()
+                                            
+                                            scale: buttonScale
+                                            
+                                            Text {
+                                                text: "󰒮"
+                                                font.pixelSize: 22
+                                                anchors.centerIn: parent
+                                                color: prevArea.containsMouse ? 
+                                                    ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff") : 
+                                                    ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff")
+                                                
+                                                Behavior on color {
+                                                    ColorAnimation {
+                                                        duration: 200
+                                                        easing.type: Easing.OutQuart
+                                                    }
+                                                }
                                             }
-                                        }
-                                    }
-                                    
-                                    Rectangle {
-                                        id: nextButton
-                                        width: 40
-                                        height: 40
-                                        radius: 0
-                                        color: nextArea.containsMouse ? 
-                                            ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") : 
-                                            ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#161616")
-                                        
-                                        property real buttonScale: nextArea.pressed ? 0.9 : (nextArea.containsMouse ? 1.1 : 1.0)
-                                        
-                                        Behavior on color {
-                                            ColorAnimation {
-                                                duration: 200
-                                                easing.type: Easing.OutQuart
-                                            }
-                                        }
-                                        
-                                        Behavior on buttonScale {
-                                            NumberAnimation {
-                                                duration: 150
-                                                easing.type: Easing.OutQuart
+                                            
+                                            MouseArea {
+                                                id: prevArea
+                                                anchors.fill: parent
+                                                cursorShape: Qt.PointingHandCursor
+                                                hoverEnabled: true
+                                                onClicked: {
+                                                    playerPrev()
+                                                }
                                             }
                                         }
                                         
-                                        scale: buttonScale
-                                        
-                                        Text {
-                                            text: "󰒭"
-                                            font.pixelSize: 22
-                                            anchors.centerIn: parent
-                                            color: nextArea.containsMouse ? 
-                                                ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff") : 
-                                                ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff")
+                                        Rectangle {
+                                            id: playButton
+                                            width: 50
+                                            height: 40
+                                            radius: 0
+                                            color: playArea.containsMouse ? 
+                                                ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") : 
+                                                ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
+                                            
+                                            property real buttonScale: playArea.pressed ? 0.9 : (playArea.containsMouse ? 1.1 : 1.0)
                                             
                                             Behavior on color {
                                                 ColorAnimation {
@@ -823,15 +810,103 @@ PanelWindow {
                                                     easing.type: Easing.OutQuart
                                                 }
                                             }
+                                            
+                                            Behavior on buttonScale {
+                                                NumberAnimation {
+                                                    duration: 150
+                                                    easing.type: Easing.OutQuart
+                                                }
+                                            }
+                                            
+                                            scale: buttonScale
+                                            
+                                            Text {
+                                                text: mpPlaying ? "󰏤" : "󰐊"
+                                                font.pixelSize: 24
+                                                anchors.centerIn: parent
+                                                color: playArea.containsMouse ? 
+                                                    ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff") : 
+                                                    ((sharedData && sharedData.colorBackground) ? sharedData.colorBackground : "#0a0a0a")
+                                                
+                                                Behavior on color {
+                                                    ColorAnimation {
+                                                        duration: 200
+                                                        easing.type: Easing.OutQuart
+                                                    }
+                                                }
+                                                
+                                                rotation: playArea.pressed ? 5 : 0
+                                                
+                                                Behavior on rotation {
+                                                    NumberAnimation {
+                                                        duration: 150
+                                                        easing.type: Easing.OutQuart
+                                                    }
+                                                }
+                                            }
+                                            
+                                            MouseArea {
+                                                id: playArea
+                                                anchors.fill: parent
+                                                cursorShape: Qt.PointingHandCursor
+                                                hoverEnabled: true
+                                                onClicked: {
+                                                    playerPlayPause()
+                                                }
+                                            }
                                         }
                                         
-                                        MouseArea {
-                                            id: nextArea
-                                            anchors.fill: parent
-                                            cursorShape: Qt.PointingHandCursor
-                                            hoverEnabled: true
-                                            onClicked: {
-                                                playerNext()
+                                        Rectangle {
+                                            id: nextButton
+                                            width: 40
+                                            height: 40
+                                            radius: 0
+                                            color: nextArea.containsMouse ? 
+                                                ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") : 
+                                                ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#161616")
+                                            
+                                            property real buttonScale: nextArea.pressed ? 0.9 : (nextArea.containsMouse ? 1.1 : 1.0)
+                                            
+                                            Behavior on color {
+                                                ColorAnimation {
+                                                    duration: 200
+                                                    easing.type: Easing.OutQuart
+                                                }
+                                            }
+                                            
+                                            Behavior on buttonScale {
+                                                NumberAnimation {
+                                                    duration: 150
+                                                    easing.type: Easing.OutQuart
+                                                }
+                                            }
+                                            
+                                            scale: buttonScale
+                                            
+                                            Text {
+                                                text: "󰒭"
+                                                font.pixelSize: 22
+                                                anchors.centerIn: parent
+                                                color: nextArea.containsMouse ? 
+                                                    ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff") : 
+                                                    ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff")
+                                                
+                                                Behavior on color {
+                                                    ColorAnimation {
+                                                        duration: 200
+                                                        easing.type: Easing.OutQuart
+                                                    }
+                                                }
+                                            }
+                                            
+                                            MouseArea {
+                                                id: nextArea
+                                                anchors.fill: parent
+                                                cursorShape: Qt.PointingHandCursor
+                                                hoverEnabled: true
+                                                onClicked: {
+                                                    playerNext()
+                                                }
                                             }
                                         }
                                     }
@@ -1214,301 +1289,361 @@ PanelWindow {
                         rowSpacing: 12
                         
                         // CPU Card
-                        Rectangle {
+                        Item {
                             Layout.column: 0
                             Layout.row: 0
                             Layout.fillWidth: true
                             Layout.fillHeight: true
                             Layout.minimumHeight: 140
-                            radius: 0
-                            color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1a1a1a"
                             
-                            Column {
+                            // Shadow
+                            Rectangle {
                                 anchors.fill: parent
-                                anchors.margins: 16
-                                spacing: 12
-                                
-                                Row {
-                                    width: parent.width
-                                    spacing: 10
+                                anchors.topMargin: 3
+                                anchors.leftMargin: 3
+                                color: "#000000"
+                                opacity: 0.15
+                                z: 0
+                            }
+                            
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: 0
+                                color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1a1a1a"
+                                z: 1
+                            
+                                Column {
+                                    anchors.fill: parent
+                                    anchors.margins: 16
+                                    spacing: 12
                                     
-                                    Text {
-                                        text: "󰻠"
-                                        font.pixelSize: 24
-                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
-                                    }
-                                    
-                                    Column {
-                                        spacing: 4
+                                    Row {
+                                        width: parent.width
+                                        spacing: 10
                                         
                                         Text {
-                                            text: "CPU"
-                                            font.pixelSize: 16
-                                            font.family: "JetBrains Mono"
-                                            font.weight: Font.Bold
+                                            text: "󰻠"
+                                            font.pixelSize: 24
                                             color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                         }
                                         
-                                        Text {
-                                            text: cpuUsageValue + "%"
-                                            font.pixelSize: 28
-                                            font.family: "JetBrains Mono"
-                                            font.weight: Font.Bold
-                                            color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
-                                        }
-                                    }
-                                }
-                                
-                                Rectangle {
-                                    width: parent.width
-                                    height: 12
-                                    radius: 0
-                                    color: (sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#141414"
-                                    
-                                    Rectangle {
-                                        anchors.left: parent.left
-                                        width: parent.width * (cpuUsageValue / 100)
-                                        height: parent.height
-                                        radius: 0
-                                        color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
-                                        
-                                        Behavior on width {
-                                            NumberAnimation {
-                                                duration: 400
-                                                easing.type: Easing.OutCubic
+                                        Column {
+                                            spacing: 4
+                                            
+                                            Text {
+                                                text: "CPU"
+                                                font.pixelSize: 16
+                                                font.family: "JetBrains Mono"
+                                                font.weight: Font.Bold
+                                                color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                            }
+                                            
+                                            Text {
+                                                text: cpuUsageValue + "%"
+                                                font.pixelSize: 28
+                                                font.family: "JetBrains Mono"
+                                                font.weight: Font.Bold
+                                                color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
                                             }
                                         }
                                     }
-                                }
-                                
-                                Text {
-                                    text: "Temperature: " + cpuTempValue + "°C"
-                                    font.pixelSize: 12
-                                    font.family: "JetBrains Mono"
-                                    color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
+                                    
+                                    Rectangle {
+                                        width: parent.width
+                                        height: 12
+                                        radius: 0
+                                        color: (sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#141414"
+                                        
+                                        Rectangle {
+                                            anchors.left: parent.left
+                                            width: parent.width * (cpuUsageValue / 100)
+                                            height: parent.height
+                                            radius: 0
+                                            color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                            
+                                            Behavior on width {
+                                                NumberAnimation {
+                                                    duration: 400
+                                                    easing.type: Easing.OutCubic
+                                                }
+                                            }
+                                        }
+                                    }
+                                    
+                                    Text {
+                                        text: "Temperature: " + cpuTempValue + "°C"
+                                        font.pixelSize: 12
+                                        font.family: "JetBrains Mono"
+                                        color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
+                                    }
                                 }
                             }
                         }
                         
                         // RAM Card
-                        Rectangle {
+                        Item {
                             Layout.column: 1
                             Layout.row: 0
                             Layout.fillWidth: true
                             Layout.fillHeight: true
                             Layout.minimumHeight: 140
-                            radius: 0
-                            color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1a1a1a"
                             
-                            Column {
+                            // Shadow
+                            Rectangle {
                                 anchors.fill: parent
-                                anchors.margins: 16
-                                spacing: 12
-                                
-                                Row {
-                                    width: parent.width
-                                    spacing: 10
+                                anchors.topMargin: 3
+                                anchors.leftMargin: 3
+                                color: "#000000"
+                                opacity: 0.15
+                                z: 0
+                            }
+                            
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: 0
+                                color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1a1a1a"
+                                z: 1
+                            
+                                Column {
+                                    anchors.fill: parent
+                                    anchors.margins: 16
+                                    spacing: 12
                                     
-                                    Text {
-                                        text: "󰍛"
-                                        font.pixelSize: 24
-                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
-                                    }
-                                    
-                                    Column {
-                                        spacing: 4
+                                    Row {
+                                        width: parent.width
+                                        spacing: 10
                                         
                                         Text {
-                                            text: "RAM"
-                                            font.pixelSize: 16
-                                            font.family: "JetBrains Mono"
-                                            font.weight: Font.Bold
+                                            text: "󰍛"
+                                            font.pixelSize: 24
                                             color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                         }
                                         
-                                        Text {
-                                            text: ramUsageValue + "%"
-                                            font.pixelSize: 28
-                                            font.family: "JetBrains Mono"
-                                            font.weight: Font.Bold
-                                            color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
-                                        }
-                                    }
-                                }
-                                
-                                Rectangle {
-                                    width: parent.width
-                                    height: 12
-                                    radius: 0
-                                    color: (sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#141414"
-                                    
-                                    Rectangle {
-                                        anchors.left: parent.left
-                                        width: parent.width * (ramUsageValue / 100)
-                                        height: parent.height
-                                        radius: 0
-                                        color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
-                                        
-                                        Behavior on width {
-                                            NumberAnimation {
-                                                duration: 400
-                                                easing.type: Easing.OutCubic
+                                        Column {
+                                            spacing: 4
+                                            
+                                            Text {
+                                                text: "RAM"
+                                                font.pixelSize: 16
+                                                font.family: "JetBrains Mono"
+                                                font.weight: Font.Bold
+                                                color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                            }
+                                            
+                                            Text {
+                                                text: ramUsageValue + "%"
+                                                font.pixelSize: 28
+                                                font.family: "JetBrains Mono"
+                                                font.weight: Font.Bold
+                                                color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
                                             }
                                         }
                                     }
-                                }
-                                
-                                Text {
-                                    text: "Available: " + Math.round((100 - ramUsageValue) / 100 * ramTotalGB) + "GB / " + ramTotalGB + "GB"
-                                    font.pixelSize: 12
-                                    font.family: "JetBrains Mono"
-                                    color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
+                                    
+                                    Rectangle {
+                                        width: parent.width
+                                        height: 12
+                                        radius: 0
+                                        color: (sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#141414"
+                                        
+                                        Rectangle {
+                                            anchors.left: parent.left
+                                            width: parent.width * (ramUsageValue / 100)
+                                            height: parent.height
+                                            radius: 0
+                                            color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                            
+                                            Behavior on width {
+                                                NumberAnimation {
+                                                    duration: 400
+                                                    easing.type: Easing.OutCubic
+                                                }
+                                            }
+                                        }
+                                    }
+                                    
+                                    Text {
+                                        text: "Available: " + Math.round((100 - ramUsageValue) / 100 * ramTotalGB) + "GB / " + ramTotalGB + "GB"
+                                        font.pixelSize: 12
+                                        font.family: "JetBrains Mono"
+                                        color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
+                                    }
                                 }
                             }
                         }
                         
                         // GPU Card
-                        Rectangle {
+                        Item {
                             Layout.column: 0
                             Layout.row: 1
                             Layout.fillWidth: true
                             Layout.fillHeight: true
                             Layout.minimumHeight: 140
-                            radius: 0
-                            color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1a1a1a"
                             
-                            Column {
+                            // Shadow
+                            Rectangle {
                                 anchors.fill: parent
-                                anchors.margins: 16
-                                spacing: 12
-                                
-                                Row {
-                                    width: parent.width
-                                    spacing: 10
+                                anchors.topMargin: 3
+                                anchors.leftMargin: 3
+                                color: "#000000"
+                                opacity: 0.15
+                                z: 0
+                            }
+                            
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: 0
+                                color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1a1a1a"
+                                z: 1
+                            
+                                Column {
+                                    anchors.fill: parent
+                                    anchors.margins: 16
+                                    spacing: 12
                                     
-                                    Text {
-                                        text: "󰾲"
-                                        font.pixelSize: 24
-                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
-                                    }
-                                    
-                                    Column {
-                                        spacing: 4
+                                    Row {
+                                        width: parent.width
+                                        spacing: 10
                                         
                                         Text {
-                                            text: "GPU"
-                                            font.pixelSize: 16
-                                            font.family: "JetBrains Mono"
-                                            font.weight: Font.Bold
+                                            text: "󰾲"
+                                            font.pixelSize: 24
                                             color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                         }
                                         
-                                        Text {
-                                            text: gpuUsageValue + "%"
-                                            font.pixelSize: 28
-                                            font.family: "JetBrains Mono"
-                                            font.weight: Font.Bold
-                                            color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
-                                        }
-                                    }
-                                }
-                                
-                                Rectangle {
-                                    width: parent.width
-                                    height: 12
-                                    radius: 0
-                                    color: (sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#141414"
-                                    
-                                    Rectangle {
-                                        anchors.left: parent.left
-                                        width: parent.width * (gpuUsageValue / 100)
-                                        height: parent.height
-                                        radius: 0
-                                        color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
-                                        
-                                        Behavior on width {
-                                            NumberAnimation {
-                                                duration: 400
-                                                easing.type: Easing.OutCubic
+                                        Column {
+                                            spacing: 4
+                                            
+                                            Text {
+                                                text: "GPU"
+                                                font.pixelSize: 16
+                                                font.family: "JetBrains Mono"
+                                                font.weight: Font.Bold
+                                                color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                            }
+                                            
+                                            Text {
+                                                text: gpuUsageValue + "%"
+                                                font.pixelSize: 28
+                                                font.family: "JetBrains Mono"
+                                                font.weight: Font.Bold
+                                                color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
                                             }
                                         }
                                     }
-                                }
-                                
-                                Text {
-                                    text: "Temperature: " + gpuTempValue + "°C"
-                                    font.pixelSize: 12
-                                    font.family: "JetBrains Mono"
-                                    color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
+                                    
+                                    Rectangle {
+                                        width: parent.width
+                                        height: 12
+                                        radius: 0
+                                        color: (sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#141414"
+                                        
+                                        Rectangle {
+                                            anchors.left: parent.left
+                                            width: parent.width * (gpuUsageValue / 100)
+                                            height: parent.height
+                                            radius: 0
+                                            color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                            
+                                            Behavior on width {
+                                                NumberAnimation {
+                                                    duration: 400
+                                                    easing.type: Easing.OutCubic
+                                                }
+                                            }
+                                        }
+                                    }
+                                    
+                                    Text {
+                                        text: "Temperature: " + gpuTempValue + "°C"
+                                        font.pixelSize: 12
+                                        font.family: "JetBrains Mono"
+                                        color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
+                                    }
                                 }
                             }
                         }
                         
                         // Top Processes Card
-                        Rectangle {
+                        Item {
                             Layout.column: 1
                             Layout.row: 1
                             Layout.rowSpan: 2
                             Layout.fillWidth: true
                             Layout.fillHeight: true
-                            radius: 0
-                            color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1a1a1a"
                             
-                            Column {
+                            // Shadow
+                            Rectangle {
                                 anchors.fill: parent
-                                anchors.margins: 16
-                                spacing: 12
-                                
-                                Text {
-                                    text: "󰨳 Top Processes"
-                                    font.pixelSize: 16
-                                    font.family: "JetBrains Mono"
-                                    font.weight: Font.Bold
-                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
-                                }
-                                
+                                anchors.topMargin: 3
+                                anchors.leftMargin: 3
+                                color: "#000000"
+                                opacity: 0.15
+                                z: 0
+                            }
+                            
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: 0
+                                color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1a1a1a"
+                                z: 1
+                            
                                 Column {
-                                    width: parent.width
-                                    spacing: 8
+                                    anchors.fill: parent
+                                    anchors.margins: 16
+                                    spacing: 12
                                     
-                                    Repeater {
-                                        model: topProcessesModel.length > 0 ? topProcessesModel.slice(0, 8) : []
+                                    Text {
+                                        text: "󰨳 Top Processes"
+                                        font.pixelSize: 16
+                                        font.family: "JetBrains Mono"
+                                        font.weight: Font.Bold
+                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                    }
+                                    
+                                    Column {
+                                        width: parent.width
+                                        spacing: 8
                                         
-                                        Row {
-                                            width: parent.width
-                                            spacing: 10
+                                        Repeater {
+                                            model: topProcessesModel.length > 0 ? topProcessesModel.slice(0, 8) : []
                                             
-                                            Text {
-                                                text: (index + 1) + "."
-                                                font.pixelSize: 12
-                                                font.family: "JetBrains Mono"
-                                                color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
-                                                width: 25
-                                            }
-                                            
-                                            Text {
-                                                text: modelData.name.length > 20 ? modelData.name.substring(0, 20) + "..." : modelData.name
-                                                font.pixelSize: 12
-                                                font.family: "JetBrains Mono"
-                                                color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
-                                                width: parent.width - 120
-                                            }
-                                            
-                                            Text {
-                                                text: modelData.cpu + "%"
-                                                font.pixelSize: 12
-                                                font.family: "JetBrains Mono"
-                                                font.weight: Font.Bold
-                                                color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
-                                                width: 45
-                                            }
-                                            
-                                            Text {
-                                                text: modelData.mem + "%"
-                                                font.pixelSize: 12
-                                                font.family: "JetBrains Mono"
-                                                color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
-                                                width: 45
+                                            Row {
+                                                width: parent.width
+                                                spacing: 10
+                                                
+                                                Text {
+                                                    text: (index + 1) + "."
+                                                    font.pixelSize: 12
+                                                    font.family: "JetBrains Mono"
+                                                    color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
+                                                    width: 25
+                                                }
+                                                
+                                                Text {
+                                                    text: modelData.name.length > 20 ? modelData.name.substring(0, 20) + "..." : modelData.name
+                                                    font.pixelSize: 12
+                                                    font.family: "JetBrains Mono"
+                                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                                    width: parent.width - 120
+                                                }
+                                                
+                                                Text {
+                                                    text: modelData.cpu + "%"
+                                                    font.pixelSize: 12
+                                                    font.family: "JetBrains Mono"
+                                                    font.weight: Font.Bold
+                                                    color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                                    width: 45
+                                                }
+                                                
+                                                Text {
+                                                    text: modelData.mem + "%"
+                                                    font.pixelSize: 12
+                                                    font.family: "JetBrains Mono"
+                                                    color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
+                                                    width: 45
+                                                }
                                             }
                                         }
                                     }
@@ -1517,87 +1652,102 @@ PanelWindow {
                         }
                         
                         // Disk Usage Card
-                        Rectangle {
+                        Item {
                             Layout.column: 0
                             Layout.row: 2
                             Layout.fillWidth: true
                             Layout.fillHeight: true
-                            radius: 0
-                            color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1a1a1a"
                             
-                            Column {
+                            // Shadow
+                            Rectangle {
                                 anchors.fill: parent
-                                anchors.margins: 16
-                                spacing: 12
-                                
-                                Text {
-                                    text: "󰋼 Disk Usage"
-                                    font.pixelSize: 16
-                                    font.family: "JetBrains Mono"
-                                    font.weight: Font.Bold
-                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
-                                }
+                                anchors.topMargin: 3
+                                anchors.leftMargin: 3
+                                color: "#000000"
+                                opacity: 0.15
+                                z: 0
+                            }
+                            
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: 0
+                                color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#1a1a1a"
+                                z: 1
                                 
                                 Column {
-                                    width: parent.width
-                                    spacing: 10
+                                    anchors.fill: parent
+                                    anchors.margins: 16
+                                    spacing: 12
                                     
-                                    Repeater {
-                                        model: diskUsageModel.length > 0 ? diskUsageModel.slice(0, 4) : []
+                                    Text {
+                                        text: "󰋼 Disk Usage"
+                                        font.pixelSize: 16
+                                        font.family: "JetBrains Mono"
+                                        font.weight: Font.Bold
+                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                    }
+                                    
+                                    Column {
+                                        width: parent.width
+                                        spacing: 10
                                         
-                                        Column {
-                                            width: parent.width
-                                            spacing: 6
+                                        Repeater {
+                                            model: diskUsageModel.length > 0 ? diskUsageModel.slice(0, 4) : []
                                             
-                                            Row {
+                                            Column {
                                                 width: parent.width
-                                                spacing: 10
+                                                spacing: 6
                                                 
-                                                Text {
-                                                    text: modelData.mount
-                                                    font.pixelSize: 12
-                                                    font.family: "JetBrains Mono"
-                                                    font.weight: Font.Bold
-                                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
-                                                    width: 60
+                                                Row {
+                                                    width: parent.width
+                                                    spacing: 10
+                                                    
+                                                    Text {
+                                                        text: modelData.mount
+                                                        font.pixelSize: 12
+                                                        font.family: "JetBrains Mono"
+                                                        font.weight: Font.Bold
+                                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                                                        width: 60
+                                                    }
+                                                    
+                                                    Text {
+                                                        text: modelData.usage + "%"
+                                                        font.pixelSize: 12
+                                                        font.family: "JetBrains Mono"
+                                                        font.weight: Font.Bold
+                                                        color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                                        width: 45
+                                                    }
+                                                    
+                                                    Item { width: parent.width - 120; height: 1 }
+                                                    
+                                                    Text {
+                                                        text: modelData.used + " / " + modelData.total
+                                                        font.pixelSize: 11
+                                                        font.family: "JetBrains Mono"
+                                                        color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
+                                                    }
                                                 }
-                                                
-                                                Text {
-                                                    text: modelData.usage + "%"
-                                                    font.pixelSize: 12
-                                                    font.family: "JetBrains Mono"
-                                                    font.weight: Font.Bold
-                                                    color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
-                                                    width: 45
-                                                }
-                                                
-                                                Item { width: parent.width - 120; height: 1 }
-                                                
-                                                Text {
-                                                    text: modelData.used + " / " + modelData.total
-                                                    font.pixelSize: 11
-                                                    font.family: "JetBrains Mono"
-                                                    color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
-                                                }
-                                            }
-                                            
-                                            Rectangle {
-                                                width: parent.width
-                                                height: 6
-                                                radius: 0
-                                                color: (sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#141414"
                                                 
                                                 Rectangle {
-                                                    anchors.left: parent.left
-                                                    width: parent.width * (modelData.usage / 100)
-                                                    height: parent.height
+                                                    width: parent.width
+                                                    height: 6
                                                     radius: 0
-                                                    color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                                    color: (sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#141414"
                                                     
-                                                    Behavior on width {
-                                                        NumberAnimation {
-                                                            duration: 400
-                                                            easing.type: Easing.OutCubic
+                                                    Rectangle {
+                                                        anchors.left: parent.left
+                                                        width: parent.width * (modelData.usage / 100)
+                                                        height: parent.height
+                                                        radius: 0
+                                                        color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                                        
+                                                        Behavior on width {
+                                                            NumberAnimation {
+                                                                duration: 400
+                                                                easing.type: Easing.OutCubic
+                                                            }
                                                         }
                                                     }
                                                 }
