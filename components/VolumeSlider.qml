@@ -51,9 +51,6 @@ PanelWindow {
         enabled: true  // Always enabled
         propagateComposedEvents: false
         
-        // Only process events when slider is visible
-        property bool isSliderVisible: (sharedData && sharedData.volumeVisible)
-        
         // Calculate slider bounds (centered, 180px high)
         property real sliderY: (parent.height - 180) / 2
         property real sliderHeight: 180
@@ -65,6 +62,10 @@ PanelWindow {
             var sliderRight = centerX + sliderWidth / 2
             return mouse.x >= sliderLeft && mouse.x <= sliderRight && 
                    mouse.y >= sliderY && mouse.y <= sliderY + sliderHeight
+        }
+        
+        function isSliderVisible() {
+            return (sharedData && sharedData.volumeVisible)
         }
         
         // Also handle hover for the entire slider area
@@ -108,8 +109,10 @@ PanelWindow {
         }
         
         onPressed: function(mouse) {
-            console.log("VolumeSlider: Mouse pressed at", mouse.x, mouse.y, "isSliderVisible:", isSliderVisible, "isOverSlider:", isMouseOverSlider(mouse))
-            if (isSliderVisible && isMouseOverSlider(mouse)) {
+            var visible = isSliderVisible()
+            var overSlider = isMouseOverSlider(mouse)
+            console.log("VolumeSlider: Mouse pressed at", mouse.x, mouse.y, "isSliderVisible:", visible, "isOverSlider:", overSlider)
+            if (visible && overSlider) {
                 mouse.accepted = true
                 setVolumeFromMouse(mouse)
             } else {
@@ -118,17 +121,25 @@ PanelWindow {
         }
         
         onPositionChanged: function(mouse) {
-            if (pressed && isSliderVisible && isMouseOverSlider(mouse)) {
-                console.log("VolumeSlider: Mouse dragged to", mouse.x, mouse.y)
-                mouse.accepted = true
-                setVolumeFromMouse(mouse)
+            if (pressed) {
+                var visible = isSliderVisible()
+                var overSlider = isMouseOverSlider(mouse)
+                if (visible && overSlider) {
+                    console.log("VolumeSlider: Mouse dragged to", mouse.x, mouse.y)
+                    mouse.accepted = true
+                    setVolumeFromMouse(mouse)
+                } else {
+                    mouse.accepted = false
+                }
             }
         }
         
         onWheel: function(wheel) {
             var mousePos = mapToItem(parent, wheel.x, wheel.y)
-            console.log("VolumeSlider: Wheel event", wheel.angleDelta.y, "isSliderVisible:", isSliderVisible, "isOverSlider:", isMouseOverSlider({x: mousePos.x, y: mousePos.y}))
-            if (isSliderVisible && isMouseOverSlider({x: mousePos.x, y: mousePos.y})) {
+            var visible = isSliderVisible()
+            var overSlider = isMouseOverSlider({x: mousePos.x, y: mousePos.y})
+            console.log("VolumeSlider: Wheel event", wheel.angleDelta.y, "isSliderVisible:", visible, "isOverSlider:", overSlider)
+            if (visible && overSlider) {
                 var delta = wheel.angleDelta.y > 0 ? 5 : -5
                 adjustVolume(delta)
                 wheel.accepted = true
@@ -142,7 +153,8 @@ PanelWindow {
     Item {
         id: volumeSliderContainer
         anchors.fill: parent
-        visible: (sharedData && sharedData.volumeVisible)  // Use visible instead of opacity for mouse events
+        visible: true  // Always visible - use opacity for fade effect instead
+        enabled: (sharedData && sharedData.volumeVisible)  // Disable interactions when hidden
         
         // Właściwości animacji scale
         scale: (sharedData && sharedData.volumeVisible) ? 1.0 : 0.95

@@ -185,6 +185,67 @@ PanelWindow {
         console.log("Saving wallpaper to:", colorConfigPath, "path:", wallpaperPath)
     }
     
+    function changePassword() {
+        passwordErrorText.text = ""
+        passwordSuccessText.text = ""
+        
+        var currentPassword = currentPasswordInput.text.trim()
+        var newPassword = newPasswordInput.text.trim()
+        var confirmPassword = confirmPasswordInput.text.trim()
+        
+        // Load current password from file
+        var passwordFilePath = colorConfigPath.replace("colors.json", "lock-password.txt")
+        console.log("Loading password from:", passwordFilePath)
+        var xhr = new XMLHttpRequest()
+        xhr.open("GET", "file://" + passwordFilePath)
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                var savedPassword = ""
+                if (xhr.status === 200 || xhr.status === 0) {
+                    savedPassword = xhr.responseText.trim()
+                    console.log("Loaded password from file, length:", savedPassword.length)
+                } else {
+                    // If file doesn't exist, use default
+                    savedPassword = "Marzec"
+                    console.log("File doesn't exist, using default password")
+                }
+                
+                // Validate
+                if (currentPassword !== savedPassword) {
+                    passwordErrorText.text = "Current password is incorrect"
+                    console.log("Password mismatch - current:", currentPassword, "saved:", savedPassword)
+                    return
+                }
+                
+                console.log("Password verified successfully")
+                
+                if (newPassword.length === 0) {
+                    passwordErrorText.text = "New password cannot be empty"
+                    return
+                }
+                
+                if (newPassword !== confirmPassword) {
+                    passwordErrorText.text = "New passwords do not match"
+                    return
+                }
+                
+                // Save new password
+                var escapedPassword = newPassword.replace(/"/g, '\\"').replace(/\$/g, '\\$').replace(/`/g, '\\`')
+                var cmd = 'echo "' + escapedPassword + '" > "' + passwordFilePath + '"'
+                Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh', '-c', '" + cmd + "']; running: true }", appLauncherRoot)
+                
+                passwordSuccessText.text = "Password changed successfully!"
+                currentPasswordInput.text = ""
+                newPasswordInput.text = ""
+                confirmPasswordInput.text = ""
+                
+                // Clear success message after 3 seconds
+                Qt.createQmlObject("import QtQuick; Timer { interval: 3000; running: true; repeat: false; onTriggered: { passwordSuccessText.text = '' } }", appLauncherRoot)
+            }
+        }
+        xhr.send()
+    }
+    
     function updateColor(colorType, value) {
         console.log("Updating color:", colorType, "to", value)
         var oldValue = ""
@@ -375,11 +436,11 @@ PanelWindow {
             accent: "#ffd54f"
         },
         "Monochrome": {
-            background: "#000000",
-            primary: "#1f1f1f",
-            secondary: "#0f0f0f",
+            background: "#0f0f0f",
+            primary: "#1a1a1a",
+            secondary: "#141414",
             text: "#ffffff",
-            accent: "#888888"
+            accent: "#3a3a3a"
         },
         "Cherry": {
             background: "#1a0a0a",
@@ -511,7 +572,7 @@ PanelWindow {
     property int currentPackageMode: -1  // -1 = Packages option selection, 0 = install source selection (Pacman/AUR), 1 = Pacman search, 2 = AUR search, 3 = remove source selection (Pacman/AUR), 4 = Pacman remove search, 5 = AUR remove search
     property int installSourceMode: -1  // -1 = selection, 0 = Pacman, 1 = AUR
     property int removeSourceMode: -1  // -1 = selection, 0 = Pacman, 1 = AUR
-    property int currentSettingsMode: -1  // -1 = settings list, 0 = Wallpaper, 3 = Colors menu, 4 = Presets, 5 = Custom HEX
+    property int currentSettingsMode: -1  // -1 = settings list, 0 = Wallpaper, 3 = Colors menu, 4 = Presets, 5 = Custom HEX, 7 = Change Password
     
     // Color theme properties
     property string colorBackground: "#0a0a0a"
@@ -1924,6 +1985,17 @@ PanelWindow {
                             if (sharedData && sharedData.sidebarVisible !== undefined) {
                                 sharedData.sidebarVisible = !sharedData.sidebarVisible
                                 console.log("Sidebar toggled to:", sharedData.sidebarVisible)
+                            }
+                            // Close launcher after toggle
+                            if (sharedData) {
+                                sharedData.launcherVisible = false
+                            }
+                            event.accepted = true
+                        } else if (settingOption.settingId === 6) {
+                            // Toggle Sidebar Position - immediate action
+                            if (sharedData && sharedData.sidebarPosition !== undefined) {
+                                sharedData.sidebarPosition = (sharedData.sidebarPosition === "left") ? "top" : "left"
+                                console.log("Sidebar position changed to:", sharedData.sidebarPosition)
                             }
                             // Close launcher after toggle
                             if (sharedData) {
@@ -3532,7 +3604,9 @@ PanelWindow {
                         id: settingsModel
                         ListElement { name: "Wallpaper"; description: "Change wallpaper with swww"; icon: "󰸉"; settingId: 0 }
                         ListElement { name: "Toggle Sidebar"; description: "Show or hide sidebar"; icon: "󰍁"; settingId: 1 }
+                        ListElement { name: "Sidebar Position"; description: "Change sidebar position (left/top)"; icon: "󰍇"; settingId: 6 }
                         ListElement { name: "Colors"; description: "Customize color theme"; icon: "󰏘"; settingId: 3 }
+                        ListElement { name: "Change Password"; description: "Change lock screen password"; icon: "󰌾"; settingId: 7 }
                     }
                     
                     delegate: Rectangle {
@@ -3606,6 +3680,16 @@ PanelWindow {
                                     if (sharedData && sharedData.sidebarVisible !== undefined) {
                                         sharedData.sidebarVisible = !sharedData.sidebarVisible
                                         console.log("Sidebar toggled to:", sharedData.sidebarVisible)
+                                    }
+                                    // Close launcher after toggle
+                                    if (sharedData) {
+                                        sharedData.launcherVisible = false
+                                    }
+                                } else if (model.settingId === 6) {
+                                    // Toggle Sidebar Position - immediate action, no submenu
+                                    if (sharedData && sharedData.sidebarPosition !== undefined) {
+                                        sharedData.sidebarPosition = (sharedData.sidebarPosition === "left") ? "top" : "left"
+                                        console.log("Sidebar position changed to:", sharedData.sidebarPosition)
                                     }
                                     // Close launcher after toggle
                                     if (sharedData) {
@@ -5095,6 +5179,213 @@ PanelWindow {
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     acceptedButtons: Qt.NoButton
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Change Password
+                Item {
+                    id: changePasswordPicker
+                    anchors.fill: parent
+                    visible: currentSettingsMode === 7
+                    enabled: true
+                    z: 10
+                    
+                    // Content
+                    Flickable {
+                        id: passwordFlickable
+                        anchors.fill: parent
+                        anchors.margins: 20
+                        contentHeight: passwordColumn.height
+                        clip: true
+                        
+                        Column {
+                            id: passwordColumn
+                            width: parent.width
+                            spacing: 16
+                            
+                            // Title
+                            Text {
+                                text: "Change Password"
+                                font.pixelSize: 18
+                                font.family: "JetBrains Mono"
+                                font.weight: Font.Bold
+                                color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
+                            }
+                            
+                            // Current password
+                            Column {
+                                width: parent.width
+                                spacing: 8
+                                
+                                Text {
+                                    text: "Current Password"
+                                    font.pixelSize: 12
+                                    font.family: "JetBrains Mono"
+                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
+                                    opacity: 0.7
+                                }
+                                
+                                Rectangle {
+                                    width: parent.width
+                                    height: 40
+                                    color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary
+                                    border.color: currentPasswordInput.activeFocus ? 
+                                        ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : 
+                                        ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : colorSecondary)
+                                    border.width: 2
+                                    radius: 0
+                                    
+                                    TextInput {
+                                        id: currentPasswordInput
+                                        anchors.fill: parent
+                                        anchors.margins: 12
+                                        font.pixelSize: 14
+                                        font.family: "JetBrains Mono"
+                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
+                                        echoMode: TextInput.Password
+                                        selectByMouse: true
+                                        activeFocusOnPress: true
+                                        verticalAlignment: TextInput.AlignVCenter
+                                    }
+                                }
+                            }
+                            
+                            // New password
+                            Column {
+                                width: parent.width
+                                spacing: 8
+                                
+                                Text {
+                                    text: "New Password"
+                                    font.pixelSize: 12
+                                    font.family: "JetBrains Mono"
+                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
+                                    opacity: 0.7
+                                }
+                                
+                                Rectangle {
+                                    width: parent.width
+                                    height: 40
+                                    color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary
+                                    border.color: newPasswordInput.activeFocus ? 
+                                        ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : 
+                                        ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : colorSecondary)
+                                    border.width: 2
+                                    radius: 0
+                                    
+                                    TextInput {
+                                        id: newPasswordInput
+                                        anchors.fill: parent
+                                        anchors.margins: 12
+                                        font.pixelSize: 14
+                                        font.family: "JetBrains Mono"
+                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
+                                        echoMode: TextInput.Password
+                                        selectByMouse: true
+                                        activeFocusOnPress: true
+                                        verticalAlignment: TextInput.AlignVCenter
+                                    }
+                                }
+                            }
+                            
+                            // Confirm new password
+                            Column {
+                                width: parent.width
+                                spacing: 8
+                                
+                                Text {
+                                    text: "Confirm New Password"
+                                    font.pixelSize: 12
+                                    font.family: "JetBrains Mono"
+                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
+                                    opacity: 0.7
+                                }
+                                
+                                Rectangle {
+                                    width: parent.width
+                                    height: 40
+                                    color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary
+                                    border.color: confirmPasswordInput.activeFocus ? 
+                                        ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : 
+                                        ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : colorSecondary)
+                                    border.width: 2
+                                    radius: 0
+                                    
+                                    TextInput {
+                                        id: confirmPasswordInput
+                                        anchors.fill: parent
+                                        anchors.margins: 12
+                                        font.pixelSize: 14
+                                        font.family: "JetBrains Mono"
+                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
+                                        echoMode: TextInput.Password
+                                        selectByMouse: true
+                                        activeFocusOnPress: true
+                                        verticalAlignment: TextInput.AlignVCenter
+                                        
+                                        Keys.onPressed: function(event) {
+                                            if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                                                changePassword()
+                                                event.accepted = true
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // Error message
+                            Text {
+                                id: passwordErrorText
+                                text: ""
+                                font.pixelSize: 12
+                                font.family: "JetBrains Mono"
+                                color: "#ff4444"
+                                visible: text !== ""
+                                width: parent.width
+                                wrapMode: Text.Wrap
+                            }
+                            
+                            // Success message
+                            Text {
+                                id: passwordSuccessText
+                                text: ""
+                                font.pixelSize: 12
+                                font.family: "JetBrains Mono"
+                                color: "#44ff44"
+                                visible: text !== ""
+                                width: parent.width
+                                wrapMode: Text.Wrap
+                            }
+                            
+                            // Save button
+                            Rectangle {
+                                width: parent.width
+                                height: 45
+                                color: savePasswordButtonMouseArea.containsMouse ? 
+                                    ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : 
+                                    ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : colorSecondary)
+                                radius: 0
+                                
+                                Text {
+                                    text: "Save Password"
+                                    font.pixelSize: 14
+                                    font.family: "JetBrains Mono"
+                                    font.weight: Font.Bold
+                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
+                                    anchors.centerIn: parent
+                                }
+                                
+                                MouseArea {
+                                    id: savePasswordButtonMouseArea
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        changePassword()
+                                    }
                                 }
                             }
                         }

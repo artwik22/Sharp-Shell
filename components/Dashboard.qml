@@ -24,9 +24,10 @@ PanelWindow {
     color: "transparent"
     
     property int slideOffset: (sharedData && sharedData.menuVisible) ? 0 : -implicitHeight
+    property int sidebarTopOffset: (sharedData && sharedData.menuVisible && sharedData.sidebarVisible && sharedData.sidebarPosition === "top") ? 36 : 0
     
     margins {
-        top: slideOffset
+        top: slideOffset + sidebarTopOffset
         left: 0
         right: 0
     }
@@ -37,6 +38,8 @@ PanelWindow {
             easing.type: Easing.OutQuart
         }
     }
+    
+    // No animation on sidebarTopOffset - should update immediately when position changes
 
     Item {
         id: dashboardContainer
@@ -2253,9 +2256,8 @@ PanelWindow {
                         }
                     }
                 } else {
-                    if (cavaRunning) {
-                        console.log("Cava file is empty, checking if process is running...")
-                    }
+                    // No data, silently continue - cavaCheckTimer will handle restart if needed
+                    // Removed frequent logging to reduce console spam
                 }
             }
         }

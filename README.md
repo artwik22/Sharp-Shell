@@ -384,7 +384,7 @@ Contributions are welcome! Feel free to:
 - Built with [Quickshell](https://github.com/Quickshell/Quickshell)
 - Audio visualization powered by [cava](https://github.com/karlstav/cava)
 - Wallpaper system inspired by [Caelestia Shell](https://github.com/caelestia-dots/shell)
-- Optional wallpaper tools: [swww](https://github.com/Horus645/swww), [wbg](https://github.com/djpohly/wbg), [hyprpaper](https://github.com/hyprwm/hyprpaper)
+
 
 ---
 

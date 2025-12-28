@@ -16,6 +16,8 @@ ShellRoot {
         property bool volumeEdgeHovered: false  // Czy myszka jest nad detektorem krawędzi
         property bool clipboardVisible: false
         property bool sidebarVisible: true  // Sidebar visibility toggle
+        property string sidebarPosition: "left"  // Sidebar position: "left" or "top"
+        property bool lockScreenVisible: false  // Lock screen visibility
         
         // Color theme properties
         property string colorBackground: "#0a0a0a"
@@ -116,7 +118,9 @@ ShellRoot {
     
     // Funkcja lock screen - współdzielona między komponentami
     function lockScreen() {
-        Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['hyprlock']; running: true }", root)
+        if (sharedData) {
+            sharedData.lockScreenVisible = true
+        }
     }
     
     // Funkcja otwierania ustawień - można rozszerzyć
@@ -166,6 +170,10 @@ ShellRoot {
                             Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh', '-c', 'rm -f /tmp/quickshell_command']; running: true }", root)
                         } else if (cmd === "openClipboardManager") {
                             root.openClipboardManager()
+                            // Usuń plik po przetworzeniu
+                            Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh', '-c', 'rm -f /tmp/quickshell_command']; running: true }", root)
+                        } else if (cmd === "lockScreen") {
+                            root.lockScreen()
                             // Usuń plik po przetworzeniu
                             Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh', '-c', 'rm -f /tmp/quickshell_command']; running: true }", root)
                         }
@@ -242,6 +250,14 @@ ShellRoot {
                 RightEdgeDetector {
                     id: rightEdgeDetectorInstance
                     screen: modelData
+                    sharedData: root.sharedData
+                }
+                
+                // Lock Screen - ekran blokady
+                LockScreen {
+                    id: lockScreenInstance
+                    screen: modelData
+                    currentWallpaper: root.currentWallpaperPath
                     sharedData: root.sharedData
                 }
             }

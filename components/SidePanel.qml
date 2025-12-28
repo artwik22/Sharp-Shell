@@ -12,26 +12,31 @@ PanelWindow {
     
     screen: sidePanel.screen
     
-    anchors {
-        left: true
-        top: true
-        bottom: true
-    }
+    // Dynamic anchors based on position
+    anchors.left: (sharedData && sharedData.sidebarPosition === "left") ? true : (sharedData && sharedData.sidebarPosition === "top") ? true : true
+    anchors.right: (sharedData && sharedData.sidebarPosition === "top") ? true : false
+    anchors.top: true
+    anchors.bottom: (sharedData && sharedData.sidebarPosition === "left") ? true : false
     
-    implicitWidth: 36
+    // Dynamic dimensions based on position
+    implicitWidth: (sharedData && sharedData.sidebarPosition === "top") ? undefined : 36
+    implicitHeight: (sharedData && sharedData.sidebarPosition === "top") ? 36 : undefined
     color: "transparent"
     visible: sharedData && sharedData.sidebarVisible !== undefined ? sharedData.sidebarVisible : true
     
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "qssidepanel"
-    exclusiveZone: (sharedData && sharedData.sidebarVisible !== undefined && sharedData.sidebarVisible) ? implicitWidth : 0  // Reserve 36px space so windows don't overlap
+    exclusiveZone: (sharedData && sharedData.sidebarVisible !== undefined && sharedData.sidebarVisible) ? 
+        ((sharedData && sharedData.sidebarPosition === "top") ? implicitHeight : implicitWidth) : 0
     
     property var sharedData: null
     
+    // Dynamic margins based on position
     margins {
         left: 0
         top: 0
-        bottom: 0
+        bottom: (sharedData && sharedData.sidebarPosition === "left") ? 0 : undefined
+        right: (sharedData && sharedData.sidebarPosition === "top") ? 0 : undefined
     }
     
     // No global MouseArea needed - individual MouseAreas handle clicks
@@ -42,13 +47,15 @@ PanelWindow {
         color: (sharedData && sharedData.colorBackground) ? sharedData.colorBackground : "#0d0d0d"
         radius: 0
         
-        // Zegar na górze - godzina nad minutą
+        // Zegar - layout zależy od pozycji sidebara
+        // Pionowy zegar dla pozycji left
         Column {
             id: sidePanelClockColumn
             anchors.top: parent.top
             anchors.topMargin: 14
             anchors.horizontalCenter: parent.horizontalCenter
             spacing: 4
+            visible: (sharedData && sharedData.sidebarPosition === "top") ? false : true
             
             Text {
                 id: sidePanelHoursDisplay
@@ -85,6 +92,59 @@ PanelWindow {
             }
         }
         
+        // Poziomy zegar dla pozycji top
+        Row {
+            id: sidePanelClockRow
+            anchors.left: parent.left
+            anchors.leftMargin: 14
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 4
+            visible: (sharedData && sharedData.sidebarPosition === "top") ? true : false
+            
+            Text {
+                id: sidePanelHoursDisplayTop
+                text: "00"
+                font.pixelSize: 20
+                font.family: "JetBrains Mono"
+                font.weight: Font.Bold
+                color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                verticalAlignment: Text.AlignVCenter
+                
+                Behavior on color {
+                    ColorAnimation {
+                        duration: 180
+                        easing.type: Easing.OutQuart
+                    }
+                }
+            }
+            
+            Text {
+                text: ":"
+                font.pixelSize: 20
+                font.family: "JetBrains Mono"
+                font.weight: Font.Bold
+                color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                verticalAlignment: Text.AlignVCenter
+            }
+            
+            Text {
+                id: sidePanelMinutesDisplayTop
+                text: "00"
+                font.pixelSize: 20
+                font.family: "JetBrains Mono"
+                font.weight: Font.Bold
+                color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                verticalAlignment: Text.AlignVCenter
+                
+                Behavior on color {
+                    ColorAnimation {
+                        duration: 180
+                        easing.type: Easing.OutQuart
+                    }
+                }
+            }
+        }
+        
         Timer {
             id: sidePanelClockTimer
             interval: 1000
@@ -94,24 +154,32 @@ PanelWindow {
                 var now = new Date()
                 var h = now.getHours()
                 var m = now.getMinutes()
-                sidePanelHoursDisplay.text = h < 10 ? "0" + h : h.toString()
-                sidePanelMinutesDisplay.text = m < 10 ? "0" + m : m.toString()
+                var hStr = h < 10 ? "0" + h : h.toString()
+                var mStr = m < 10 ? "0" + m : m.toString()
+                sidePanelHoursDisplay.text = hStr
+                sidePanelMinutesDisplay.text = mStr
+                sidePanelHoursDisplayTop.text = hStr
+                sidePanelMinutesDisplayTop.text = mStr
             }
             Component.onCompleted: {
                 var now = new Date()
                 var h = now.getHours()
                 var m = now.getMinutes()
-                sidePanelHoursDisplay.text = h < 10 ? "0" + h : h.toString()
-                sidePanelMinutesDisplay.text = m < 10 ? "0" + m : m.toString()
+                var hStr = h < 10 ? "0" + h : h.toString()
+                var mStr = m < 10 ? "0" + m : m.toString()
+                sidePanelHoursDisplay.text = hStr
+                sidePanelMinutesDisplay.text = mStr
+                sidePanelHoursDisplayTop.text = hStr
+                sidePanelMinutesDisplayTop.text = mStr
             }
         }
         
-        // Workspace switcher - wyśrodkowany na pasku
+        // Workspace switcher - pionowy dla pozycji left
         Column {
             id: sidePanelWorkspaceColumn
             spacing: 9
             width: 4
-            visible: true
+            visible: (sharedData && sharedData.sidebarPosition === "top") ? false : true
             anchors.centerIn: parent
                 
                 Repeater {
@@ -253,15 +321,163 @@ PanelWindow {
             }
         }
         
-        // Music Visualizer - PIONOWY na dole panelu (poziome paski ułożone w kolumnie)
+        // Workspace switcher - poziomy dla pozycji top
+        Row {
+            id: sidePanelWorkspaceRow
+            spacing: 9
+            height: 4
+            visible: (sharedData && sharedData.sidebarPosition === "top") ? true : false
+            anchors.centerIn: parent
+                
+            Repeater {
+                model: 4  // Workspaces 1-4
+                
+                Item {
+                    id: workspaceItemTop
+                    height: 4
+                    width: workspaceLineTop.width
+                    anchors.verticalCenter: parent.verticalCenter
+                    
+                    property bool isActive: Hyprland.focusedWorkspace ? 
+                        Hyprland.focusedWorkspace.id === (index + 1) : false
+                    property bool hasWindows: {
+                        var ws = Hyprland.workspaces.values.find(w => w.id === (index + 1))
+                        return ws ? ws.lastIpcObject.windows > 0 : false
+                    }
+                    property bool wasActive: false
+                    
+                    onIsActiveChanged: {
+                        if (isActive && !wasActive) {
+                            workspaceActivateAnimTop.restart()
+                        }
+                        wasActive = isActive
+                    }
+                    
+                    Component.onCompleted: wasActive = isActive
+                    
+                    // Pozioma linia
+                    Rectangle {
+                        id: workspaceLineTop
+                        anchors.centerIn: parent
+                        height: workspaceItemTop.isActive ? 4 : 3
+                        width: workspaceItemTop.isActive ? 40 : workspaceItemTop.hasWindows ? 34 : 30
+                        color: workspaceItemTop.isActive ? 
+                            ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") : 
+                            workspaceItemTop.hasWindows ? 
+                            ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : "#3a3a3a") : 
+                            ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#2a2a2a")
+                        radius: 0
+                        
+                        Behavior on width {
+                            NumberAnimation { 
+                                duration: 280
+                                easing.type: Easing.OutQuart
+                            }
+                        }
+                        
+                        Behavior on height {
+                            NumberAnimation { 
+                                duration: 280
+                                easing.type: Easing.OutQuart
+                            }
+                        }
+                        
+                        Behavior on color {
+                            ColorAnimation { 
+                                duration: 180
+                                easing.type: Easing.OutQuart
+                            }
+                        }
+                        
+                        Behavior on scale {
+                            NumberAnimation { 
+                                duration: 180
+                                easing.type: Easing.OutQuart
+                            }
+                        }
+                        
+                        Behavior on opacity {
+                            NumberAnimation { 
+                                duration: 180
+                                easing.type: Easing.OutQuart
+                            }
+                        }
+                    }
+                    
+                    // Animacja aktywacji
+                    SequentialAnimation {
+                        id: workspaceActivateAnimTop
+                        NumberAnimation {
+                            target: workspaceLineTop
+                            property: "scale"
+                            from: 0.5
+                            to: 1.1
+                            duration: 200
+                            easing.type: Easing.OutQuart
+                        }
+                        NumberAnimation {
+                            target: workspaceLineTop
+                            property: "scale"
+                            to: 1.0
+                            duration: 150
+                            easing.type: Easing.OutQuart
+                        }
+                    }
+                    
+                    MouseArea {
+                        id: workspaceMouseAreaTop
+                        anchors.fill: parent
+                        anchors.margins: -5
+                        hoverEnabled: true
+                        propagateComposedEvents: false
+                        
+                        onEntered: {
+                            workspaceLineTop.scale = 1.25
+                            workspaceLineTop.opacity = 1.2
+                        }
+                        
+                        onExited: {
+                            workspaceLineTop.scale = 1.0
+                            workspaceLineTop.opacity = 1.0
+                        }
+                        
+                        onClicked: {
+                            workspaceClickAnimTop.restart()
+                            Hyprland.dispatch("workspace", index + 1)
+                        }
+                    }
+                    
+                    // Animacja kliknięcia
+                    SequentialAnimation {
+                        id: workspaceClickAnimTop
+                        NumberAnimation {
+                            target: workspaceLineTop
+                            property: "scale"
+                            to: 0.7
+                            duration: 80
+                            easing.type: Easing.InQuad
+                        }
+                        NumberAnimation {
+                            target: workspaceLineTop
+                            property: "scale"
+                            to: 1.0
+                            duration: 200
+                            easing.type: Easing.OutQuart
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Music Visualizer - PIONOWY dla pozycji left
         Column {
             id: musicVisualizerColumn
             spacing: 2
             width: 24  // Szerokość pasków
-            visible: true
+            visible: (sharedData && sharedData.sidebarPosition === "top") ? false : true
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 48  // Space for button below
+            anchors.bottomMargin: 100  // Space for buttons below (moved above buttons)
             z: 1
             
             Repeater {
@@ -295,6 +511,127 @@ PanelWindow {
             }
         }
         
+        // Music Visualizer - POZIOMY dla pozycji top
+        Row {
+            id: musicVisualizerRow
+            spacing: 2
+            height: 24  // Wysokość pasków
+            visible: (sharedData && sharedData.sidebarPosition === "top") ? true : false
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: parent.right
+            anchors.rightMargin: 100  // Space for buttons on right (moved above buttons)
+            z: 1
+            
+            Repeater {
+                id: visualizerBarsRepeaterTop
+                model: 36  // 36 pasków poziomo
+                
+                Rectangle {
+                    id: visualizerBarTop
+                    width: 3  // Grubość paska
+                    height: Math.max(3, visualizerBarValueTop)  // Wysokość zależy od audio
+                    anchors.verticalCenter: parent.verticalCenter
+                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                    radius: 0
+                    visible: true
+                    
+                    property real visualizerBarValueTop: 5  // Start z widoczną wysokością
+                    
+                    Behavior on height {
+                        NumberAnimation {
+                            duration: 80
+                            easing.type: Easing.OutQuad
+                        }
+                    }
+                    
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: 100
+                        }
+                    }
+                }
+            }
+        }
+        
+    }
+    
+    // Lock Screen Button - OUTSIDE sidePanelRect to ensure it's clickable
+    Item {
+        id: lockButtonContainer
+        width: 40
+        height: 40
+        anchors.left: (sharedData && sharedData.sidebarPosition === "left") ? sidePanelRect.left : undefined
+        anchors.horizontalCenter: (sharedData && sharedData.sidebarPosition === "left") ? sidePanelRect.horizontalCenter : undefined
+        anchors.verticalCenter: (sharedData && sharedData.sidebarPosition === "top") ? sidePanelRect.verticalCenter : undefined
+        anchors.right: (sharedData && sharedData.sidebarPosition === "top") ? sidePanelRect.right : undefined
+        anchors.rightMargin: (sharedData && sharedData.sidebarPosition === "top") ? 56 : 0
+        anchors.bottom: (sharedData && sharedData.sidebarPosition === "left") ? sidePanelRect.bottom : undefined
+        anchors.bottomMargin: (sharedData && sharedData.sidebarPosition === "left") ? 56 : 0
+        z: 10000  // Very high z to ensure it's on top of everything
+        visible: true
+        enabled: true
+        
+        Rectangle {
+            id: lockButton
+            width: 28
+            height: 28
+            anchors.centerIn: parent
+            radius: 0
+            color: lockButtonMouseArea.containsMouse ? 
+                ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") : 
+                ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#141414")
+            
+            property real buttonScale: lockButtonMouseArea.pressed ? 0.9 : (lockButtonMouseArea.containsMouse ? 1.1 : 1.0)
+            
+            Behavior on color {
+                ColorAnimation {
+                    duration: 200
+                    easing.type: Easing.OutQuart
+                }
+            }
+            
+            Behavior on buttonScale {
+                NumberAnimation {
+                    duration: 150
+                    easing.type: Easing.OutQuart
+                }
+            }
+            
+            scale: buttonScale
+            
+            Text {
+                text: "🔒"
+                font.pixelSize: 16
+                anchors.centerIn: parent
+                color: lockButtonMouseArea.containsMouse ? 
+                    ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff") : 
+                    ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff")
+                
+                Behavior on color {
+                    ColorAnimation {
+                        duration: 200
+                        easing.type: Easing.OutQuart
+                    }
+                }
+            }
+        }
+        
+        MouseArea {
+            id: lockButtonMouseArea
+            anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
+            hoverEnabled: true
+            enabled: true
+            propagateComposedEvents: false
+            acceptedButtons: Qt.LeftButton
+            z: 10001
+            onClicked: {
+                console.log("=== LOCK BUTTON CLICKED ===")
+                if (lockScreenFunction) {
+                    lockScreenFunction()
+                }
+            }
+        }
     }
     
     // Clipboard Manager Button - OUTSIDE sidePanelRect to ensure it's clickable
@@ -302,9 +639,13 @@ PanelWindow {
         id: clipboardButtonContainer
         width: 40
         height: 40
-        anchors.horizontalCenter: sidePanelRect.horizontalCenter
-        anchors.bottom: sidePanelRect.bottom
-        anchors.bottomMargin: 8
+        anchors.left: (sharedData && sharedData.sidebarPosition === "left") ? sidePanelRect.left : undefined
+        anchors.horizontalCenter: (sharedData && sharedData.sidebarPosition === "left") ? sidePanelRect.horizontalCenter : undefined
+        anchors.verticalCenter: (sharedData && sharedData.sidebarPosition === "top") ? sidePanelRect.verticalCenter : undefined
+        anchors.right: (sharedData && sharedData.sidebarPosition === "top") ? sidePanelRect.right : undefined
+        anchors.rightMargin: (sharedData && sharedData.sidebarPosition === "top") ? 8 : 0
+        anchors.bottom: (sharedData && sharedData.sidebarPosition === "left") ? sidePanelRect.bottom : undefined
+        anchors.bottomMargin: (sharedData && sharedData.sidebarPosition === "left") ? 8 : 0
         z: 10000  // Very high z to ensure it's on top of everything
         visible: true
         enabled: true
@@ -472,9 +813,12 @@ PanelWindow {
                                 val = parseInt(values[i]) || 0
                             }
                             var normalizedWidth = Math.max(3, (val / 100) * 24)
+                            var normalizedHeight = Math.max(3, (val / 100) * 24)
+                            var intensity = val / 100
+                            
+                            // Update vertical visualizer (for left position)
                             if (visualizerBarsRepeater.itemAt(i)) {
                                 visualizerBarsRepeater.itemAt(i).visualizerBarValue = normalizedWidth
-                                var intensity = val / 100
                                 if (intensity > 0.7) {
                                     // Najwyższe wartości - accent color (najjaśniejszy, kolorowy)
                                     visualizerBarsRepeater.itemAt(i).color = colorAccent
@@ -489,13 +833,25 @@ PanelWindow {
                                     visualizerBarsRepeater.itemAt(i).color = colorSecondary
                                 }
                             }
+                            
+                            // Update horizontal visualizer (for top position)
+                            if (visualizerBarsRepeaterTop.itemAt(i)) {
+                                visualizerBarsRepeaterTop.itemAt(i).visualizerBarValueTop = normalizedHeight
+                                if (intensity > 0.7) {
+                                    visualizerBarsRepeaterTop.itemAt(i).color = colorAccent
+                                } else if (intensity > 0.4) {
+                                    visualizerBarsRepeaterTop.itemAt(i).color = colorText
+                                } else if (intensity > 0.1) {
+                                    visualizerBarsRepeaterTop.itemAt(i).color = colorPrimary
+                                } else {
+                                    visualizerBarsRepeaterTop.itemAt(i).color = colorSecondary
+                                }
+                            }
                         }
                     }
                 } else {
-                    // No data, check if cava is still running
-                    if (cavaRunning) {
-                        console.log("Cava file is empty, checking if process is running...")
-                    }
+                    // No data, silently continue - cavaCheckTimer will handle restart if needed
+                    // Removed frequent logging to reduce console spam
                 }
             }
         }
@@ -546,10 +902,14 @@ PanelWindow {
         running: false
         repeat: false
         onTriggered: {
-            // Ustaw minimalne wartości dla pasków (8 pasków), żeby były widoczne od razu
+            // Ustaw minimalne wartości dla pasków, żeby były widoczne od razu
             for (var i = 0; i < 36; i++) {
+                var value = 5 + (i % 3) * 3  // Różne wartości dla testu
                 if (visualizerBarsRepeater.itemAt(i)) {
-                    visualizerBarsRepeater.itemAt(i).visualizerBarValue = 5 + (i % 3) * 3  // Różne szerokości dla testu
+                    visualizerBarsRepeater.itemAt(i).visualizerBarValue = value
+                }
+                if (visualizerBarsRepeaterTop.itemAt(i)) {
+                    visualizerBarsRepeaterTop.itemAt(i).visualizerBarValueTop = value
                 }
             }
         }

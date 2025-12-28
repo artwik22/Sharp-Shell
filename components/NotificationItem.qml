@@ -10,7 +10,91 @@ Rectangle {
     signal notificationClosed()
     
     // Store notification reference to prevent garbage collection
-    property var storedNotification: notification
+    property var storedNotification: null
+    
+    // Flag to prevent double timer start
+    property bool timerStarted: false
+    
+    // Helper function to start auto-dismiss timer
+    function startAutoDismissTimer() {
+        if (timerStarted) {
+            console.log("Timer already started, skipping")
+            return
+        }
+        
+        // Use storedNotification as fallback if notification is null
+        var notif = notification || storedNotification
+        
+        if (!notif) {
+            console.log("No notification available, cannot start timer. notification:", notification, "storedNotification:", storedNotification)
+            return
+        }
+        
+        // Check expireTimeout - handle undefined, null, 0, -1, and positive values
+        var expireTimeout = notif.expireTimeout
+        
+        console.log("startAutoDismissTimer: expireTimeout =", expireTimeout, "type:", typeof expireTimeout)
+        
+        // Always use default 5 seconds for auto-dismiss, regardless of expireTimeout
+        // Many notifications have expireTimeout = -1, but we want them to auto-dismiss anyway
+        // Only use expireTimeout if it's a positive number greater than 0
+        var timeout = 5000  // Default 5 seconds
+        
+        if (expireTimeout && expireTimeout > 0 && expireTimeout !== -1) {
+            // Use the notification's timeout if it's valid and positive
+            timeout = expireTimeout
+            console.log("Using notification's expireTimeout:", timeout)
+        } else {
+            console.log("Using default timeout: 5000ms (expireTimeout was:", expireTimeout, ")")
+        }
+        
+        console.log("Starting auto-dismiss timer with interval:", timeout, "ms")
+        
+        // Stop timer if already running
+        if (autoDismissTimer.running) {
+            autoDismissTimer.stop()
+        }
+        
+        // Set interval first
+        autoDismissTimer.interval = timeout
+        
+        console.log("About to call autoDismissTimer.start() - interval:", timeout)
+        autoDismissTimer.start()
+        console.log("autoDismissTimer.start() called - running:", autoDismissTimer.running)
+        
+        // Start progress bar animation - wait for progressBar to be ready
+        var startProgressAnimation = function() {
+            if (progressBar && progressBar.width > 0) {
+                // Set initial width to full
+                progressBarWidth = progressBar.width
+                // Configure animation
+                progressBarAnimation.from = progressBar.width
+                progressBarAnimation.to = 0
+                progressBarAnimation.duration = timeout
+                // Start animation
+                progressBarAnimation.start()
+                console.log("Progress bar animation started - from:", progressBar.width, "to: 0, duration:", timeout, "ms")
+            } else {
+                console.log("Progress bar not ready, retrying...")
+                // Retry after a short delay
+                var retryTimer = Qt.createQmlObject('import QtQuick; Timer { interval: 200; running: true; repeat: false }', notificationItem)
+                retryTimer.triggered.connect(startProgressAnimation)
+            }
+        }
+        
+        // Start animation after a small delay to ensure progressBar is ready
+        Qt.callLater(startProgressAnimation)
+        
+        timerStarted = true
+        
+        console.log("Auto-dismiss timer started - running:", autoDismissTimer.running, "interval:", autoDismissTimer.interval)
+        
+        // Verify after a moment
+        var verifyTimer = Qt.createQmlObject('import QtQuick; Timer { interval: 200; running: true; repeat: false }', notificationItem)
+        verifyTimer.triggered.connect(function() {
+            console.log("Timer verification after 200ms - running:", autoDismissTimer.running, "interval:", autoDismissTimer.interval, "timerStarted:", timerStarted)
+        })
+    }
     
     // Auto-dismiss timer
     Timer {
@@ -19,30 +103,18 @@ Rectangle {
         running: false
         repeat: false
         onTriggered: {
-            console.log("Auto-dismiss timer triggered in NotificationItem")
+            console.log("=== Auto-dismiss timer TRIGGERED ===")
+            console.log("Timer interval was:", interval, "ms")
+            console.log("Calling startExitAnimation()")
             startExitAnimation()
         }
-    }
-    
-    // Progress bar animation timer
-    property int dismissStartTime: 0
-    property real progressValue: 0.0
-    
-    Timer {
-        id: progressUpdateTimer
-        interval: 50
-        running: autoDismissTimer.running
-        repeat: true
-        onTriggered: {
-            if (autoDismissTimer.running && autoDismissTimer.interval > 0) {
-                var elapsed = Date.now() - dismissStartTime
-                var remaining = Math.max(0, autoDismissTimer.interval - elapsed)
-                progressValue = 1.0 - (remaining / autoDismissTimer.interval)
-            } else {
-                progressValue = 0.0
-            }
+        onRunningChanged: {
+            console.log("autoDismissTimer.running changed to:", running)
         }
     }
+    
+    // Progress bar width property - will be animated from full to zero
+    property real progressBarWidth: 0
     
     width: 380
     height: notificationContent.height + 32
@@ -302,32 +374,44 @@ Rectangle {
                     antialiasing: true
                 }
             }
-            
-            // Progress bar showing time until auto-dismiss
-            Rectangle {
-                id: progressBar
-                width: parent.width
-                height: 2
-                color: Qt.rgba(255, 255, 255, 0.1)
-                visible: autoDismissTimer.running && autoDismissTimer.interval > 0
-                
-                Rectangle {
-                    id: progressFill
-                    anchors.left: parent.left
-                    anchors.top: parent.top
-                    anchors.bottom: parent.bottom
-                    width: progressBar.width * notificationItem.progressValue
-                    color: sharedData && sharedData.colorAccent ? sharedData.colorAccent : "#4a9eff"
-                    
-                    Behavior on width {
-                        NumberAnimation {
-                            duration: 50
-                            easing.type: Easing.Linear
-                        }
-                    }
-                }
-            }
         }
+    }
+    
+    // Progress bar showing time until auto-dismiss - at the bottom
+    // This line shrinks from left to right as time passes
+    Rectangle {
+        id: progressBar
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        height: 3  // Increased height for better visibility
+        color: "transparent"  // Background is transparent, only the fill is visible
+        visible: true  // Always visible when notification exists
+        z: 100  // Ensure it's above other elements
+        
+        Rectangle {
+            id: progressFill
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            width: notificationItem.progressBarWidth
+            radius: 0
+            // Use white/light color for better visibility
+            color: sharedData && sharedData.colorAccent ? sharedData.colorAccent : "#ffffff"
+            opacity: 1.0  // Full opacity for visibility
+        }
+    }
+    
+    // Animation for progress bar width - shrinks from full to zero
+    NumberAnimation {
+        id: progressBarAnimation
+        target: notificationItem
+        property: "progressBarWidth"
+        from: 0  // Will be set before starting
+        to: 0
+        duration: 5000
+        easing.type: Easing.Linear
+        running: false
     }
     
     // Click to dismiss - exclude close button area completely
@@ -338,16 +422,19 @@ Rectangle {
         anchors.right: parent.right
         anchors.rightMargin: 50  // Leave space for close button (right 50px)
         cursorShape: Qt.PointingHandCursor
-        z: 0  // Lower than close button (z: 10000)
-        propagateComposedEvents: true  // Allow events to propagate to close button
+        z: -1  // Lower than close button (z: 10000) - use negative to ensure it doesn't block
+        propagateComposedEvents: false  // Don't propagate to avoid conflicts
         enabled: true
         onClicked: function(mouse) {
             // Only dismiss if not clicking on close button area
             var clickX = mouse.x
             var buttonAreaStart = width - 50
             if (clickX < buttonAreaStart) {
+                console.log("Notification clicked, dismissing")
                 if (notification) {
                     notification.dismiss()
+                } else {
+                    startExitAnimation()
                 }
             }
         }
@@ -371,46 +458,61 @@ Rectangle {
     Component.onCompleted: {
         console.log("=== NotificationItem Component.onCompleted ===")
         console.log("notification property:", notification)
+        
         if (notification) {
-            console.log("Summary:", notification.summary)
-            console.log("Body:", notification.body)
-            console.log("AppName:", notification.appName)
+            // Store notification reference
+            storedNotification = notification
+            
+            console.log("Component.onCompleted: Summary:", notification.summary)
+            console.log("Component.onCompleted: Body:", notification.body)
+            console.log("Component.onCompleted: AppName:", notification.appName)
+            
+            // Store notification reference for use
+            var notif = notification
             
             // Update texts immediately if notification is already set
             if (appNameText) {
-                appNameText.text = notification.appName || notification.desktopEntry || "Notification"
+                appNameText.text = notif.appName || notif.desktopEntry || "Notification"
                 console.log("Component.onCompleted: SET appNameText.text =", appNameText.text)
             }
             if (summaryText) {
-                summaryText.text = notification.summary || ""
+                summaryText.text = notif.summary || ""
                 console.log("Component.onCompleted: SET summaryText.text =", summaryText.text)
             }
             if (bodyText) {
-                var body = notification.body || ""
-                if (body.length === 0) body = notification.summary || ""
+                var body = notif.body || ""
+                if (body.length === 0) body = notif.summary || ""
                 bodyText.text = body
                 console.log("Component.onCompleted: SET bodyText.text =", bodyText.text)
             }
             
-            // Start auto-dismiss timer if notification is already set
-            if (notification.expireTimeout > 0) {
-                autoDismissTimer.interval = notification.expireTimeout
-                dismissStartTime = Date.now()
-                autoDismissTimer.start()
-                progressUpdateTimer.start()
-                console.log("Component.onCompleted: Started auto-dismiss timer with interval:", notification.expireTimeout)
-            } else if (notification.expireTimeout === -1) {
-                // No timeout
-                console.log("Component.onCompleted: Notification has no timeout")
-            } else {
-                // Default timeout of 5 seconds
-                autoDismissTimer.interval = 5000
-                dismissStartTime = Date.now()
-                autoDismissTimer.start()
-                progressUpdateTimer.start()
-                console.log("Component.onCompleted: Started default auto-dismiss timer (5 seconds)")
+            // Start auto-dismiss timer immediately - capture notification reference
+            if (!timerStarted) {
+                console.log("Component.onCompleted: Starting auto-dismiss timer immediately")
+                // Capture notification reference in local variable
+                var notifRef = notification
+                console.log("Component.onCompleted: Captured notification reference:", !!notifRef)
+                
+                // Use a small delay to ensure everything is ready
+                var startTimer = Qt.createQmlObject('import QtQuick; Timer { interval: 200; running: true; repeat: false }', notificationItem)
+                startTimer.triggered.connect(function() {
+                    // Use captured reference
+                    if (!timerStarted && notifRef) {
+                        console.log("Component.onCompleted: Starting timer now with captured notification")
+                        // Temporarily set storedNotification if needed
+                        if (!storedNotification) {
+                            storedNotification = notifRef
+                        }
+                        startAutoDismissTimer()
+                    } else {
+                        console.log("Component.onCompleted: Timer not started - timerStarted:", timerStarted, "notifRef:", !!notifRef, "storedNotification:", !!storedNotification)
+                    }
+                })
             }
+        } else {
+            console.log("Component.onCompleted: notification is null, will wait for onNotificationChanged")
         }
+        
         // Start slide-in animation
         Qt.callLater(function() {
             console.log("Starting enter animation")
@@ -421,53 +523,66 @@ Rectangle {
     // Update when notification property changes - THIS IS THE ONLY PLACE TEXT IS SET
     onNotificationChanged: {
         console.log("=== onNotificationChanged ===")
-        
-        // Store notification reference to prevent garbage collection
-        storedNotification = notification
+        console.log("  notification:", notification ? "exists" : "null")
+        console.log("  storedNotification:", storedNotification ? "exists" : "null")
         
         if (notification) {
+            // Store notification reference to prevent garbage collection
+            storedNotification = notification
+            
             console.log("  Summary:", notification.summary)
             console.log("  Body:", notification.body)
             console.log("  AppName:", notification.appName)
+            console.log("  expireTimeout:", notification.expireTimeout, "type:", typeof notification.expireTimeout)
             
-            // Set texts immediately
+            // Store notification reference for use in callback
+            var notif = notification
+            
+            // Set texts immediately (don't delay this)
             if (appNameText) {
-                appNameText.text = notification.appName || notification.desktopEntry || "Notification"
+                appNameText.text = notif.appName || notif.desktopEntry || "Notification"
                 console.log("  SET appNameText.text =", appNameText.text)
             }
             if (summaryText) {
-                summaryText.text = notification.summary || ""
+                summaryText.text = notif.summary || ""
                 console.log("  SET summaryText.text =", summaryText.text)
             }
             if (bodyText) {
-                var body = notification.body || ""
+                var body = notif.body || ""
                 if (body.length === 0) {
-                    body = notification.summary || ""
+                    body = notif.summary || ""
                 }
                 bodyText.text = body
                 console.log("  SET bodyText.text =", bodyText.text)
             }
             
-            // Start auto-dismiss timer
-            if (notification.expireTimeout > 0) {
-                autoDismissTimer.interval = notification.expireTimeout
-                dismissStartTime = Date.now()
-                autoDismissTimer.start()
-                progressUpdateTimer.start()
-                console.log("Started auto-dismiss timer with interval:", notification.expireTimeout)
-            } else if (notification.expireTimeout === -1) {
-                // No timeout, notification stays until dismissed
-                console.log("Notification has no timeout (expireTimeout = -1)")
-            } else {
-                // Default timeout of 5 seconds
-                autoDismissTimer.interval = 5000
-                dismissStartTime = Date.now()
-                autoDismissTimer.start()
-                progressUpdateTimer.start()
-                console.log("Started default auto-dismiss timer (5 seconds)")
+            // Start auto-dismiss timer immediately after a very short delay
+            if (!timerStarted) {
+                console.log("onNotificationChanged: Will start auto-dismiss timer")
+                // Capture notification reference in local variable
+                var notifRef = notification
+                console.log("onNotificationChanged: Captured notification reference:", !!notifRef)
+                
+                // Use a Timer with very short delay to ensure notification is ready
+                var startTimer = Qt.createQmlObject('import QtQuick; Timer { interval: 100; running: true; repeat: false }', notificationItem)
+                startTimer.triggered.connect(function() {
+                    // Use captured reference
+                    if (!timerStarted && notifRef) {
+                        console.log("onNotificationChanged: Starting auto-dismiss timer now with captured notification")
+                        // Ensure storedNotification is set
+                        if (!storedNotification) {
+                            storedNotification = notifRef
+                        }
+                        startAutoDismissTimer()
+                    } else {
+                        console.log("onNotificationChanged: Timer not started - timerStarted:", timerStarted, "notifRef:", !!notifRef, "storedNotification:", !!storedNotification)
+                    }
+                })
             }
         } else {
-            console.log("  notification is null!")
+            console.log("  notification is null! (This is normal on first initialization)")
+            // Don't overwrite storedNotification if it's already set
+            // storedNotification should keep the previous value
         }
     }
     
@@ -525,9 +640,11 @@ Rectangle {
         }
         ScriptAction {
             script: {
-                console.log("Exit animation completed")
+                console.log("=== Exit animation completed ===")
+                console.log("Emitting notificationClosed signal")
                 // Animation finished, now emit signal to remove from list
                 notificationItem.notificationClosed()
+                console.log("notificationClosed signal emitted")
             }
         }
     }
