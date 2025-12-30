@@ -157,6 +157,12 @@ command_exists() {
 
 # Check if user has sudo privileges
 check_sudo() {
+    if [ "$FORCE_INSTALL" = true ]; then
+        # For --force, skip sudo check - let the install command handle it
+        print_info "Force mode: sudo privileges will be requested during installation"
+        return
+    fi
+
     if ! sudo -n true 2>/dev/null; then
         print_warning "Sudo privileges required for package installation"
         sudo -v
@@ -232,6 +238,11 @@ check_dependency() {
 
     if command_exists "$name"; then
         print_success "$name is installed"
+        if [ "$FORCE_INSTALL" = true ]; then
+            # For --force, install anyway (useful for updates or reinstalls)
+            MISSING_DEPS+=("$package")
+            print_info "Will reinstall $name (--force mode)"
+        fi
         return 0
     else
         if [ "$optional" = true ] && [ "$FORCE_INSTALL" = false ]; then
@@ -319,7 +330,7 @@ check_dependencies() {
     print_step "Checking required dependencies..."
     # Required dependencies
     check_dependency "quickshell" "quickshell" false
-    
+
     echo ""
     print_step "Checking optional dependencies..."
     # Optional dependencies

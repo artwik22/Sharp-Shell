@@ -114,10 +114,10 @@ PanelWindow {
                             // Background color on hover/active
                             Rectangle {
                                 anchors.fill: parent
-                                color: tabRect.isActive ?
+                                color: tabRect.isActive ? 
                                     ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#252525") :
-                                    (tabRect.isHovered ?
-                                        ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#252525") :
+                                    (tabRect.isHovered ? 
+                                        ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#252525") : 
                                         "transparent")
                                 radius: 0
                                 
