@@ -31,6 +31,31 @@ PACKAGE_MANAGER=""
 INSTALL_CMD=""
 UPDATE_CMD=""
 
+# Parse command line arguments
+AUTO_INSTALL=false
+for arg in "$@"; do
+    case $arg in
+        --auto)
+            AUTO_INSTALL=true
+            ;;
+        --help)
+            echo "SharpShell Installer"
+            echo ""
+            echo "Usage: $0 [OPTIONS]"
+            echo ""
+            echo "Options:"
+            echo "  --auto    Automatically install all dependencies without asking"
+            echo "  --help    Show this help message"
+            echo ""
+            echo "Examples:"
+            echo "  $0                    # Interactive installation"
+            echo "  $0 --auto            # Fully automatic installation"
+            echo ""
+            exit 0
+            ;;
+    esac
+done
+
 # Detect package manager
 detect_package_manager() {
     print_header "Package Manager Selection"
@@ -340,7 +365,7 @@ check_dependencies() {
         done
     fi
     
-    # Ask about optional dependencies
+    # Install optional dependencies
     if [ ${#OPTIONAL_DEPS[@]} -gt 0 ]; then
         echo ""
         print_info "Found optional dependencies that may enhance functionality:"
@@ -348,12 +373,18 @@ check_dependencies() {
             echo -e "    ${CYAN}•${NC} $dep"
         done
         echo ""
-        read -p "$(echo -e ${YELLOW}Would you like to install optional dependencies? [y/N]: ${NC})" install_optional
-        
-        if [[ "$install_optional" =~ ^[Yy]$ ]]; then
+
+        if [ "$AUTO_INSTALL" = true ]; then
+            print_info "Auto-installing optional dependencies (--auto flag used)"
+            install_optional=true
+        else
+            read -p "$(echo -e ${YELLOW}Would you like to install optional dependencies? [y/N]: ${NC})" install_optional
+        fi
+
+        if [[ "$install_optional" =~ ^[Yy]$ ]] || [ "$AUTO_INSTALL" = true ]; then
             print_header "Installing Optional Dependencies"
             check_sudo
-            
+
             for dep in "${OPTIONAL_DEPS[@]}"; do
                 # Check if it's an AUR package (quickshell might be AUR)
                 if [ "$dep" = "quickshell" ]; then
@@ -554,11 +585,16 @@ show_instructions() {
 main() {
     clear
     echo -e "${CYAN}"
-    echo "  ███████ ██   ██  █████  ██████  ██████  ███████   ███████ ██   ██ ███████ ██      "
-    echo "  ██      ██   ██ ██   ██ ██   ██ ██   ██ ██        ██      ██   ██ ██      ██      "
-    echo "  ███████ ███████ ███████ ██████  ██████  ███████   █████   ███████ █████   ██      "
-    echo "       ██ ██   ██ ██   ██ ██   ██ ██           ██   ██      ██   ██ ██      ██      "
-    echo "  ███████ ██   ██ ██   ██ ██   ██ ██      ███████   ███████ ██   ██ ███████ ███████ "
+    echo " @@@@@@   @@@  @@@   @@@@@@   @@@@@@@   @@@@@@@   @@@ "
+    echo "@@@@@@@   @@@  @@@  @@@@@@@@  @@@@@@@@  @@@@@@@@  @@@ "
+    echo "!@@       @@!  @@@  @@!  @@@  @@!  @@@  @@!  @@@  @@! "
+    echo "!@!       !@!  @!@  !@!  @!@  !@!  @!@  !@!  @!@  !@  "
+    echo "!!@@!!    @!@!@!@!  @!@!@!@!  @!@!!@!   @!@@!@!   @!@ "
+    echo " !!@!!!   !!!@!!!!  !!!@!!!!  !!@!@!    !!@!!!    !!! "
+    echo "     !:!  !!:  !!!  !!:  !!!  !!: :!!   !!:           "
+    echo "    !:!   :!:  !:!  :!:  !:!  :!:  !:!  :!:       :!: "
+    echo ":::: ::   ::   :::  ::   :::  ::   :::   ::        :: "
+    echo ":: : :     :   : :   :   : :   :   : :   :        ::: "
     echo -e "${NC}"
     print_header "SharpShell Installer"
     echo -e "${BLUE}This script will configure SharpShell for Quickshell${NC}"

@@ -187,6 +187,8 @@ SharpShell includes an interactive installer that handles everything automatical
 git clone https://github.com/artwik22/sharpshell.git
 cd sharpshell
 ./install.sh
+# Or for fully automatic installation:
+./install.sh --auto
 ```
 
 The installer will:
@@ -197,6 +199,11 @@ The installer will:
 - Create wallpapers directory
 - Create color configuration
 - Display setup instructions
+
+#### Installer Options
+- **`./install.sh`** - Interactive installation with prompts
+- **`./install.sh --auto`** - Fully automatic installation (installs all optional dependencies)
+- **`./install.sh --help`** - Show help and usage information
 
 #### Supported Package Managers
 - **Arch Linux**: pacman + AUR (yay/paru)

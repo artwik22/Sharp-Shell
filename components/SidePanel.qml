@@ -638,14 +638,13 @@ PanelWindow {
     // Screenshot Button - OUTSIDE sidePanelRect to ensure it's clickable
     Item {
         id: screenshotButtonContainer
-        width: 40
-        height: 40
-        anchors.horizontalCenter: panelPosition === "left" ? parent.horizontalCenter : undefined
-        anchors.verticalCenter: panelPosition === "top" ? parent.verticalCenter : undefined
+        width: 36
+        height: 36
+
         anchors.right: panelPosition === "top" ? parent.right : undefined
         anchors.rightMargin: panelPosition === "top" ? 48 : 0
         anchors.bottom: panelPosition === "left" ? parent.bottom : undefined
-        anchors.bottomMargin: panelPosition === "left" ? 48 : 0
+        anchors.bottomMargin: panelPosition === "left" ? 10 : 0
         z: 10000  // Very high z to ensure it's on top of everything
         visible: true
         enabled: true
@@ -666,13 +665,13 @@ PanelWindow {
         
         Rectangle {
             id: screenshotButton
-            width: 28
-            height: 28
+            width: 24
+            height: 24
             anchors.centerIn: parent
             radius: 0
-            color: screenshotButtonMouseArea.containsMouse ? 
-                ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") : 
-                ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#141414")
+            color: screenshotButtonMouseArea.containsMouse ?
+                "#ff4444" :
+                ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#444444")
             
             property real buttonScale: screenshotButtonMouseArea.pressed ? 0.9 : (screenshotButtonMouseArea.containsMouse ? 1.1 : 1.0)
             
@@ -694,7 +693,7 @@ PanelWindow {
             
             Text {
                 text: "󰹑"  // Camera/screenshot icon (Nerd Fonts)
-                font.pixelSize: 16
+                font.pixelSize: 14
                 anchors.centerIn: parent
                 color: screenshotButtonMouseArea.containsMouse ? 
                     ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff") : 
@@ -722,11 +721,22 @@ PanelWindow {
             
             onClicked: {
                 console.log("=== SCREENSHOT BUTTON CLICKED ===")
+                console.log("Mouse position:", mouse.x, mouse.y)
+                console.log("Button container position:", screenshotButtonContainer.x, screenshotButtonContainer.y)
+                console.log("Panel position:", panelPosition)
                 if (screenshotFunction) {
                     screenshotFunction()
                 } else {
                     console.log("screenshotFunction is null!")
                 }
+            }
+
+            onPressed: {
+                console.log("Screenshot button pressed")
+            }
+
+            onEntered: {
+                console.log("Mouse entered screenshot button")
             }
         }
     }
@@ -734,14 +744,12 @@ PanelWindow {
     // Clipboard Manager Button - OUTSIDE sidePanelRect to ensure it's clickable
     Item {
         id: clipboardButtonContainer
-        width: 40
-        height: 40
-        anchors.horizontalCenter: panelPosition === "left" ? parent.horizontalCenter : undefined
-        anchors.verticalCenter: panelPosition === "top" ? parent.verticalCenter : undefined
+        width: 36
+        height: 36
         anchors.right: panelPosition === "top" ? parent.right : undefined
         anchors.rightMargin: panelPosition === "top" ? 8 : 0
         anchors.bottom: panelPosition === "left" ? parent.bottom : undefined
-        anchors.bottomMargin: panelPosition === "left" ? 8 : 0
+        anchors.bottomMargin: panelPosition === "left" ? 35 : 0
         z: 10000  // Very high z to ensure it's on top of everything
         visible: true
         enabled: true
@@ -762,8 +770,8 @@ PanelWindow {
         
         Rectangle {
             id: clipboardButton
-            width: 28
-            height: 28
+            width: 24
+            height: 24
             anchors.centerIn: parent
             radius: 0
             color: clipboardButtonMouseArea.containsMouse ? 
@@ -790,7 +798,7 @@ PanelWindow {
             
             Text {
                 text: "󰨸"
-                font.pixelSize: 16
+                font.pixelSize: 14
                 anchors.centerIn: parent
                 color: clipboardButtonMouseArea.containsMouse ? 
                     ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff") : 

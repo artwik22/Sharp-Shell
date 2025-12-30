@@ -141,30 +141,36 @@ PanelWindow {
     }
 
     function loadNotesList() {
-        // For now, just show placeholder - we'll implement proper directory listing later
+        // Clear and show loading
         notesModel.clear()
-        notesModel.append({ name: "Brak zapisanych notatek", file: "" })
+        notesModel.append({ name: "Ładowanie notatek...", file: "" })
 
-        // Try to find existing note files
+        // Use Process to list all .txt files in the directory
         var notesDir = colorConfigPath.replace("colors.json", "")
-        var testFiles = ["test.txt", "notatka.txt", "przypomnienie.txt"]
+        Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['ls', '-1', '" + notesDir + "', '2>/dev/null', '|', 'grep', '\\.txt$']; running: true }", appLauncherRoot)
 
-        for (var i = 0; i < testFiles.length; i++) {
-            var xhr = new XMLHttpRequest()
-            xhr.open("GET", "file://" + notesDir + "/" + testFiles[i])
-            xhr.onreadystatechange = (function(file) {
-                return function() {
-                    if (this.readyState === XMLHttpRequest.DONE && (this.status === 200 || this.status === 0)) {
-                        // File exists, add to model
-                        if (notesModel.count === 1 && notesModel.get(0).name === "Brak zapisanych notatek") {
-                            notesModel.clear()
-                        }
-                        var fileName = file.replace('.txt', '')
-                        notesModel.append({ name: fileName, file: file })
-                    }
-                }
-            })(testFiles[i])
-            xhr.send()
+        // Use timer to process results
+        Qt.createQmlObject("import QtQuick; Timer { interval: 200; running: true; repeat: false; onTriggered: appLauncherRoot.processNotesList() }", appLauncherRoot)
+    }
+
+    function processNotesList() {
+        // For now, manually add known existing files
+        // TODO: Implement proper directory reading
+        console.log("Processing notes list...")
+        notesModel.clear()
+
+        var existingFiles = ["notes.txt", "test.txt", "wybickiego14c.txt", "12312321.txt"]
+
+        if (existingFiles.length === 0) {
+            notesModel.append({ name: "Brak zapisanych notatek", file: "" })
+            console.log("No notes found")
+        } else {
+            console.log("Found", existingFiles.length, "note files")
+            for (var i = 0; i < existingFiles.length; i++) {
+                var fileName = existingFiles[i].replace('.txt', '')
+                notesModel.append({ name: fileName, file: existingFiles[i] })
+                console.log("Added note:", fileName, "->", existingFiles[i])
+            }
         }
     }
 
@@ -201,20 +207,39 @@ PanelWindow {
     }
 
     function loadNoteContent(fileName) {
+        console.log("Loading note content for file:", fileName)
         var notesPath = colorConfigPath.replace("colors.json", fileName)
+        console.log("Full path:", notesPath)
         var xhr = new XMLHttpRequest()
         xhr.open("GET", "file://" + notesPath)
         xhr.onreadystatechange = function() {
             if (xhr.readyState === XMLHttpRequest.DONE) {
+                console.log("XMLHttpRequest readyState DONE, status:", xhr.status)
                 if (xhr.status === 200 || xhr.status === 0) {
-                    notesEditText.text = xhr.responseText
-                    console.log("Note loaded from:", notesPath)
+                    pendingNoteContent = xhr.responseText
+                    console.log("Note content loaded, length:", xhr.responseText.length)
+                    console.log("Content preview:", xhr.responseText.substring(0, 50))
+                    // Use timer to set content after UI is ready
+                    Qt.createQmlObject("import QtQuick; Timer { interval: 100; running: true; repeat: false; onTriggered: appLauncherRoot.applyPendingNoteContent() }", appLauncherRoot)
                 } else {
-                    notesEditText.text = ""
+                    pendingNoteContent = "Błąd ładowania notatki"
+                    console.log("Failed to load note from:", notesPath, "status:", xhr.status)
+                    Qt.createQmlObject("import QtQuick; Timer { interval: 100; running: true; repeat: false; onTriggered: appLauncherRoot.applyPendingNoteContent() }", appLauncherRoot)
                 }
             }
         }
         xhr.send()
+    }
+
+    function applyPendingNoteContent() {
+        console.log("Applying pending note content, text length:", pendingNoteContent.length)
+        if (notesEditText && pendingNoteContent !== "") {
+            notesEditText.text = pendingNoteContent
+            console.log("Note content applied to TextEdit")
+            pendingNoteContent = ""
+        } else {
+            console.log("Cannot apply content - notesEditText exists:", !!notesEditText, "pending content length:", pendingNoteContent.length)
+        }
     }
 
     function readHomePath() {
@@ -606,6 +631,8 @@ PanelWindow {
     property int currentMode: -1  // -1 = mode selection, 0 = Launcher, 1 = Packages, 2 = Settings, 3 = Notes
     property int currentNotesMode: -1  // -1 = menu, 0 = new note, 1 = edit note
     property string notesFileName: ""  // Current note file name
+    property string pendingNoteContent: ""  // Content to load into editor
+    property int notesMenuIndex: 0  // Selected index in notes menu (0 = new note button, 1+ = notes list)
     property int currentPackageMode: -1  // -1 = Packages option selection, 0 = install source selection (Pacman/AUR), 1 = Pacman search, 2 = AUR search, 3 = remove source selection (Pacman/AUR), 4 = Pacman remove search, 5 = AUR remove search
     property int installSourceMode: -1  // -1 = selection, 0 = Pacman, 1 = AUR
     property int removeSourceMode: -1  // -1 = selection, 0 = Pacman, 1 = AUR
@@ -1984,6 +2011,10 @@ PanelWindow {
                             currentPackageMode = -1
                             installSourceMode = -1
                             removeSourceMode = -1
+                        } else if (currentMode === 3) {
+                            currentNotesMode = -1
+                            notesMenuIndex = 0
+                            loadNotesList()
                         }
                     }
                     event.accepted = true
@@ -2148,30 +2179,40 @@ PanelWindow {
                     if (removeAurSearchInput) removeAurSearchInput.forceActiveFocus()
                     event.accepted = false
                 } else if (currentMode === 3 && currentNotesMode === -1) {
-                    // W menu notes - nawigacja po liście notatek
+                    // W menu notes - nawigacja po menu (przycisk nowa + lista notatek)
                     if (event.key === Qt.Key_Up) {
-                        if (selectedIndex > 0) {
-                            selectedIndex--
-                            notesList.positionViewAtIndex(selectedIndex, ListView.Center)
+                        if (notesMenuIndex > 0) {
+                            notesMenuIndex--
+                            if (notesMenuIndex > 0) {
+                                // W liście notatek
+                                selectedIndex = notesMenuIndex - 1
+                                notesList.positionViewAtIndex(selectedIndex, ListView.Center)
+                            }
                         }
                         event.accepted = true
                     } else if (event.key === Qt.Key_Down) {
-                        if (selectedIndex < notesList.count - 1) {
-                            selectedIndex++
-                            notesList.positionViewAtIndex(selectedIndex, ListView.Center)
+                        var maxIndex = notesModel.count // 0 = new note button, 1+ = notes
+                        if (notesMenuIndex < maxIndex) {
+                            notesMenuIndex++
+                            if (notesMenuIndex > 0) {
+                                // W liście notatek
+                                selectedIndex = notesMenuIndex - 1
+                                notesList.positionViewAtIndex(selectedIndex, ListView.Center)
+                            }
                         }
                         event.accepted = true
                     } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                        // Enter - wybierz pierwszą notatkę lub nową notatkę
-                        if (selectedIndex === 0) {
+                        if (notesMenuIndex === 0) {
                             // Nowa notatka
+                            console.log("Creating new note")
                             currentNotesMode = 0
-                            selectedIndex = 0
                             notesEditText.text = ""
                             notesFileName = ""
                         } else {
                             // Wybierz istniejącą notatkę
-                            var noteItem = notesModel.get(selectedIndex)
+                            var noteIndex = notesMenuIndex - 1
+                            var noteItem = notesModel.get(noteIndex)
+                            console.log("Opening existing note:", noteItem.name, "file:", noteItem.file)
                             if (noteItem && noteItem.file !== "") {
                                 currentNotesMode = 1
                                 notesFileName = noteItem.file
@@ -5361,10 +5402,19 @@ PanelWindow {
 
                             // New note button
                             Rectangle {
+                                id: newNoteButton
                                 width: parent.width
                                 height: 60
-                                color: newNoteButtonMouseArea.containsMouse ? colorAccent : colorSecondary
+                                color: "transparent"
                                 radius: 0
+                                scale: (notesMenuIndex === 0 || newNoteButtonMouseArea.containsMouse) ? 1.02 : 1.0
+
+                                Behavior on scale {
+                                    NumberAnimation {
+                                        duration: 150
+                                        easing.type: Easing.OutQuart
+                                    }
+                                }
 
                                 Text {
                                     text: "➕ Nowa notatka"
@@ -5381,8 +5431,8 @@ PanelWindow {
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
+                                        console.log("Creating new note")
                                         currentNotesMode = 0
-                                        selectedIndex = 0
                                         notesEditText.text = ""
                                         notesFileName = ""
                                     }
@@ -5392,10 +5442,17 @@ PanelWindow {
                                 Rectangle {
                                     anchors.bottom: parent.bottom
                                     anchors.horizontalCenter: parent.horizontalCenter
-                                    width: parent.width * 0.8
+                                    width: notesMenuIndex === 0 ? parent.width * 0.8 : 0
                                     height: 3
                                     color: colorAccent
                                     radius: 1.5
+
+                                    Behavior on width {
+                                        NumberAnimation {
+                                            duration: 300
+                                            easing.type: Easing.OutCubic
+                                        }
+                                    }
                                 }
                             }
 
@@ -5421,7 +5478,7 @@ PanelWindow {
                                 delegate: Rectangle {
                                     width: parent.width
                                     height: 50
-                                    color: selectedIndex === index ? colorAccent : (notesItemMouseArea.containsMouse ? colorPrimary : "transparent")
+                                    color: (notesMenuIndex === index + 1) ? colorAccent : (notesItemMouseArea.containsMouse ? colorPrimary : "transparent")
                                     radius: 0
 
                                     Text {
@@ -5440,10 +5497,12 @@ PanelWindow {
                                         anchors.fill: parent
                                         hoverEnabled: true
                                         onClicked: {
+                                            console.log("Note clicked:", model.name, "file:", model.file)
                                             if (model.file !== "") {
                                                 selectedIndex = index
                                                 currentNotesMode = 1
                                                 notesFileName = model.file
+                                                console.log("Loading note content for:", model.file)
                                                 loadNoteContent(model.file)
                                             }
                                         }
