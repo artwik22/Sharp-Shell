@@ -8,7 +8,7 @@
 [![Wayland](https://img.shields.io/badge/Wayland-Supported-FF6B6B?style=for-the-badge&logo=wayland)](https://wayland.freedesktop.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 
-*A customizable system with smooth animations, automated installation, and comprehensive features*
+*A customizable system with beautiful smooth animations, automated installation, and comprehensive features*
 
 </div>
 
@@ -21,9 +21,9 @@
   - [Dashboard](#dashboard)
   - [Side Panel](#side-panel)
   - [Clipboard Manager](#clipboard-manager)
+  - [Screenshot Tool](#screenshot-tool)
   - [Notification System](#notification-system)
   - [Wallpaper Management](#wallpaper-management)
-  - [Lock Screen](#lock-screen)
 - [Requirements](#requirements)
 - [Installation](#installation)
   - [Automated Installer](#automated-installer)
@@ -38,6 +38,19 @@
 
 ---
 
+## Latest Updates
+
+### Version 2.1.0 - UI/UX Improvements
+
+- **Fixed Selection Visibility**: Resolved issue where selected items in launcher were too bright with invisible text
+- **Enhanced Keyboard Navigation**: Fixed inconsistent keyboard navigation across all launcher submenus
+- **Unified Animations**: Added smooth scale and opacity animations to all menu items for consistent user experience
+- **Improved Color Contrast**: Changed selected item backgrounds to use darker colors for better text visibility
+- **UI Polish**: Standardized animation durations and easing functions across all components
+- **Removed Change Password**: Eliminated the Change Password feature for a cleaner settings interface
+
+---
+
 ## Features
 
 ### Application Launcher
@@ -47,11 +60,13 @@
 | Fast Search | Real-time filtering of applications |
 | Web Search | Multiple engines: `!` (DuckDuckGo), `!w` (Wikipedia), `!r` (Reddit), `!y` (YouTube) |
 | Calculator | Type `=` followed by math expressions |
-| Keyboard Navigation | Full arrow key support |
+| Keyboard Navigation | Full arrow key support with smooth animations |
 | Package Management | Install/remove via Pacman and AUR |
-| Settings Panel | Wallpaper, colors, sidebar toggle, system updates |
-| Color Presets | 24 pre-made themes |
-| Custom Colors | Edit HEX values directly |
+| Settings Panel | Wallpaper, colors, sidebar toggle, system updates, bar position (4 options) |
+| Color Presets | 24 pre-made themes with live preview |
+| Custom Colors | Edit HEX values directly with instant feedback |
+| Beautiful Animations | Smooth transitions, hover effects, and UI feedback throughout |
+| Consistent UI | Unified animations and visual effects across all components |
 
 ### Dashboard
 
@@ -75,15 +90,19 @@ System monitoring dashboard with multiple tabs.
 
 
 
-### Side Panel
+### Side Panel / Top Bar
 
+- Two separate panels: left sidebar and top bar
+- Switch between positions via "Bar Position" setting
 - Real-time audio visualizer with cava
 - Volume control slider (hover right edge)
 - Bluetooth toggle
 - Clipboard manager button
+- Screenshot button with area selection
 - Clock and date display
 - Clean, minimal design
 - Toggle visibility from launcher settings
+- Position preference saved to `colors.json`
 
 ### Clipboard Manager
 
@@ -93,6 +112,18 @@ System monitoring dashboard with multiple tabs.
 - Clear history button
 - Keyboard support (Escape to close)
 - Matches your color theme
+- Dynamic positioning:
+  - Left side when bar is on the left
+  - Right side when bar is on top (with proper spacing)
+
+### Screenshot Tool
+
+- Area selection with visual feedback
+- Dark overlay with white border for better visibility
+- Saves to `~/Pictures/Screenshots/`
+- Automatically copies to clipboard
+- Desktop notifications with preview
+- Uses `grim` and `slurp` for Wayland compatibility
 
 ### Notification System
 
@@ -113,16 +144,6 @@ System monitoring dashboard with multiple tabs.
 - Multi-screen synchronization
 - Fallback support for swww, wbg, hyprpaper
 
-### Lock Screen
-
-- Password protection
-- Current wallpaper background
-- Secure password entry
-- Alternative unlock button
-- Configurable auto-lock
-- Matches SharpShell theme
-
----
 
 ## Requirements
 
@@ -135,6 +156,8 @@ System monitoring dashboard with multiple tabs.
 - `playerctl` - Media player control
 - `pactl` - PulseAudio volume control
 - `bluetoothctl` - Bluetooth management
+- `grim` and `slurp` - Screenshot functionality (Wayland)
+- `wl-copy` - Clipboard support for screenshots
 - `nvidia-smi` or `radeontop` - GPU monitoring
 - `sensors` - Hardware temperature monitoring
 - `swww`, `wbg`, or `hyprpaper` - External wallpaper tools
@@ -160,7 +183,6 @@ The installer will:
 - Copy all files to `~/.config/sharpshell`
 - Set proper permissions
 - Create wallpapers directory
-- Set up lock screen password
 - Create color configuration
 - Display setup instructions
 
@@ -192,7 +214,6 @@ The installer provides configuration snippets for your compositor.
 bind = SUPER, R, exec, ~/.config/sharpshell/open-launcher.sh
 bind = SUPER, M, exec, ~/.config/sharpshell/toggle-menu.sh
 bind = SUPER, V, exec, ~/.config/sharpshell/open-clipboard.sh
-bind = SUPER, L, exec, ~/.config/sharpshell/lock-screen.sh
 ```
 
 #### For other compositors
@@ -205,8 +226,9 @@ Configure similar bindings to execute the scripts from `~/.config/sharpshell`.
 |--------|----------|
 | Open Launcher | `Super+R` |
 | Toggle Dashboard | `Super+M` |
-| Open Clipboard Manager | `Super+V` / Click button in Side Panel |
-| Lock Screen | `Super+L` / Click lock button in Side Panel |
+| Open Clipboard Manager | `Super+V` / Click button in Side Panel/Top Bar |
+| Take Screenshot | Click screenshot button in Side Panel/Top Bar |
+| Change Bar Position | Settings → Bar Position (left/top) |
 | Navigate | Arrow keys |
 | Select | `Enter` or `Space` |
 | Search | Start typing |
@@ -214,6 +236,9 @@ Configure similar bindings to execute the scripts from `~/.config/sharpshell`.
 | Calculator | Type `=` followed by expression |
 | Tab Navigation | Click tabs or use mouse |
 | Close | `Escape` |
+| Package Management | Navigate to Packages → Install/Remove |
+| Color Customization | Settings → Colors → Custom HEX |
+| Toggle Features | Settings → Sidebar, Bar Position |
 
 ---
 
@@ -236,6 +261,7 @@ sharpshell/
 │   └── RightEdgeDetector.qml # Right edge detection
 ├── scripts/
 │   ├── start-cava.sh         # Audio visualizer
+│   ├── take-screenshot.sh    # Screenshot with area selection
 │   ├── install-package.sh    # Pacman installation
 │   ├── install-aur-package.sh # AUR installation
 │   ├── remove-package.sh     # Package removal
@@ -275,8 +301,11 @@ SharpShell includes a comprehensive color system:
 
 ### Behavior
 
-- Animation speed: Modify `duration` in animation blocks
-- Hover effects: Adjust `scale` values
+- Animation speed: Modify `duration` in animation blocks (200-400ms for smooth experience)
+- Hover effects: Adjust `scale` values (1.015x scale, smooth color transitions)
+- Notification animations: Slide-in effects with opacity and scale transitions
+- Sidebar animations: 280ms duration for fluid panel interactions
+- Selection colors: Dark backgrounds with smooth color animations
 - Keyboard shortcuts: Configure in compositor settings
 
 ---
@@ -339,6 +368,14 @@ Supports Pacman and AUR (via yay/paru).
 ### Keyboard Focus Issues
 - Try clicking on the launcher window
 - Check compositor focus settings
+- **Fixed in v2.1.0**: All launcher submenus now have consistent keyboard navigation
+
+### Screenshot Not Working
+- Install `grim` and `slurp`: `sudo pacman -S grim slurp`
+- Install `wl-copy` for clipboard support: `sudo pacman -S wl-clipboard`
+- Ensure Wayland display is accessible
+- Check if screenshot directory exists: `~/Pictures/Screenshots/`
+- Verify script permissions: `chmod +x ~/.config/sharpshell/scripts/take-screenshot.sh`
 
 ---
 

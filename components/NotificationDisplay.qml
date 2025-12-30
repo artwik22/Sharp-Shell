@@ -116,6 +116,35 @@ PanelWindow {
         anchors.rightMargin: 0
         width: parent.width
         spacing: 8
+
+        // Smooth animation for notification repositioning
+        move: Transition {
+            NumberAnimation {
+                properties: "y"
+                duration: 300
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        // Animation for adding new notifications
+        add: Transition {
+            ParallelAnimation {
+                NumberAnimation {
+                    property: "opacity"
+                    from: 0.0
+                    to: 1.0
+                    duration: 400
+                    easing.type: Easing.OutCubic
+                }
+                NumberAnimation {
+                    property: "scale"
+                    from: 0.8
+                    to: 1.0
+                    duration: 400
+                    easing.type: Easing.OutCubic
+                }
+            }
+        }
     }
 }
 

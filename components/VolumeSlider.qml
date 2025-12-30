@@ -8,6 +8,7 @@ PanelWindow {
 
     anchors { 
         right: true
+        top: true
     }
     implicitWidth: 54
     implicitHeight: 270
@@ -17,6 +18,7 @@ PanelWindow {
     exclusiveZone: 0
 
     property var sharedData: null
+    property var screen: null
     
     // Kontrola widoczności - zawsze widoczne, przesuwamy przez margins
     visible: true
@@ -26,7 +28,7 @@ PanelWindow {
     property int slideOffset: (sharedData && sharedData.volumeVisible) ? 0 : -implicitWidth
     
     margins {
-        top: 0
+        top: (screen && screen.height) ? (screen.height - 270) / 2 : 0
         bottom: 0
         right: slideOffset
         left: 0
@@ -54,42 +56,6 @@ PanelWindow {
         // Calculate slider bounds (centered, 180px high)
         property real sliderY: (parent.height - 180) / 2
         property real sliderHeight: 180
-        property real sliderWidth: parent.width - 18
-        
-        function isMouseOverSlider(mouse) {
-            var centerX = parent.width / 2
-            var sliderLeft = centerX - sliderWidth / 2
-            var sliderRight = centerX + sliderWidth / 2
-            return mouse.x >= sliderLeft && mouse.x <= sliderRight && 
-                   mouse.y >= sliderY && mouse.y <= sliderY + sliderHeight
-        }
-        
-        function isSliderVisible() {
-            return (sharedData && sharedData.volumeVisible)
-        }
-        
-        // Also handle hover for the entire slider area
-        onEntered: {
-            console.log("VolumeSlider: Mouse entered PanelWindow area")
-            if (sharedData) {
-                sharedData.volumeVisible = true
-                hideDelayTimer.stop()
-            }
-        }
-        
-        onExited: {
-            console.log("VolumeSlider: Mouse exited PanelWindow area")
-            if (sharedData) {
-                // Don't start timer if mouse is still over edge detector
-                if (!sharedData.volumeEdgeHovered) {
-                    console.log("Starting hideDelayTimer")
-                    hideDelayTimer.stop()
-                    hideDelayTimer.restart()
-                } else {
-                    console.log("Not starting timer - mouse still over edge detector")
-                }
-            }
-        }
         
         function setVolumeFromMouse(mouse) {
             // Calculate volume based on mouse position relative to slider area
@@ -108,43 +74,56 @@ PanelWindow {
             setSystemVolume(newVolume)
         }
         
-        onPressed: function(mouse) {
-            var visible = isSliderVisible()
-            var overSlider = isMouseOverSlider(mouse)
-            console.log("VolumeSlider: Mouse pressed at", mouse.x, mouse.y, "isSliderVisible:", visible, "isOverSlider:", overSlider)
-            if (visible && overSlider) {
+        // Also handle hover for the entire slider area
+        onEntered: {
+            console.log("VolumeSlider: Mouse entered PanelWindow area")
+            if (sharedData) {
+                sharedData.volumeVisible = true
+                hideDelayTimer.stop()
+            }
+        }
+        
+        onExited: {
+            console.log("VolumeSlider: Mouse exited PanelWindow area")
+            if (sharedData) {
+                // Don't start timer if mouse is still over edge detector
+                Qt.callLater(function() {
+                    if (sharedData && !sharedData.volumeEdgeHovered) {
+                        console.log("Starting hideDelayTimer")
+                        hideDelayTimer.stop()
+                        hideDelayTimer.restart()
+                    } else {
+                        console.log("Not starting timer - mouse still over edge detector")
+                    }
+                })
+            }
+        }
+        
+        // Kliknięcie - ustaw volume na podstawie pozycji Y myszki
+        onClicked: function(mouse) {
+            console.log("VolumeSlider: Mouse clicked at", mouse.x, mouse.y, "volumeVisible:", sharedData ? sharedData.volumeVisible : false)
+            if (sharedData && sharedData.volumeVisible) {
                 mouse.accepted = true
                 setVolumeFromMouse(mouse)
-            } else {
-                mouse.accepted = false
             }
         }
         
+        // Przeciąganie - zmieniaj volume podczas przeciągania
         onPositionChanged: function(mouse) {
-            if (pressed) {
-                var visible = isSliderVisible()
-                var overSlider = isMouseOverSlider(mouse)
-                if (visible && overSlider) {
-                    console.log("VolumeSlider: Mouse dragged to", mouse.x, mouse.y)
-                    mouse.accepted = true
-                    setVolumeFromMouse(mouse)
-                } else {
-                    mouse.accepted = false
-                }
+            if (pressed && sharedData && sharedData.volumeVisible) {
+                console.log("VolumeSlider: Mouse dragged to", mouse.x, mouse.y)
+                mouse.accepted = true
+                setVolumeFromMouse(mouse)
             }
         }
         
+        // Scroll - zmieniaj volume
         onWheel: function(wheel) {
-            var mousePos = mapToItem(parent, wheel.x, wheel.y)
-            var visible = isSliderVisible()
-            var overSlider = isMouseOverSlider({x: mousePos.x, y: mousePos.y})
-            console.log("VolumeSlider: Wheel event", wheel.angleDelta.y, "isSliderVisible:", visible, "isOverSlider:", overSlider)
-            if (visible && overSlider) {
+            console.log("VolumeSlider: Wheel event", wheel.angleDelta.y, "volumeVisible:", sharedData ? sharedData.volumeVisible : false)
+            if (sharedData && sharedData.volumeVisible) {
                 var delta = wheel.angleDelta.y > 0 ? 5 : -5
                 adjustVolume(delta)
                 wheel.accepted = true
-            } else {
-                wheel.accepted = false
             }
         }
     }
@@ -286,16 +265,21 @@ PanelWindow {
     // Timer do opóźnienia ukrywania
     Timer {
         id: hideDelayTimer
-        interval: 1000  // Zwiększony interwał
+        interval: 500  // Krótszy interwał dla szybszej reakcji
         onTriggered: {
             // Sprawdź czy myszka nie jest ani nad sliderem ani nad detektorem
-            console.log("hideDelayTimer triggered, sliderMouseArea.containsMouse:", sliderMouseArea.containsMouse, "volumeEdgeHovered:", sharedData ? sharedData.volumeEdgeHovered : "null")
-            if (sharedData && !sliderMouseArea.containsMouse && !sharedData.volumeEdgeHovered) {
-                console.log("Hiding volume slider")
-                sharedData.volumeVisible = false
-            } else {
-                console.log("Not hiding - mouse still over slider or edge")
-            }
+            // Użyj Qt.callLater aby upewnić się, że wszystkie stany są zaktualizowane
+            Qt.callLater(function() {
+                var mouseOverSlider = sliderMouseArea.containsMouse
+                var mouseOverEdge = sharedData ? sharedData.volumeEdgeHovered : false
+                console.log("hideDelayTimer triggered, mouseOverSlider:", mouseOverSlider, "mouseOverEdge:", mouseOverEdge)
+                if (sharedData && !mouseOverSlider && !mouseOverEdge) {
+                    console.log("Hiding volume slider")
+                    sharedData.volumeVisible = false
+                } else {
+                    console.log("Not hiding - mouse still over slider or edge")
+                }
+            })
         }
     }
     
@@ -304,16 +288,19 @@ PanelWindow {
         target: sharedData
         function onVolumeEdgeHoveredChanged() {
             console.log("volumeEdgeHovered changed to:", sharedData ? sharedData.volumeEdgeHovered : "null", "sliderMouseArea.containsMouse:", sliderMouseArea.containsMouse)
-            if (sharedData && !sharedData.volumeEdgeHovered) {
+            if (sharedData && sharedData.volumeEdgeHovered) {
+                // Myszka weszła na detektor - pokaż slider i zatrzymaj timer
+                sharedData.volumeVisible = true
+                hideDelayTimer.stop()
+            } else if (sharedData && !sharedData.volumeEdgeHovered) {
                 // Myszka opuściła detektor - uruchom timer tylko jeśli myszka nie jest nad sliderem
-                // Dodaj małe opóźnienie, aby dać czas MouseArea na zareagowanie
                 Qt.callLater(function() {
                     if (!sliderMouseArea.containsMouse && sharedData && !sharedData.volumeEdgeHovered) {
                         console.log("Starting hideDelayTimer after edge detector exit")
                         hideDelayTimer.stop()
                         hideDelayTimer.restart()
                     } else {
-                        console.log("Not starting timer - mouse over slider or edge")
+                        console.log("Not starting timer - mouse over slider")
                     }
                 })
             }

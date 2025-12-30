@@ -17,7 +17,6 @@ ShellRoot {
         property bool clipboardVisible: false
         property bool sidebarVisible: true  // Sidebar visibility toggle
         property string sidebarPosition: "left"  // Sidebar position: "left" or "top"
-        property bool lockScreenVisible: false  // Lock screen visibility
         
         // Color theme properties
         property string colorBackground: "#0a0a0a"
@@ -116,13 +115,6 @@ ShellRoot {
         sharedData.menuVisible = !sharedData.menuVisible
     }
     
-    // Funkcja lock screen - współdzielona między komponentami
-    function lockScreen() {
-        if (sharedData) {
-            sharedData.lockScreenVisible = true
-        }
-    }
-    
     // Funkcja otwierania ustawień - można rozszerzyć
     function openSettings() {
         // Otwiera Dashboard
@@ -144,6 +136,39 @@ ShellRoot {
         } else {
             console.log("sharedData is null!")
         }
+    }
+    
+    // Screenshot Service - Take screenshot with area selection
+    function takeScreenshot() {
+        console.log("takeScreenshot called")
+        
+        // Get script path - try environment variable first, then fallback to home directory
+        Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh', '-c', 'if [ -n \"$QUICKSHELL_PROJECT_PATH\" ]; then echo \"$QUICKSHELL_PROJECT_PATH/scripts/take-screenshot.sh\"; elif [ -n \"$HOME\" ]; then echo \"$HOME/.config/sharpshell/scripts/take-screenshot.sh\"; else echo \"/tmp/sharpshell/scripts/take-screenshot.sh\"; fi > /tmp/quickshell_screenshot_script_path']; running: true }", root)
+        Qt.createQmlObject("import QtQuick; Timer { interval: 100; running: true; repeat: false; onTriggered: root.runScreenshotScript() }", root)
+    }
+    
+    function runScreenshotScript() {
+        var xhr = new XMLHttpRequest()
+        xhr.open("GET", "file:///tmp/quickshell_screenshot_script_path")
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                var scriptPath = xhr.responseText.trim()
+                if (scriptPath && scriptPath.length > 0) {
+                    console.log("Running screenshot script:", scriptPath)
+                    // Run screenshot script through hyprctl to ensure it has proper Wayland access
+                    // This allows slurp to interact with the user properly
+                    Qt.createQmlObject(
+                        "import Quickshell.Io; import QtQuick; Process { " +
+                        "command: ['sh', '-c', 'hyprctl dispatch exec \"bash \\\"" + scriptPath.replace(/"/g, '\\"') + "\\\"\"']; " +
+                        "running: true }",
+                        root
+                    )
+                } else {
+                    console.log("Screenshot script path not found.")
+                }
+            }
+        }
+        xhr.send()
     }
     
     // Timer do monitorowania pliku poleceń dla skrótów klawiszowych z Hyprland
@@ -170,10 +195,6 @@ ShellRoot {
                             Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh', '-c', 'rm -f /tmp/quickshell_command']; running: true }", root)
                         } else if (cmd === "openClipboardManager") {
                             root.openClipboardManager()
-                            // Usuń plik po przetworzeniu
-                            Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh', '-c', 'rm -f /tmp/quickshell_command']; running: true }", root)
-                        } else if (cmd === "lockScreen") {
-                            root.lockScreen()
                             // Usuń plik po przetworzeniu
                             Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh', '-c', 'rm -f /tmp/quickshell_command']; running: true }", root)
                         }
@@ -229,15 +250,28 @@ ShellRoot {
                     currentWallpaper: root.currentWallpaperPath
                 }
                 
-                // Panel boczny (SidePanel) - jeden na ekran
+                // Panel boczny - lewy (SidePanel) - jeden na ekran
                 SidePanel {
-                    id: sidePanelInstance
+                    id: sidePanelLeftInstance
                     screen: modelData
+                    panelPosition: "left"
                     sharedData: root.sharedData
-                    lockScreenFunction: root.lockScreen
                     settingsFunction: root.openSettings
                     launcherFunction: root.openLauncher
                     clipboardFunction: root.openClipboardManager
+                    screenshotFunction: root.takeScreenshot
+                }
+                
+                // Panel boczny - górny (SidePanel) - jeden na ekran
+                SidePanel {
+                    id: sidePanelTopInstance
+                    screen: modelData
+                    panelPosition: "top"
+                    sharedData: root.sharedData
+                    settingsFunction: root.openSettings
+                    launcherFunction: root.openLauncher
+                    clipboardFunction: root.openClipboardManager
+                    screenshotFunction: root.takeScreenshot
                 }
                 
                 // Wykrywacz górnej krawędzi - wykrywa najechanie myszką
@@ -251,14 +285,6 @@ ShellRoot {
                 RightEdgeDetector {
                     id: rightEdgeDetectorInstance
                     screen: modelData
-                    sharedData: root.sharedData
-                }
-                
-                // Lock Screen - ekran blokady
-                LockScreen {
-                    id: lockScreenInstance
-                    screen: modelData
-                    currentWallpaper: root.currentWallpaperPath
                     sharedData: root.sharedData
                 }
             }
@@ -285,6 +311,7 @@ ShellRoot {
     VolumeSlider {
         id: volumeSliderInstance
         sharedData: root.sharedData
+        screen: Quickshell.screens.length > 0 ? Quickshell.screens[0] : null
     }
     
     // ClipboardManager - menedżer schowka (jeden na pierwszym ekranie)

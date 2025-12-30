@@ -19,7 +19,6 @@ NC='\033[0m' # No Color
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_DIR="$HOME/.config/sharpshell"
 WALLPAPER_DIR="$HOME/Pictures/Wallpapers"
-PASSWORD_FILE="$CONFIG_DIR/lock-password.txt"
 COLORS_FILE="$CONFIG_DIR/colors.json"
 
 # Track installed dependencies
@@ -212,47 +211,6 @@ check_dependencies() {
     fi
 }
 
-# Setup password for lock screen
-setup_password() {
-    print_header "Lock Screen Password Configuration"
-    
-    if [ -f "$PASSWORD_FILE" ]; then
-        print_warning "Password file already exists: $PASSWORD_FILE"
-        read -p "$(echo -e ${YELLOW}Would you like to change the password? [y/N]: ${NC})" change_password
-        if [[ ! "$change_password" =~ ^[Yy]$ ]]; then
-            print_info "Skipping password configuration"
-            return 0
-        fi
-    fi
-    
-    while true; do
-        echo ""
-        read -sp "$(echo -e ${CYAN}Enter lock screen password: ${NC})" password1
-        echo ""
-        
-        if [ -z "$password1" ]; then
-            print_error "Password cannot be empty!"
-            continue
-        fi
-        
-        read -sp "$(echo -e ${CYAN}Confirm password: ${NC})" password2
-        echo ""
-        
-        if [ "$password1" != "$password2" ]; then
-            print_error "Passwords do not match! Please try again."
-            continue
-        fi
-        
-        # Save password to file
-        mkdir -p "$CONFIG_DIR"
-        echo -n "$password1" > "$PASSWORD_FILE"
-        chmod 600 "$PASSWORD_FILE"
-        
-        print_success "Password saved to $PASSWORD_FILE"
-        return 0
-    done
-}
-
 # Setup directories
 setup_directories() {
     print_header "Directory Setup"
@@ -299,7 +257,7 @@ copy_files() {
     print_step "Copying main configuration files..."
 
     # List of files to copy from root directory
-    local root_files=("shell.qml" "run.sh" "README.md" "lock-screen.sh" "open-clipboard.sh" "open-launcher.sh" "toggle-menu.sh")
+    local root_files=("shell.qml" "run.sh" "README.md" "open-clipboard.sh" "open-launcher.sh" "toggle-menu.sh")
 
     # Copy root files
     for file in "${root_files[@]}"; do
@@ -402,7 +360,6 @@ show_instructions() {
     echo -e "   ${GREEN}bind = SUPER, R, exec, $CONFIG_DIR/open-launcher.sh${NC}"
     echo -e "   ${GREEN}bind = SUPER, M, exec, $CONFIG_DIR/toggle-menu.sh${NC}"
     echo -e "   ${GREEN}bind = SUPER, V, exec, $CONFIG_DIR/open-clipboard.sh${NC}"
-    echo -e "   ${GREEN}bind = SUPER, L, exec, $CONFIG_DIR/lock-screen.sh${NC}"
     echo ""
     echo -e "${YELLOW}2. Running Quickshell:${NC}"
     echo -e "   Ensure Quickshell is configured to use:"
@@ -417,13 +374,8 @@ show_instructions() {
     echo -e "   Place your wallpapers in: ${CYAN}$WALLPAPER_DIR${NC}"
     echo -e "   Supported formats: ${GREEN}JPG, JPEG, PNG, WEBP, GIF${NC}"
     echo ""
-    echo -e "${YELLOW}4. Password Configuration:${NC}"
-    echo -e "   Lock screen password is saved in: ${CYAN}$PASSWORD_FILE${NC}"
-    echo -e "   You can change it later by running this installer again"
-    echo ""
     echo -e "${CYAN}${BOLD}Configuration Files:${NC}"
     echo -e "  ${GREEN}•${NC} Color configuration: ${CYAN}$COLORS_FILE${NC}"
-    echo -e "  ${GREEN}•${NC} Lock password: ${CYAN}$PASSWORD_FILE${NC}"
     echo -e "  ${GREEN}•${NC} Main file: ${CYAN}$CONFIG_DIR/shell.qml${NC}"
     echo ""
     
@@ -473,7 +425,6 @@ main() {
 
     setup_directories
     copy_files
-    setup_password
     setup_colors
     show_instructions
 }

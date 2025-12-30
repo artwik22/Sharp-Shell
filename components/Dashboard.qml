@@ -114,10 +114,10 @@ PanelWindow {
                             // Background color on hover/active
                             Rectangle {
                                 anchors.fill: parent
-                                color: tabRect.isActive ? 
-                                    ((sharedData && sharedData.colorAccent) ? Qt.lighter(sharedData.colorAccent, 1.1) : "#5ab0ff") : 
-                                    (tabRect.isHovered ? 
-                                        ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#252525") : 
+                                color: tabRect.isActive ?
+                                    ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#252525") :
+                                    (tabRect.isHovered ?
+                                        ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#252525") :
                                         "transparent")
                                 radius: 0
                                 
@@ -140,7 +140,8 @@ PanelWindow {
                                         ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff") : 
                                         (tabRect.isHovered ? 
                                             ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff") : 
-                                            ((sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#888888"))
+                                            ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"))
+                                    opacity: tabRect.isActive ? 1.0 : (tabRect.isHovered ? 1.0 : 0.6)
                                     anchors.verticalCenter: parent.verticalCenter
                                     
                                     Behavior on color {
@@ -167,7 +168,8 @@ PanelWindow {
                                         ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff") : 
                                         (tabRect.isHovered ? 
                                             ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff") : 
-                                            ((sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#888888"))
+                                            ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"))
+                                    opacity: tabRect.isActive ? 1.0 : (tabRect.isHovered ? 1.0 : 0.6)
                                     anchors.verticalCenter: parent.verticalCenter
                                     
                                     Behavior on color {

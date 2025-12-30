@@ -185,66 +185,6 @@ PanelWindow {
         console.log("Saving wallpaper to:", colorConfigPath, "path:", wallpaperPath)
     }
     
-    function changePassword() {
-        passwordErrorText.text = ""
-        passwordSuccessText.text = ""
-        
-        var currentPassword = currentPasswordInput.text.trim()
-        var newPassword = newPasswordInput.text.trim()
-        var confirmPassword = confirmPasswordInput.text.trim()
-        
-        // Load current password from file
-        var passwordFilePath = colorConfigPath.replace("colors.json", "lock-password.txt")
-        console.log("Loading password from:", passwordFilePath)
-        var xhr = new XMLHttpRequest()
-        xhr.open("GET", "file://" + passwordFilePath)
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                var savedPassword = ""
-                if (xhr.status === 200 || xhr.status === 0) {
-                    savedPassword = xhr.responseText.trim()
-                    console.log("Loaded password from file, length:", savedPassword.length)
-                } else {
-                    // If file doesn't exist, use default
-                    savedPassword = "Marzec"
-                    console.log("File doesn't exist, using default password")
-                }
-                
-                // Validate
-                if (currentPassword !== savedPassword) {
-                    passwordErrorText.text = "Current password is incorrect"
-                    console.log("Password mismatch - current:", currentPassword, "saved:", savedPassword)
-                    return
-                }
-                
-                console.log("Password verified successfully")
-                
-                if (newPassword.length === 0) {
-                    passwordErrorText.text = "New password cannot be empty"
-                    return
-                }
-                
-                if (newPassword !== confirmPassword) {
-                    passwordErrorText.text = "New passwords do not match"
-                    return
-                }
-                
-                // Save new password
-                var escapedPassword = newPassword.replace(/"/g, '\\"').replace(/\$/g, '\\$').replace(/`/g, '\\`')
-                var cmd = 'echo "' + escapedPassword + '" > "' + passwordFilePath + '"'
-                Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh', '-c', '" + cmd + "']; running: true }", appLauncherRoot)
-                
-                passwordSuccessText.text = "Password changed successfully!"
-                currentPasswordInput.text = ""
-                newPasswordInput.text = ""
-                confirmPasswordInput.text = ""
-                
-                // Clear success message after 3 seconds
-                Qt.createQmlObject("import QtQuick; Timer { interval: 3000; running: true; repeat: false; onTriggered: { passwordSuccessText.text = '' } }", appLauncherRoot)
-            }
-        }
-        xhr.send()
-    }
     
     function updateColor(colorType, value) {
         console.log("Updating color:", colorType, "to", value)
@@ -572,7 +512,7 @@ PanelWindow {
     property int currentPackageMode: -1  // -1 = Packages option selection, 0 = install source selection (Pacman/AUR), 1 = Pacman search, 2 = AUR search, 3 = remove source selection (Pacman/AUR), 4 = Pacman remove search, 5 = AUR remove search
     property int installSourceMode: -1  // -1 = selection, 0 = Pacman, 1 = AUR
     property int removeSourceMode: -1  // -1 = selection, 0 = Pacman, 1 = AUR
-    property int currentSettingsMode: -1  // -1 = settings list, 0 = Wallpaper, 3 = Colors menu, 4 = Presets, 5 = Custom HEX, 7 = Change Password
+    property int currentSettingsMode: -1  // -1 = settings list, 0 = Wallpaper, 3 = Colors menu, 4 = Presets, 5 = Custom HEX
     
     // Color theme properties
     property string colorBackground: "#0a0a0a"
@@ -2159,10 +2099,27 @@ PanelWindow {
             delegate: Rectangle {
                 id: modeItem
                 width: modesList.width
-                    height: 64
-                    color: selectedIndex === index ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (modeItemMouseArea.containsMouse ? ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : "transparent")
+                height: 72
+                color: "transparent"
                 radius: 0
-                    scale: (selectedIndex === index || modeItemMouseArea.containsMouse) ? 1.015 : 1.0
+                scale: (selectedIndex === index || modeItemMouseArea.containsMouse) ? 1.02 : 1.0
+
+                // Bottom accent line for selected items
+                Rectangle {
+                    anchors.bottom: parent.bottom
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: selectedIndex === index ? parent.width * 0.8 : 0
+                    height: 3
+                    color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                    radius: 1.5
+
+                    Behavior on width {
+                        NumberAnimation {
+                            duration: 300
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                }
                 
                 Behavior on color {
                         ColorAnimation { 
@@ -2419,22 +2376,25 @@ PanelWindow {
                                 delegate: Rectangle {
                                 id: appItem
                                 width: appsList.width
-                                height: 64
-                                color: selectedIndex === index ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (appItemMouseArea.containsMouse ? ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : "transparent")
+                                height: 72
+                                color: "transparent"
                                 radius: 0
-                                scale: (selectedIndex === index || appItemMouseArea.containsMouse) ? 1.01 : 1.0
-                                
-                                Behavior on color {
-                                    ColorAnimation { 
-                                        duration: 200
-                                        easing.type: Easing.OutCubic
-                                    }
-                                }
-                                
-                                Behavior on scale {
-                                    NumberAnimation {
-                                        duration: 200
-                                        easing.type: Easing.OutCubic
+                                scale: (selectedIndex === index || appItemMouseArea.containsMouse) ? 1.02 : 1.0
+
+                                // Bottom accent line for selected items
+                                Rectangle {
+                                    anchors.bottom: parent.bottom
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    width: selectedIndex === index ? parent.width * 0.8 : 0
+                                    height: 3
+                                    color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                    radius: 1.5
+
+                                    Behavior on width {
+                                        NumberAnimation {
+                                            duration: 300
+                                            easing.type: Easing.OutCubic
+                                        }
                                     }
                                 }
                                 
@@ -2547,22 +2507,25 @@ PanelWindow {
                 delegate: Rectangle {
                     id: packageOptionItem
                     width: packagesOptionsList.width
-                    height: 64
-                    color: selectedIndex === index ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (packageOptionItemMouseArea.containsMouse ? ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : "transparent")
+                    height: 72
+                    color: "transparent"
                     radius: 0
-                    scale: (selectedIndex === index || packageOptionItemMouseArea.containsMouse) ? 1.015 : 1.0
-                    
-                    Behavior on color {
-                        ColorAnimation { 
-                            duration: 200
-                            easing.type: Easing.OutCubic
-                        }
-                    }
-                    
-                    Behavior on scale {
-                        NumberAnimation {
-                            duration: 200
-                            easing.type: Easing.OutCubic
+                    scale: (selectedIndex === index || packageOptionItemMouseArea.containsMouse) ? 1.02 : 1.0
+
+                    // Bottom accent line for selected items
+                    Rectangle {
+                        anchors.bottom: parent.bottom
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        width: selectedIndex === index ? parent.width * 0.8 : 0
+                        height: 3
+                        color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                        radius: 1.5
+
+                        Behavior on width {
+                            NumberAnimation {
+                                duration: 300
+                                easing.type: Easing.OutCubic
+                            }
                         }
                     }
                     
@@ -2652,22 +2615,25 @@ PanelWindow {
                 delegate: Rectangle {
                     id: installSourceItem
                     width: installSourceList.width
-                    height: 64
-                    color: selectedIndex === index ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (installSourceItemMouseArea.containsMouse ? ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : "transparent")
+                    height: 72
+                    color: "transparent"
                     radius: 0
-                    scale: (selectedIndex === index || installSourceItemMouseArea.containsMouse) ? 1.015 : 1.0
-                    
-                    Behavior on color {
-                        ColorAnimation { 
-                            duration: 200
-                            easing.type: Easing.OutCubic
-                        }
-                    }
-                    
-                    Behavior on scale {
-                        NumberAnimation {
-                            duration: 200
-                            easing.type: Easing.OutCubic
+                    scale: (selectedIndex === index || installSourceItemMouseArea.containsMouse) ? 1.02 : 1.0
+
+                    // Bottom accent line for selected items
+                    Rectangle {
+                        anchors.bottom: parent.bottom
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        width: selectedIndex === index ? parent.width * 0.8 : 0
+                        height: 3
+                        color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                        radius: 1.5
+
+                        Behavior on width {
+                            NumberAnimation {
+                                duration: 300
+                                easing.type: Easing.OutCubic
+                            }
                         }
                     }
                     
@@ -2857,17 +2823,27 @@ PanelWindow {
                         delegate: Rectangle {
                             id: packageItem
                             width: pacmanPackagesList.width
-                            height: 64
-                            color: selectedIndex === index ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (packageItemMouseArea.containsMouse ? ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : "transparent")
+                            height: 72
+                            color: "transparent"
                             radius: 0
-                            scale: (selectedIndex === index || packageItemMouseArea.containsMouse) ? 1.01 : 1.0
-                            
-                            Behavior on color {
-                        ColorAnimation { 
-                            duration: 200
-                            easing.type: Easing.OutCubic
-                        }
-                    }
+                            scale: (selectedIndex === index || packageItemMouseArea.containsMouse) ? 1.02 : 1.0
+
+                            // Bottom accent line for selected items
+                            Rectangle {
+                                anchors.bottom: parent.bottom
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                width: selectedIndex === index ? parent.width * 0.8 : 0
+                                height: 3
+                                color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                radius: 1.5
+
+                                Behavior on width {
+                                    NumberAnimation {
+                                        duration: 300
+                                        easing.type: Easing.OutCubic
+                                    }
+                                }
+                            }
                     
                     Behavior on scale {
                         NumberAnimation {
@@ -3038,10 +3014,27 @@ PanelWindow {
                         delegate: Rectangle {
                             id: aurPackageItem
                             width: aurPackagesList.width
-                            height: 64
-                            color: selectedIndex === index ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (aurPackageItemMouseArea.containsMouse ? ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : "transparent")
+                            height: 72
+                            color: "transparent"
                             radius: 0
-                            scale: (selectedIndex === index || aurPackageItemMouseArea.containsMouse) ? 1.01 : 1.0
+                            scale: (selectedIndex === index || aurPackageItemMouseArea.containsMouse) ? 1.02 : 1.0
+
+                            // Bottom accent line for selected items
+                            Rectangle {
+                                anchors.bottom: parent.bottom
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                width: selectedIndex === index ? parent.width * 0.8 : 0
+                                height: 3
+                                color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                radius: 1.5
+
+                                Behavior on width {
+                                    NumberAnimation {
+                                        duration: 300
+                                        easing.type: Easing.OutCubic
+                                    }
+                                }
+                            }
                             
                             Behavior on color {
                         ColorAnimation { 
@@ -3126,10 +3119,27 @@ PanelWindow {
                 delegate: Rectangle {
                     id: removeSourceItem
                     width: removeSourceList.width
-                    height: 64
-                    color: selectedIndex === index ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (removeSourceItemMouseArea.containsMouse ? ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : "transparent")
+                    height: 72
+                    color: "transparent"
                     radius: 0
-                    scale: (selectedIndex === index || removeSourceItemMouseArea.containsMouse) ? 1.015 : 1.0
+                    scale: (selectedIndex === index || removeSourceItemMouseArea.containsMouse) ? 1.02 : 1.0
+
+                    // Bottom accent line for selected items
+                    Rectangle {
+                        anchors.bottom: parent.bottom
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        width: selectedIndex === index ? parent.width * 0.8 : 0
+                        height: 3
+                        color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                        radius: 1.5
+
+                        Behavior on width {
+                            NumberAnimation {
+                                duration: 300
+                                easing.type: Easing.OutCubic
+                            }
+                        }
+                    }
                     
                     Behavior on color {
                         ColorAnimation { 
@@ -3333,17 +3343,27 @@ PanelWindow {
                         delegate: Rectangle {
                             id: installedPackageItem
                             width: removePackagesList.width
-                            height: 64
-                            color: selectedIndex === index ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (installedPackageItemMouseArea.containsMouse ? ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : "transparent")
+                            height: 72
+                            color: "transparent"
                             radius: 0
-                            scale: (selectedIndex === index || installedPackageItemMouseArea.containsMouse) ? 1.01 : 1.0
-                            
-                            Behavior on color {
-                        ColorAnimation { 
-                            duration: 200
-                            easing.type: Easing.OutCubic
-                        }
-                    }
+                            scale: (selectedIndex === index || installedPackageItemMouseArea.containsMouse) ? 1.02 : 1.0
+
+                            // Bottom accent line for selected items
+                            Rectangle {
+                                anchors.bottom: parent.bottom
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                width: selectedIndex === index ? parent.width * 0.8 : 0
+                                height: 3
+                                color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                radius: 1.5
+
+                                Behavior on width {
+                                    NumberAnimation {
+                                        duration: 300
+                                        easing.type: Easing.OutCubic
+                                    }
+                                }
+                            }
                     
                     Behavior on scale {
                         NumberAnimation {
@@ -3514,10 +3534,27 @@ PanelWindow {
                         delegate: Rectangle {
                             id: installedAurPackageItem
                             width: removeAurPackagesList.width
-                            height: 54
-                            color: selectedIndex === index ? colorPrimary : (installedAurPackageItemMouseArea.containsMouse ? colorSecondary : "transparent")
+                            height: 72
+                            color: "transparent"
                             radius: 0
-                            scale: (selectedIndex === index || installedAurPackageItemMouseArea.containsMouse) ? 1.01 : 1.0
+                            scale: (selectedIndex === index || installedAurPackageItemMouseArea.containsMouse) ? 1.02 : 1.0
+
+                            // Bottom accent line for selected items
+                            Rectangle {
+                                anchors.bottom: parent.bottom
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                width: selectedIndex === index ? parent.width * 0.8 : 0
+                                height: 3
+                                color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                radius: 1.5
+
+                                Behavior on width {
+                                    NumberAnimation {
+                                        duration: 300
+                                        easing.type: Easing.OutCubic
+                                    }
+                                }
+                            }
                             
                             Behavior on color {
                         ColorAnimation { 
@@ -3606,26 +3643,27 @@ PanelWindow {
                         ListElement { name: "Toggle Sidebar"; description: "Show or hide sidebar"; icon: "󰍁"; settingId: 1 }
                         ListElement { name: "Sidebar Position"; description: "Change sidebar position (left/top)"; icon: "󰍇"; settingId: 6 }
                         ListElement { name: "Colors"; description: "Customize color theme"; icon: "󰏘"; settingId: 3 }
-                        ListElement { name: "Change Password"; description: "Change lock screen password"; icon: "󰌾"; settingId: 7 }
                     }
                     
                     delegate: Rectangle {
                         width: settingsList.width
-                        height: 64
-                        color: (selectedIndex === index) ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (settingsItemMouseArea.containsMouse ? ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : "transparent")
-                        scale: settingsItemMouseArea.containsMouse ? 1.015 : 1.0
-                        
-                        Behavior on color {
-                            ColorAnimation {
-                                duration: 200
-                                easing.type: Easing.OutCubic
-                            }
-                        }
-                        
-                        Behavior on scale {
-                            NumberAnimation {
-                                duration: 200
-                                easing.type: Easing.OutCubic
+                        height: 72
+                        color: "transparent"
+
+                        // Bottom accent line for selected items
+                        Rectangle {
+                            anchors.bottom: parent.bottom
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            width: selectedIndex === index ? parent.width * 0.8 : 0
+                            height: 3
+                            color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                            radius: 1.5
+
+                            Behavior on width {
+                                NumberAnimation {
+                                    duration: 300
+                                    easing.type: Easing.OutCubic
+                                }
                             }
                         }
                         
@@ -4148,21 +4186,23 @@ PanelWindow {
                         
                         delegate: Rectangle {
                             width: colorsMenuList.width
-                            height: 64
-                            color: (selectedIndex === index) ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : (colorsMenuMouseArea.containsMouse ? ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : "transparent")
-                            scale: colorsMenuMouseArea.containsMouse ? 1.01 : 1.0
-                            
-                            Behavior on color {
-                                ColorAnimation {
-                                    duration: 200
-                                    easing.type: Easing.OutCubic
-                                }
-                            }
-                            
-                            Behavior on scale {
-                                NumberAnimation {
-                                    duration: 200
-                                    easing.type: Easing.OutCubic
+                            height: 72
+                            color: "transparent"
+
+                            // Bottom accent line for selected items
+                            Rectangle {
+                                anchors.bottom: parent.bottom
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                width: selectedIndex === index ? parent.width * 0.8 : 0
+                                height: 3
+                                color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
+                                radius: 1.5
+
+                                Behavior on width {
+                                    NumberAnimation {
+                                        duration: 300
+                                        easing.type: Easing.OutCubic
+                                    }
                                 }
                             }
                             
@@ -5179,213 +5219,6 @@ PanelWindow {
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     acceptedButtons: Qt.NoButton
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                // Change Password
-                Item {
-                    id: changePasswordPicker
-                    anchors.fill: parent
-                    visible: currentSettingsMode === 7
-                    enabled: true
-                    z: 10
-                    
-                    // Content
-                    Flickable {
-                        id: passwordFlickable
-                        anchors.fill: parent
-                        anchors.margins: 20
-                        contentHeight: passwordColumn.height
-                        clip: true
-                        
-                        Column {
-                            id: passwordColumn
-                            width: parent.width
-                            spacing: 16
-                            
-                            // Title
-                            Text {
-                                text: "Change Password"
-                                font.pixelSize: 18
-                                font.family: "JetBrains Mono"
-                                font.weight: Font.Bold
-                                color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
-                            }
-                            
-                            // Current password
-                            Column {
-                                width: parent.width
-                                spacing: 8
-                                
-                                Text {
-                                    text: "Current Password"
-                                    font.pixelSize: 12
-                                    font.family: "JetBrains Mono"
-                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
-                                    opacity: 0.7
-                                }
-                                
-                                Rectangle {
-                                    width: parent.width
-                                    height: 40
-                                    color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary
-                                    border.color: currentPasswordInput.activeFocus ? 
-                                        ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : 
-                                        ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : colorSecondary)
-                                    border.width: 2
-                                    radius: 0
-                                    
-                                    TextInput {
-                                        id: currentPasswordInput
-                                        anchors.fill: parent
-                                        anchors.margins: 12
-                                        font.pixelSize: 14
-                                        font.family: "JetBrains Mono"
-                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
-                                        echoMode: TextInput.Password
-                                        selectByMouse: true
-                                        activeFocusOnPress: true
-                                        verticalAlignment: TextInput.AlignVCenter
-                                    }
-                                }
-                            }
-                            
-                            // New password
-                            Column {
-                                width: parent.width
-                                spacing: 8
-                                
-                                Text {
-                                    text: "New Password"
-                                    font.pixelSize: 12
-                                    font.family: "JetBrains Mono"
-                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
-                                    opacity: 0.7
-                                }
-                                
-                                Rectangle {
-                                    width: parent.width
-                                    height: 40
-                                    color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary
-                                    border.color: newPasswordInput.activeFocus ? 
-                                        ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : 
-                                        ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : colorSecondary)
-                                    border.width: 2
-                                    radius: 0
-                                    
-                                    TextInput {
-                                        id: newPasswordInput
-                                        anchors.fill: parent
-                                        anchors.margins: 12
-                                        font.pixelSize: 14
-                                        font.family: "JetBrains Mono"
-                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
-                                        echoMode: TextInput.Password
-                                        selectByMouse: true
-                                        activeFocusOnPress: true
-                                        verticalAlignment: TextInput.AlignVCenter
-                                    }
-                                }
-                            }
-                            
-                            // Confirm new password
-                            Column {
-                                width: parent.width
-                                spacing: 8
-                                
-                                Text {
-                                    text: "Confirm New Password"
-                                    font.pixelSize: 12
-                                    font.family: "JetBrains Mono"
-                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
-                                    opacity: 0.7
-                                }
-                                
-                                Rectangle {
-                                    width: parent.width
-                                    height: 40
-                                    color: (sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary
-                                    border.color: confirmPasswordInput.activeFocus ? 
-                                        ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : 
-                                        ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : colorSecondary)
-                                    border.width: 2
-                                    radius: 0
-                                    
-                                    TextInput {
-                                        id: confirmPasswordInput
-                                        anchors.fill: parent
-                                        anchors.margins: 12
-                                        font.pixelSize: 14
-                                        font.family: "JetBrains Mono"
-                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
-                                        echoMode: TextInput.Password
-                                        selectByMouse: true
-                                        activeFocusOnPress: true
-                                        verticalAlignment: TextInput.AlignVCenter
-                                        
-                                        Keys.onPressed: function(event) {
-                                            if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                                                changePassword()
-                                                event.accepted = true
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            
-                            // Error message
-                            Text {
-                                id: passwordErrorText
-                                text: ""
-                                font.pixelSize: 12
-                                font.family: "JetBrains Mono"
-                                color: "#ff4444"
-                                visible: text !== ""
-                                width: parent.width
-                                wrapMode: Text.Wrap
-                            }
-                            
-                            // Success message
-                            Text {
-                                id: passwordSuccessText
-                                text: ""
-                                font.pixelSize: 12
-                                font.family: "JetBrains Mono"
-                                color: "#44ff44"
-                                visible: text !== ""
-                                width: parent.width
-                                wrapMode: Text.Wrap
-                            }
-                            
-                            // Save button
-                            Rectangle {
-                                width: parent.width
-                                height: 45
-                                color: savePasswordButtonMouseArea.containsMouse ? 
-                                    ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent) : 
-                                    ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : colorSecondary)
-                                radius: 0
-                                
-                                Text {
-                                    text: "Save Password"
-                                    font.pixelSize: 14
-                                    font.family: "JetBrains Mono"
-                                    font.weight: Font.Bold
-                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
-                                    anchors.centerIn: parent
-                                }
-                                
-                                MouseArea {
-                                    id: savePasswordButtonMouseArea
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        changePassword()
-                                    }
                                 }
                             }
                         }

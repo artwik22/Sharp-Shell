@@ -11,11 +11,11 @@ PanelWindow {
     
     screen: clipboardManagerRoot.screen
     
-    anchors { 
-        left: true
-        top: true
-        bottom: true
-    }
+    // Dynamic anchors based on sidebar position
+    anchors.left: (sharedData && sharedData.sidebarPosition === "left") ? true : false
+    anchors.right: (sharedData && sharedData.sidebarPosition === "top") ? true : false
+    anchors.top: true
+    anchors.bottom: true
     implicitWidth: 320
     implicitHeight: 500
     
@@ -29,19 +29,40 @@ PanelWindow {
     visible: true
     color: "transparent"
     
-    // Właściwość do animacji margins.left
+    // Właściwość do animacji margins - różne dla lewej i prawej strony
     // Sidebar ma szerokość 36px, więc dodajemy margines 40px aby nie nachodził
-    property int slideOffset: (sharedData && sharedData.clipboardVisible) ? 40 : -implicitWidth
+    // Dla prawej strony mniejszy margines, aby było bliżej krawędzi
+    property int slideOffsetLeft: (sharedData && sharedData.clipboardVisible) ? 40 : -implicitWidth
+    property int slideOffsetRight: (sharedData && sharedData.clipboardVisible) ? 20 : -implicitWidth
+    
+    // Top margin - gdy sidebar jest na górze, dodajemy 36px + 8px marginesu
+    property int topMargin: (sharedData && sharedData.sidebarPosition === "top" && sharedData.sidebarVisible) ? 44 : 8
     
     margins {
-        top: 8
+        top: topMargin
         bottom: 8
-        left: slideOffset
-        right: 0
+        left: (sharedData && sharedData.sidebarPosition === "left") ? slideOffsetLeft : 0
+        right: (sharedData && sharedData.sidebarPosition === "top") ? slideOffsetRight : 0
     }
     
-    // Animacja slideOffset
-    Behavior on slideOffset {
+    // Animacja slideOffset dla lewej strony
+    Behavior on slideOffsetLeft {
+        NumberAnimation { 
+            duration: 300
+            easing.type: Easing.OutQuart
+        }
+    }
+    
+    // Animacja slideOffset dla prawej strony
+    Behavior on slideOffsetRight {
+        NumberAnimation { 
+            duration: 300
+            easing.type: Easing.OutQuart
+        }
+    }
+    
+    // Animacja topMargin
+    Behavior on topMargin {
         NumberAnimation { 
             duration: 300
             easing.type: Easing.OutQuart

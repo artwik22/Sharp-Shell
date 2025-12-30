@@ -8,35 +8,52 @@ PanelWindow {
     id: sidePanel
     
     required property var screen
+    required property string panelPosition  // "left" or "top" - determines which panel this is
     property string projectPath: ""  // Will be set from environment or auto-detected
     
     screen: sidePanel.screen
     
-    // Dynamic anchors based on position
-    anchors.left: (sharedData && sharedData.sidebarPosition === "left") ? true : (sharedData && sharedData.sidebarPosition === "top") ? true : true
-    anchors.right: (sharedData && sharedData.sidebarPosition === "top") ? true : false
+    // Anchors based on panel position
+    anchors.left: panelPosition === "left" ? true : false
+    anchors.right: panelPosition === "top" ? true : false
     anchors.top: true
-    anchors.bottom: (sharedData && sharedData.sidebarPosition === "left") ? true : false
+    anchors.bottom: panelPosition === "left" ? true : false
     
-    // Dynamic dimensions based on position
-    implicitWidth: sharedData && sharedData.sidebarPosition === "left" ? 36 : 0
-    implicitHeight: sharedData && sharedData.sidebarPosition === "top" ? 36 : 0
+    // Dimensions based on panel position
+    implicitWidth: panelPosition === "left" ? 36 : (panelPosition === "top" ? (screen ? screen.width : 1920) : 0)
+    implicitHeight: panelPosition === "top" ? 36 : (panelPosition === "left" ? (screen ? screen.height : 1080) : 0)
     color: "transparent"
-    visible: sharedData && sharedData.sidebarVisible !== undefined ? sharedData.sidebarVisible : true
+    // Visible only when this panel's position matches the current sidebar position
+    visible: (sharedData && sharedData.sidebarVisible !== undefined ? sharedData.sidebarVisible : true) && 
+             (sharedData && sharedData.sidebarPosition === panelPosition)
     
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "qssidepanel"
-    exclusiveZone: (sharedData && sharedData.sidebarVisible !== undefined && sharedData.sidebarVisible) ? 
-        ((sharedData && sharedData.sidebarPosition === "top") ? implicitHeight : implicitWidth) : 0
+    exclusiveZone: (sharedData && sharedData.sidebarVisible !== undefined && sharedData.sidebarVisible && sharedData.sidebarPosition === panelPosition) ? 
+        ((panelPosition === "top") ? implicitHeight : implicitWidth) : 0
     
     property var sharedData: null
     
-    // Dynamic margins based on position
+    // Margins based on panel position
     margins {
         left: 0
         top: 0
-        bottom: (sharedData && sharedData.sidebarPosition === "left") ? 0 : 0
-        right: (sharedData && sharedData.sidebarPosition === "top") ? 0 : 0
+        bottom: panelPosition === "left" ? 0 : 0
+        right: panelPosition === "top" ? 0 : 0
+
+        // Smooth animation when switching panel positions
+        Behavior on bottom {
+            NumberAnimation {
+                duration: 400
+                easing.type: Easing.OutCubic
+            }
+        }
+        Behavior on right {
+            NumberAnimation {
+                duration: 400
+                easing.type: Easing.OutCubic
+            }
+        }
     }
     
     // No global MouseArea needed - individual MouseAreas handle clicks
@@ -46,6 +63,17 @@ PanelWindow {
         anchors.fill: parent
         color: (sharedData && sharedData.colorBackground) ? sharedData.colorBackground : "#0d0d0d"
         radius: 0
+        // Ensure this doesn't block mouse events for buttons outside
+        enabled: false
+
+        // Smooth fade animation when panel appears/disappears
+        opacity: visible ? 1.0 : 0.0
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 300
+                easing.type: Easing.OutCubic
+            }
+        }
         
         // Zegar - layout zależy od pozycji sidebara
         // Pionowy zegar dla pozycji left
@@ -55,7 +83,16 @@ PanelWindow {
             anchors.topMargin: 14
             anchors.horizontalCenter: parent.horizontalCenter
             spacing: 4
-            visible: (sharedData && sharedData.sidebarPosition === "top") ? false : true
+            visible: panelPosition === "left"
+
+            // Smooth fade when switching panel positions
+            opacity: visible ? 1.0 : 0.0
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 300
+                    easing.type: Easing.OutCubic
+                }
+            }
             
             Text {
                 id: sidePanelHoursDisplay
@@ -68,7 +105,7 @@ PanelWindow {
                 
                 Behavior on color {
                     ColorAnimation {
-                        duration: 180
+                        duration: 280
                         easing.type: Easing.OutQuart
                     }
                 }
@@ -85,7 +122,7 @@ PanelWindow {
                 
                 Behavior on color {
                     ColorAnimation {
-                        duration: 180
+                        duration: 280
                         easing.type: Easing.OutQuart
                     }
                 }
@@ -99,7 +136,16 @@ PanelWindow {
             anchors.leftMargin: 14
             anchors.verticalCenter: parent.verticalCenter
             spacing: 4
-            visible: (sharedData && sharedData.sidebarPosition === "top") ? true : false
+            visible: panelPosition === "top"
+
+            // Smooth fade when switching panel positions
+            opacity: visible ? 1.0 : 0.0
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 300
+                    easing.type: Easing.OutCubic
+                }
+            }
             
             Text {
                 id: sidePanelHoursDisplayTop
@@ -112,7 +158,7 @@ PanelWindow {
                 
                 Behavior on color {
                     ColorAnimation {
-                        duration: 180
+                        duration: 280
                         easing.type: Easing.OutQuart
                     }
                 }
@@ -138,7 +184,7 @@ PanelWindow {
                 
                 Behavior on color {
                     ColorAnimation {
-                        duration: 180
+                        duration: 280
                         easing.type: Easing.OutQuart
                     }
                 }
@@ -179,8 +225,9 @@ PanelWindow {
             id: sidePanelWorkspaceColumn
             spacing: 9
             width: 4
-            visible: (sharedData && sharedData.sidebarPosition === "top") ? false : true
+            visible: panelPosition === "left"
             anchors.centerIn: parent
+            z: 100  // Higher than visualizer to ensure clicks work
                 
                 Repeater {
                     model: 4  // Workspaces 1-4
@@ -236,21 +283,21 @@ PanelWindow {
                         
                         Behavior on color {
                             ColorAnimation { 
-                                duration: 180
+                                duration: 280
                                 easing.type: Easing.OutQuart
                             }
                         }
                         
                         Behavior on scale {
                             NumberAnimation { 
-                                duration: 180
+                                duration: 280
                                 easing.type: Easing.OutQuart
                             }
                         }
                         
                         Behavior on opacity {
                             NumberAnimation { 
-                                duration: 180
+                                duration: 280
                                 easing.type: Easing.OutQuart
                             }
                         }
@@ -326,8 +373,9 @@ PanelWindow {
             id: sidePanelWorkspaceRow
             spacing: 9
             height: 4
-            visible: (sharedData && sharedData.sidebarPosition === "top") ? true : false
+            visible: panelPosition === "top"
             anchors.centerIn: parent
+            z: 100  // Higher than visualizer to ensure clicks work
                 
             Repeater {
                 model: 4  // Workspaces 1-4
@@ -384,21 +432,21 @@ PanelWindow {
                         
                         Behavior on color {
                             ColorAnimation { 
-                                duration: 180
+                                duration: 280
                                 easing.type: Easing.OutQuart
                             }
                         }
                         
                         Behavior on scale {
                             NumberAnimation { 
-                                duration: 180
+                                duration: 280
                                 easing.type: Easing.OutQuart
                             }
                         }
                         
                         Behavior on opacity {
                             NumberAnimation { 
-                                duration: 180
+                                duration: 280
                                 easing.type: Easing.OutQuart
                             }
                         }
@@ -474,11 +522,27 @@ PanelWindow {
             id: musicVisualizerColumn
             spacing: 2
             width: 24  // Szerokość pasków
-            visible: (sharedData && sharedData.sidebarPosition === "top") ? false : true
+            visible: panelPosition === "left"
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 100  // Space for buttons below (moved above buttons)
-            z: 1
+            anchors.bottomMargin: 270  // Above buttons but not at the very top
+            z: 0  // Lower z-order to ensure buttons are clickable
+
+            // Smooth fade when switching panel positions
+            opacity: visible ? 1.0 : 0.0
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 300
+                    easing.type: Easing.OutCubic
+                }
+            }
+            
+            // MouseArea to pass through mouse events - don't block clicks
+            MouseArea {
+                anchors.fill: parent
+                enabled: false  // Don't capture events, just pass them through
+                z: -1
+            }
             
             Repeater {
                 id: visualizerBarsRepeater
@@ -516,11 +580,27 @@ PanelWindow {
             id: musicVisualizerRow
             spacing: 2
             height: 24  // Wysokość pasków
-            visible: (sharedData && sharedData.sidebarPosition === "top") ? true : false
+            visible: panelPosition === "top"
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
             anchors.rightMargin: 100  // Space for buttons on right (moved above buttons)
             z: 1
+
+            // Smooth fade when switching panel positions
+            opacity: visible ? 1.0 : 0.0
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 300
+                    easing.type: Easing.OutCubic
+                }
+            }
+            
+            // MouseArea to pass through mouse events - don't block clicks
+            MouseArea {
+                anchors.fill: parent
+                enabled: false  // Don't capture events, just pass them through
+                z: -1
+            }
             
             Repeater {
                 id: visualizerBarsRepeaterTop
@@ -555,33 +635,47 @@ PanelWindow {
         
     }
     
-    // Lock Screen Button - OUTSIDE sidePanelRect to ensure it's clickable
+    // Screenshot Button - OUTSIDE sidePanelRect to ensure it's clickable
     Item {
-        id: lockButtonContainer
+        id: screenshotButtonContainer
         width: 40
         height: 40
-        anchors.left: (sharedData && sharedData.sidebarPosition === "left") ? sidePanelRect.left : undefined
-        anchors.horizontalCenter: (sharedData && sharedData.sidebarPosition === "left") ? sidePanelRect.horizontalCenter : undefined
-        anchors.verticalCenter: (sharedData && sharedData.sidebarPosition === "top") ? sidePanelRect.verticalCenter : undefined
-        anchors.right: (sharedData && sharedData.sidebarPosition === "top") ? sidePanelRect.right : undefined
-        anchors.rightMargin: (sharedData && sharedData.sidebarPosition === "top") ? 56 : 0
-        anchors.bottom: (sharedData && sharedData.sidebarPosition === "left") ? sidePanelRect.bottom : undefined
-        anchors.bottomMargin: (sharedData && sharedData.sidebarPosition === "left") ? 56 : 0
+        anchors.left: panelPosition === "left" ? parent.left : undefined
+        anchors.horizontalCenter: panelPosition === "left" ? parent.horizontalCenter : undefined
+        anchors.verticalCenter: panelPosition === "top" ? parent.verticalCenter : undefined
+        anchors.right: panelPosition === "top" ? parent.right : undefined
+        anchors.rightMargin: panelPosition === "top" ? 48 : 0
+        anchors.bottom: panelPosition === "left" ? parent.bottom : undefined
+        anchors.bottomMargin: panelPosition === "left" ? 48 : 0
         z: 10000  // Very high z to ensure it's on top of everything
         visible: true
         enabled: true
+
+        // Smooth repositioning when panel position changes
+        Behavior on anchors.rightMargin {
+            NumberAnimation {
+                duration: 400
+                easing.type: Easing.OutCubic
+            }
+        }
+        Behavior on anchors.bottomMargin {
+            NumberAnimation {
+                duration: 400
+                easing.type: Easing.OutCubic
+            }
+        }
         
         Rectangle {
-            id: lockButton
+            id: screenshotButton
             width: 28
             height: 28
             anchors.centerIn: parent
             radius: 0
-            color: lockButtonMouseArea.containsMouse ? 
+            color: screenshotButtonMouseArea.containsMouse ? 
                 ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") : 
                 ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : "#141414")
             
-            property real buttonScale: lockButtonMouseArea.pressed ? 0.9 : (lockButtonMouseArea.containsMouse ? 1.1 : 1.0)
+            property real buttonScale: screenshotButtonMouseArea.pressed ? 0.9 : (screenshotButtonMouseArea.containsMouse ? 1.1 : 1.0)
             
             Behavior on color {
                 ColorAnimation {
@@ -600,10 +694,10 @@ PanelWindow {
             scale: buttonScale
             
             Text {
-                text: "🔒"
+                text: "󰹑"  // Camera/screenshot icon (Nerd Fonts)
                 font.pixelSize: 16
                 anchors.centerIn: parent
-                color: lockButtonMouseArea.containsMouse ? 
+                color: screenshotButtonMouseArea.containsMouse ? 
                     ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff") : 
                     ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff")
                 
@@ -617,18 +711,22 @@ PanelWindow {
         }
         
         MouseArea {
-            id: lockButtonMouseArea
+            id: screenshotButtonMouseArea
             anchors.fill: parent
+            anchors.margins: -5  // Slightly larger hit area
             cursorShape: Qt.PointingHandCursor
             hoverEnabled: true
             enabled: true
             propagateComposedEvents: false
             acceptedButtons: Qt.LeftButton
             z: 10001
+            
             onClicked: {
-                console.log("=== LOCK BUTTON CLICKED ===")
-                if (lockScreenFunction) {
-                    lockScreenFunction()
+                console.log("=== SCREENSHOT BUTTON CLICKED ===")
+                if (screenshotFunction) {
+                    screenshotFunction()
+                } else {
+                    console.log("screenshotFunction is null!")
                 }
             }
         }
@@ -639,16 +737,30 @@ PanelWindow {
         id: clipboardButtonContainer
         width: 40
         height: 40
-        anchors.left: (sharedData && sharedData.sidebarPosition === "left") ? sidePanelRect.left : undefined
-        anchors.horizontalCenter: (sharedData && sharedData.sidebarPosition === "left") ? sidePanelRect.horizontalCenter : undefined
-        anchors.verticalCenter: (sharedData && sharedData.sidebarPosition === "top") ? sidePanelRect.verticalCenter : undefined
-        anchors.right: (sharedData && sharedData.sidebarPosition === "top") ? sidePanelRect.right : undefined
-        anchors.rightMargin: (sharedData && sharedData.sidebarPosition === "top") ? 8 : 0
-        anchors.bottom: (sharedData && sharedData.sidebarPosition === "left") ? sidePanelRect.bottom : undefined
-        anchors.bottomMargin: (sharedData && sharedData.sidebarPosition === "left") ? 8 : 0
+        anchors.left: panelPosition === "left" ? parent.left : undefined
+        anchors.horizontalCenter: panelPosition === "left" ? parent.horizontalCenter : undefined
+        anchors.verticalCenter: panelPosition === "top" ? parent.verticalCenter : undefined
+        anchors.right: panelPosition === "top" ? parent.right : undefined
+        anchors.rightMargin: panelPosition === "top" ? 8 : 0
+        anchors.bottom: panelPosition === "left" ? parent.bottom : undefined
+        anchors.bottomMargin: panelPosition === "left" ? 8 : 0
         z: 10000  // Very high z to ensure it's on top of everything
         visible: true
         enabled: true
+
+        // Smooth repositioning when panel position changes
+        Behavior on anchors.rightMargin {
+            NumberAnimation {
+                duration: 400
+                easing.type: Easing.OutCubic
+            }
+        }
+        Behavior on anchors.bottomMargin {
+            NumberAnimation {
+                duration: 400
+                easing.type: Easing.OutCubic
+            }
+        }
         
         Rectangle {
             id: clipboardButton
@@ -698,24 +810,29 @@ PanelWindow {
         MouseArea {
             id: clipboardButtonMouseArea
             anchors.fill: parent
+            anchors.margins: -5  // Slightly larger hit area
             cursorShape: Qt.PointingHandCursor
             hoverEnabled: true
             enabled: true
             propagateComposedEvents: false
             acceptedButtons: Qt.LeftButton
             z: 10001
+            
+            onPressed: {
+                console.log("Clipboard button pressed - MouseArea received press event")
+            }
+            
             onClicked: {
                 console.log("=== CLIPBOARD BUTTON CLICKED ===")
                 if (clipboardFunction) {
                     clipboardFunction()
                 }
             }
-            onPressed: {
-                console.log("Clipboard button pressed - MouseArea received press event")
-            }
+            
             onEntered: {
                 console.log("Clipboard button hover entered - MouseArea received enter event")
             }
+            
             onExited: {
                 console.log("Clipboard button hover exited")
             }
@@ -723,10 +840,10 @@ PanelWindow {
     }
     
     // Opcjonalne funkcje callback
-    property var lockScreenFunction
     property var settingsFunction
     property var launcherFunction
     property var clipboardFunction
+    property var screenshotFunction
     
     // --- Music Visualizer ---
     property var cavaValues: []
