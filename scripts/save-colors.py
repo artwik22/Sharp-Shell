@@ -20,13 +20,41 @@ colors = {
     "accent": sys.argv[5]
 }
 
-# Preserve lastWallpaper if it exists in existing data
+# Preserve existing values if they exist in existing data
 if "lastWallpaper" in existing_data:
     colors["lastWallpaper"] = existing_data["lastWallpaper"]
+if "colorPreset" in existing_data:
+    colors["colorPreset"] = existing_data["colorPreset"]
+if "sidebarPosition" in existing_data:
+    colors["sidebarPosition"] = existing_data["sidebarPosition"]
 
-# If lastWallpaper is provided as 7th argument, use it
+# Override with provided values if they exist
+# Argument 7: lastWallpaper
 if len(sys.argv) > 7 and sys.argv[7]:
     colors["lastWallpaper"] = sys.argv[7]
+
+# Argument 8: colorPreset
+if len(sys.argv) > 8 and sys.argv[8]:
+    colors["colorPreset"] = sys.argv[8]
+
+# Argument 9: sidebarPosition
+if len(sys.argv) > 9 and sys.argv[9]:
+    colors["sidebarPosition"] = sys.argv[9]
+
+# Preserve notification settings
+if "notificationsEnabled" in existing_data:
+    colors["notificationsEnabled"] = existing_data["notificationsEnabled"]
+if "notificationSoundsEnabled" in existing_data:
+    colors["notificationSoundsEnabled"] = existing_data["notificationSoundsEnabled"]
+
+# Override with provided values if they exist
+# Argument 10: notificationsEnabled
+if len(sys.argv) > 10 and sys.argv[10]:
+    colors["notificationsEnabled"] = sys.argv[10] == "true"
+
+# Argument 11: notificationSoundsEnabled
+if len(sys.argv) > 11 and sys.argv[11]:
+    colors["notificationSoundsEnabled"] = sys.argv[11] == "true"
 
 with open(sys.argv[6], 'w') as f:
     json.dump(colors, f, indent=2)

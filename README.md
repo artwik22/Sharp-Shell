@@ -4,6 +4,8 @@
 
 **A modern shell/launcher system for Quickshell with Wayland support**
 
+**Version 2.2.0**
+
 [![Quickshell](https://img.shields.io/badge/Quickshell-Compatible-00D9FF?style=for-the-badge&logo=qt)](https://github.com/Quickshell/Quickshell)
 [![Wayland](https://img.shields.io/badge/Wayland-Supported-FF6B6B?style=for-the-badge&logo=wayland)](https://wayland.freedesktop.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
@@ -39,9 +41,47 @@
 
 ---
 
-## Latest Updates
+## Changelog
 
-### Version 2.2.0 - Multi-Platform Support & Notes System
+### Version 2.2.0 
+
+- **🎨 Premium UI Enhancements**:
+  - Fluid transitions and animations (200-300ms ease-out) on all interactive elements
+  - Spring animations for modals and tab transitions
+  - Micro-interactions with hover scaling (1.02-1.05x) and elevation effects
+  - Active/pressed states for all buttons
+  - Consistent 4px/8px grid system for spacing
+  - Improved typography hierarchy
+
+- **⚙️ Settings Application Redesign**:
+  - **Color Presets Tab**: 24 pre-made themes with improved card design
+  - **Wallpapers Tab**: 16:9 aspect ratio previews, hover effects instead of borders, 3 per row
+  - **Bar Tab**: Sidebar position settings (left/top)
+  - **Audio Tab**: Full audio mixer with PulseAudio integration
+    - Default input/output device controls
+    - Volume sliders and mute buttons for all devices
+    - Real device names instead of module names
+    - Visual feedback with accent colors
+
+- **🔔 Notification System Improvements**:
+  - Notification sounds (configurable on/off)
+  - Show/hide notifications toggle
+  - Settings saved to `colors.json`
+  - Sound file: `/usr/share/sounds/freedesktop/stereo/message.oga`
+
+- **🎯 Selection Style Consistency**:
+  - Settings tabs now use bottom accent line (matching launcher style)
+  - Transparent backgrounds with animated accent indicators
+  - Smooth 300ms transitions
+
+- **🔊 Audio Mixer**:
+  - Full PulseAudio control interface
+  - Individual device volume control
+  - Mute/unmute per device
+  - Default device management
+  - Real-time volume updates
+
+### Version 2.1.0 - Multi-Platform Support & Notes System
 
 - **📦 Multi-Platform Package Manager Support**: Installer now supports pacman (Arch), apt (Debian/Ubuntu), and dnf (Fedora/RHEL)
 - **📝 Notes System**: Added complete notes management with menu interface
@@ -52,7 +92,7 @@
 - **🔧 Enhanced Installer**: Auto-detection of package manager with manual selection fallback
 - **🎨 UI Improvements**: Refined launcher animations and menu interactions
 
-### Version 2.1.0 - UI/UX Improvements
+### Version 2.0.0 - UI/UX Improvements
 
 - **Fixed Selection Visibility**: Resolved issue where selected items in launcher were too bright with invisible text
 - **Enhanced Keyboard Navigation**: Fixed inconsistent keyboard navigation across all launcher submenus
@@ -109,11 +149,22 @@
 | Keyboard Navigation | Full arrow key support with smooth animations |
 | Package Management | Install/remove via Pacman and AUR |
 | **Notes System** | **Create, view, and edit notes with automatic file management** |
-| Settings Panel | Wallpaper, colors, sidebar toggle, system updates, bar position (4 options) |
+| Settings Panel | Comprehensive settings application with 6 tabs |
 | Color Presets | 24 pre-made themes with live preview |
 | Custom Colors | Edit HEX values directly with instant feedback |
 | Beautiful Animations | Smooth transitions, hover effects, and UI feedback throughout |
 | Consistent UI | Unified animations and visual effects across all components |
+
+### Settings Application
+
+| Tab | Features |
+|-----|----------|
+| **General** | Global appearance settings (border radius 0-25px), notification controls |
+| **Color Presets** | 24 pre-made color themes with improved card design |
+| **Wallpapers** | 16:9 previews, hover effects, 3 per row |
+| **Bar** | Sidebar position (left/top) |
+| **System** | System-related settings |
+| **Audio** | Full audio mixer with PulseAudio integration |
 
 ### Dashboard
 
@@ -181,15 +232,30 @@ System monitoring dashboard with multiple tabs.
 - Progress indicator
 - Top-right positioning
 - Urgency-based colors
+- **Configurable notification sounds** (on/off toggle)
+- **Show/hide notifications** (on/off toggle)
+- Settings saved to `colors.json`
 
 ### Wallpaper Management
 
 - Native Quickshell integration (no external tools needed)
-- Visual grid browser
-- Hover preview effects
+- Visual grid browser with **16:9 aspect ratio previews**
+- **Hover effects** (scale animations) instead of border selection
+- **3 wallpapers per row** for better visibility
 - Smooth transitions
 - Multi-screen synchronization
 - Fallback support for swww, wbg, hyprpaper
+
+### Audio Mixer
+
+- **Full PulseAudio control interface** (similar to pavucontrol)
+- Default input/output device controls with volume sliders
+- Individual device management for all audio sinks and sources
+- Volume control (0-100%) with visual feedback
+- Mute/unmute buttons for each device
+- Real device names displayed (not module names)
+- Real-time volume updates
+- Accessible via Settings → Audio tab
 
 
 ## Requirements
@@ -201,13 +267,14 @@ System monitoring dashboard with multiple tabs.
 ### Optional
 - `cava` - Audio visualizer
 - `playerctl` - Media player control
-- `pactl` - PulseAudio volume control
+- `pactl` - PulseAudio volume control (required for Audio mixer)
 - `bluetoothctl` - Bluetooth management
 - `grim` and `slurp` - Screenshot functionality (Wayland)
 - `wl-copy` - Clipboard support for screenshots
 - `nvidia-smi` or `radeontop` - GPU monitoring
 - `sensors` - Hardware temperature monitoring
 - `swww`, `wbg`, or `hyprpaper` - External wallpaper tools
+- `paplay` - Notification sounds (usually included with PulseAudio)
 
 *Note: Native Quickshell wallpaper system works without external tools*
 
@@ -356,6 +423,8 @@ SharpShell includes a comprehensive color system:
 - Custom HEX color editing
 - Live preview
 - Persistent settings saved to `colors.json`
+- **Global border radius** (0-25px) affecting all UI elements
+- **Monochrome theme** updated with premium color palette
 
 ### Layout and Sizing
 

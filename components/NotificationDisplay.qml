@@ -41,6 +41,18 @@ PanelWindow {
             console.log("Body:", notification.body)
             console.log("AppName:", notification.appName)
             console.log("AppIcon:", notification.appIcon)
+            
+            // Check if notifications are enabled
+            if (sharedData && !sharedData.notificationsEnabled) {
+                console.log("Notifications disabled, ignoring")
+                return
+            }
+            
+            // Play notification sound if enabled
+            if (sharedData && sharedData.notificationSoundsEnabled) {
+                Qt.createQmlObject('import Quickshell.Io; Process { command: ["paplay", "/usr/share/sounds/freedesktop/stereo/message.oga"]; running: true }', notificationDisplayRoot)
+            }
+            
             addNotification(notification)
         }
     }

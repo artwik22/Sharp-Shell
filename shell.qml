@@ -15,8 +15,11 @@ ShellRoot {
         property bool volumeVisible: false
         property bool volumeEdgeHovered: false  // Czy myszka jest nad detektorem krawędzi
         property bool clipboardVisible: false
+        property bool settingsVisible: false
         property bool sidebarVisible: true  // Sidebar visibility toggle
         property string sidebarPosition: "left"  // Sidebar position: "left" or "top"
+        property bool notificationsEnabled: true  // Enable/disable notifications
+        property bool notificationSoundsEnabled: true  // Enable/disable notification sounds
         
         // Color theme properties
         property string colorBackground: "#0a0a0a"
@@ -101,6 +104,27 @@ ShellRoot {
                             root.currentWallpaperPath = json.lastWallpaper
                             console.log("Loaded last wallpaper from colors.json:", json.lastWallpaper)
                         }
+                        
+                        // Load sidebar position if available
+                        if (json.sidebarPosition && (json.sidebarPosition === "left" || json.sidebarPosition === "top")) {
+                            sharedData.sidebarPosition = json.sidebarPosition
+                            console.log("Loaded sidebar position from colors.json:", json.sidebarPosition)
+                        }
+                        
+                        // Load color preset if available (for reference, not applied automatically)
+                        if (json.colorPreset && json.colorPreset.length > 0) {
+                            console.log("Loaded color preset from colors.json:", json.colorPreset)
+                        }
+                        
+                        // Load notification settings if available
+                        if (json.notificationsEnabled !== undefined) {
+                            sharedData.notificationsEnabled = json.notificationsEnabled === true || json.notificationsEnabled === "true"
+                            console.log("Loaded notificationsEnabled from colors.json:", sharedData.notificationsEnabled)
+                        }
+                        if (json.notificationSoundsEnabled !== undefined) {
+                            sharedData.notificationSoundsEnabled = json.notificationSoundsEnabled === true || json.notificationSoundsEnabled === "true"
+                            console.log("Loaded notificationSoundsEnabled from colors.json:", sharedData.notificationSoundsEnabled)
+                        }
                     } catch (e) {
                         console.log("Error parsing colors.json:", e)
                     }
@@ -114,13 +138,7 @@ ShellRoot {
     function toggleMenu() {
         sharedData.menuVisible = !sharedData.menuVisible
     }
-    
-    // Funkcja otwierania ustawień - można rozszerzyć
-    function openSettings() {
-        // Otwiera Dashboard
-        sharedData.menuVisible = true
-    }
-    
+
     // Funkcja otwierania launcher'a aplikacji
     function openLauncher() {
         sharedData.launcherVisible = !sharedData.launcherVisible
@@ -136,6 +154,11 @@ ShellRoot {
         } else {
             console.log("sharedData is null!")
         }
+    }
+
+    // Funkcja otwierania aplikacji ustawień
+    function openSettings() {
+        sharedData.settingsVisible = !sharedData.settingsVisible
     }
     
     // Screenshot Service - Take screenshot with area selection
@@ -195,6 +218,10 @@ ShellRoot {
                             Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh', '-c', 'rm -f /tmp/quickshell_command']; running: true }", root)
                         } else if (cmd === "openClipboardManager") {
                             root.openClipboardManager()
+                            // Usuń plik po przetworzeniu
+                            Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh', '-c', 'rm -f /tmp/quickshell_command']; running: true }", root)
+                        } else if (cmd === "openSettings") {
+                            root.openSettings()
                             // Usuń plik po przetworzeniu
                             Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh', '-c', 'rm -f /tmp/quickshell_command']; running: true }", root)
                         }
@@ -320,7 +347,15 @@ ShellRoot {
         screen: Quickshell.screens.length > 0 ? Quickshell.screens[0] : null
         sharedData: root.sharedData
     }
-    
+
+    // SettingsApplication - aplikacja ustawień
+    SettingsApplication {
+        id: settingsApplicationInstance
+        screen: Quickshell.screens.length > 0 ? Quickshell.screens[0] : null
+        sharedData: root.sharedData
+        visible: sharedData.settingsVisible
+    }
+
     // NotificationDisplay - wyświetlanie powiadomień w prawym górnym rogu
     NotificationDisplay {
         id: notificationDisplayInstance

@@ -68,7 +68,6 @@ PanelWindow {
         initializePaths()
         loadProjectPath()
         loadApps()
-        detectWallpaperTool()  // Detect available wallpaper tool
         if (sharedData) {
             // Load colors from sharedData if available
             colorBackground = sharedData.colorBackground || colorBackground
@@ -249,18 +248,14 @@ PanelWindow {
                 var home = xhr.responseText.trim()
                 if (home && home.length > 0) {
                     colorConfigPath = home + "/.config/sharpshell/colors.json"
-                    wallpapersPath = home + "/Pictures/Wallpapers"
                     notesDir = home + "/Documents/Notes"
-                    console.log("Paths initialized - home:", home, "colorConfig:", colorConfigPath, "wallpapers:", wallpapersPath, "notes:", notesDir)
+                    console.log("Paths initialized - home:", home, "colorConfig:", colorConfigPath, "notes:", notesDir)
                 } else {
                     // Fallback to defaults
                     colorConfigPath = "/tmp/sharpshell/colors.json"
-                    wallpapersPath = "/tmp/Pictures/Wallpapers"
                     notesDir = "/tmp/Documents/Notes"
                     console.log("Using fallback paths")
                 }
-                // Load wallpapers immediately after path is initialized
-                loadWallpapers()
             }
         }
         xhr.send()
@@ -284,27 +279,6 @@ PanelWindow {
         console.log("Saving colors to:", colorConfigPath)
     }
     
-    function saveWallpaper(wallpaperPath) {
-        // Validate paths before saving
-        if (!projectPath || projectPath.length === 0) {
-            console.log("Project path not initialized, cannot save wallpaper")
-            return
-        }
-        if (!colorConfigPath || colorConfigPath.length === 0) {
-            console.log("Color config path not initialized, cannot save wallpaper")
-            return
-        }
-        if (!wallpaperPath || wallpaperPath.length === 0) {
-            console.log("Wallpaper path is empty, cannot save")
-            return
-        }
-        // Use Python script to save wallpaper - pass colors and wallpaper as arguments
-        var scriptPath = projectPath + "/scripts/save-colors.py"
-        var escapedWallpaper = wallpaperPath.replace(/"/g, '\\"')
-        var cmd = 'python3 "' + scriptPath + '" "' + colorBackground + '" "' + colorPrimary + '" "' + colorSecondary + '" "' + colorText + '" "' + colorAccent + '" "' + colorConfigPath + '" "' + escapedWallpaper + '"'
-        Qt.createQmlObject("import Quickshell.Io; import QtQuick; Process { command: ['sh', '-c', '" + cmd + "']; running: true }", appLauncherRoot)
-        console.log("Saving wallpaper to:", colorConfigPath, "path:", wallpaperPath)
-    }
     
     
     function updateColor(colorType, value) {
@@ -565,23 +539,14 @@ PanelWindow {
     property int baseWidth: 540
     property int baseHeight: 315  // 70% of 450 (30% shorter)
     
-    // Size when in wallpaper mode (30% larger)
-    property bool isWallpaperMode: (currentMode === 2 && currentSettingsMode === 0)
-    property int wallpaperWidth: Math.floor(baseWidth * 1.3)  // 30% wider
-    property int wallpaperHeight: Math.floor(baseHeight * 1.3)  // 30% taller
-    
-    // Size when in presets mode (40% wider, 30% taller)
-    property bool isPresetsMode: (currentMode === 2 && currentSettingsMode === 4)
-    property int presetsWidth: Math.floor(baseWidth * 1.4)  // 40% wider
-    property int presetsHeight: Math.floor(baseHeight * 1.3)  // 30% taller
 
     // Size when in notes mode (50% larger)
     property bool isNotesMode: (currentMode === 3)
     property int notesWidth: Math.floor(baseWidth * 1.5)  // 50% wider
     property int notesHeight: Math.floor(baseHeight * 1.5)  // 50% taller
     
-    implicitWidth: isNotesMode ? notesWidth : (isPresetsMode ? presetsWidth : (isWallpaperMode ? wallpaperWidth : baseWidth))
-    implicitHeight: isNotesMode ? notesHeight : (isPresetsMode ? presetsHeight : (isWallpaperMode ? wallpaperHeight : baseHeight))
+    implicitWidth: isNotesMode ? notesWidth : baseWidth
+    implicitHeight: isNotesMode ? notesHeight : baseHeight
     width: implicitWidth
     height: implicitHeight
     
@@ -621,8 +586,8 @@ PanelWindow {
     
     Behavior on slideOffset {
         NumberAnimation { 
-            duration: 280
-            easing.type: Easing.OutQuart
+            duration: 300
+            easing.type: Easing.OutCubic
         }
     }
     
@@ -643,7 +608,6 @@ PanelWindow {
     property int currentPackageMode: -1  // -1 = Packages option selection, 0 = install source selection (Pacman/AUR), 1 = Pacman search, 2 = AUR search, 3 = remove source selection (Pacman/AUR), 4 = Pacman remove search, 5 = AUR remove search
     property int installSourceMode: -1  // -1 = selection, 0 = Pacman, 1 = AUR
     property int removeSourceMode: -1  // -1 = selection, 0 = Pacman, 1 = AUR
-    property int currentSettingsMode: -1  // -1 = settings list, 0 = Wallpaper, 3 = Colors menu, 4 = Presets, 5 = Custom HEX
     
     // Color theme properties
     property string colorBackground: "#0a0a0a"
@@ -654,12 +618,8 @@ PanelWindow {
     
     // Color config file path - dynamically determined
     property string colorConfigPath: ""
-    property int wallpaperSelectedIndex: 0  // Indeks wybranej tapety w GridView
     property var packages: []
     property string packageSearchText: ""
-    property var wallpapers: []
-    // Wallpapers path - dynamically determined
-    property string wallpapersPath: ""
     
     // Filtered applications list
     ListModel {
@@ -679,109 +639,11 @@ PanelWindow {
         id: filteredInstalledPackages
     }
     
-    // Wallpapers list
-    ListModel {
-        id: wallpapersModel
-    }
     
-    // Function to load wallpapers
-    function loadWallpapers() {
-        if (!wallpapersPath || wallpapersPath.length === 0) {
-            console.log("Wallpapers path not initialized, waiting...")
-            // Retry after a short delay
-            Qt.createQmlObject("import QtQuick; Timer { interval: 500; running: true; repeat: false; onTriggered: appLauncherRoot.loadWallpapers() }", appLauncherRoot)
-            return
-        }
-        wallpapersModel.clear()
-        Qt.createQmlObject('import Quickshell.Io; import QtQuick; Process { command: ["sh", "-c", "find ' + wallpapersPath + ' -maxdepth 1 -type f \\\\( -iname \\"*.jpg\\" -o -iname \\"*.jpeg\\" -o -iname \\"*.png\\" -o -iname \\"*.webp\\" -o -iname \\"*.gif\\" \\\\) 2>/dev/null | sort > /tmp/quickshell_wallpapers"]; running: true }', appLauncherRoot)
-        Qt.createQmlObject("import QtQuick; Timer { interval: 300; running: true; repeat: false; onTriggered: appLauncherRoot.readWallpapersList() }", appLauncherRoot)
-    }
     
-    function readWallpapersList() {
-        var xhr = new XMLHttpRequest()
-        xhr.open("GET", "file:///tmp/quickshell_wallpapers")
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                wallpapersModel.clear()
-                var content = xhr.responseText || ""
-                var lines = content.trim().split("\n")
-                for (var i = 0; i < lines.length; i++) {
-                    var path = lines[i].trim()
-                    if (path.length > 0) {
-                        var filename = path.split("/").pop()
-                        wallpapersModel.append({ path: path, filename: filename })
-                    }
-                }
-                console.log("Loaded", wallpapersModel.count, "wallpapers")
-            }
-        }
-        xhr.send()
-    }
     
-    // Wallpaper tool detection
-    property string wallpaperTool: ""  // Will be detected: "swww", "wbg", "hyprpaper", or ""
     
-    function detectWallpaperTool() {
-        // Check which wallpaper tool is available
-        Qt.createQmlObject('import Quickshell.Io; import QtQuick; Process { command: ["sh", "-c", "which swww > /dev/null 2>&1 && echo swww > /tmp/quickshell_wallpaper_tool || which wbg > /dev/null 2>&1 && echo wbg > /tmp/quickshell_wallpaper_tool || which hyprpaper > /dev/null 2>&1 && echo hyprpaper > /tmp/quickshell_wallpaper_tool || echo none > /tmp/quickshell_wallpaper_tool"]; running: true }', appLauncherRoot)
-        Qt.createQmlObject("import QtQuick; Timer { interval: 200; running: true; repeat: false; onTriggered: appLauncherRoot.readWallpaperTool() }", appLauncherRoot)
-    }
     
-    function readWallpaperTool() {
-        var xhr = new XMLHttpRequest()
-        xhr.open("GET", "file:///tmp/quickshell_wallpaper_tool")
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                var tool = xhr.responseText.trim()
-                wallpaperTool = tool
-                console.log("Detected wallpaper tool:", wallpaperTool)
-            }
-        }
-        xhr.send()
-    }
-    
-    function setWallpaper(wallpaperPath) {
-        console.log("Setting wallpaper via Quickshell:", wallpaperPath)
-        
-        // Save wallpaper path to colors.json for persistence
-        saveWallpaper(wallpaperPath)
-        
-        // Use Quickshell's built-in wallpaper system (like Caelestia Shell)
-        // Set wallpaper directly in sharedData or root component
-        if (sharedData) {
-            // Try to find the root ShellRoot component to set wallpaper
-            var rootComponent = appLauncherRoot.parent
-            while (rootComponent && rootComponent.objectName !== "shellRoot") {
-                rootComponent = rootComponent.parent
-            }
-            
-            // If we can't find root, try to set it via sharedData property
-            // We'll use a different approach - set it in the shell.qml root
-            // For now, we'll use a file-based approach to communicate with shell.qml
-            var escapedPath = wallpaperPath.replace(/"/g, '\\"')
-            Qt.createQmlObject('import Quickshell.Io; import QtQuick; Process { command: ["sh", "-c", "echo \\"' + escapedPath + '\\" > /tmp/quickshell_wallpaper_path"]; running: true }', appLauncherRoot)
-            
-            // Also try to set it directly if we have access to parent
-            if (rootComponent && rootComponent.currentWallpaperPath !== undefined) {
-                rootComponent.currentWallpaperPath = wallpaperPath
-            }
-        }
-        
-        // Fallback: use external tools if Quickshell method doesn't work
-        var escapedPath = wallpaperPath.replace(/'/g, "\\'").replace(/"/g, '\\"')
-        
-        if (wallpaperTool === "swww") {
-            // Use swww with fade transition
-            Qt.createQmlObject('import Quickshell.Io; import QtQuick; Process { command: ["swww", "img", "' + escapedPath + '", "--transition-type", "fade", "--transition-duration", "1"]; running: true }', appLauncherRoot)
-        } else if (wallpaperTool === "wbg") {
-            // Use wbg (simpler, no transitions)
-            Qt.createQmlObject('import Quickshell.Io; import QtQuick; Process { command: ["wbg", "' + escapedPath + '"]; running: true }', appLauncherRoot)
-        } else if (wallpaperTool === "hyprpaper") {
-            // Use hyprpaper (Hyprland-specific)
-            // Get monitor name from hyprctl and set wallpaper
-            Qt.createQmlObject('import Quickshell.Io; import QtQuick; Process { command: ["sh", "-c", "MONITOR=$(hyprctl monitors -j | jq -r \\"[0].name\\" 2>/dev/null || echo \\"eDP-1\\"); hyprctl hyprpaper preload \\"' + escapedPath + '\\" && hyprctl hyprpaper wallpaper \\"$MONITOR,\\"' + escapedPath + '\\"\\""]; running: true }', appLauncherRoot)
-        }
-    }
     
     function updateSystem() {
         var scriptPath = projectPath + "/scripts/update-system.sh"
@@ -1686,7 +1548,6 @@ PanelWindow {
                 currentPackageMode = -1
                 installSourceMode = -1
                 removeSourceMode = -1
-                currentSettingsMode = -1
                 searchInput.text = ""
                 searchText = ""
                 packageSearchText = ""
@@ -1726,19 +1587,19 @@ PanelWindow {
         opacity: (sharedData && sharedData.launcherVisible) ? 1.0 : 0.0
         enabled: opacity > 0.1  // Wyłącz interakcję gdy niewidoczne
         focus: (sharedData && sharedData.launcherVisible)  // Focus dla klawiatury
-        scale: (sharedData && sharedData.launcherVisible) ? 1.0 : 0.98
+        scale: (sharedData && sharedData.launcherVisible) ? 1.0 : 0.95
         
         Behavior on opacity {
             NumberAnimation {
-                duration: 280
-                easing.type: Easing.OutQuart
+                duration: 300
+                easing.type: Easing.OutCubic
             }
         }
         
         Behavior on scale {
             NumberAnimation {
-                duration: 280
-                easing.type: Easing.OutQuart
+                duration: 300
+                easing.type: Easing.OutCubic
             }
         }
         
@@ -1796,11 +1657,6 @@ PanelWindow {
                     // W menu notes - wróć do wyboru trybu
                     currentMode = -1
                     selectedIndex = 2  // Wróć do pozycji Notes w menu
-                } else if (currentMode === 2 && currentSettingsMode !== -1) {
-                    // W ustawieniach - wróć do listy opcji
-                    currentSettingsMode = -1
-                    selectedIndex = 0
-                    wallpaperSelectedIndex = 0  // Reset indeksu tapet
                 } else if (currentMode === 1 && currentPackageMode === 0) {
                     // Wróć do wyboru opcji Packages
                     currentPackageMode = -1
@@ -1826,7 +1682,6 @@ PanelWindow {
                     currentMode = -1
                     selectedIndex = 0
                     currentPackageMode = -1
-                    currentSettingsMode = -1
                 }
                 event.accepted = true
             } else if (event.key === Qt.Key_Up) {
@@ -1882,22 +1737,6 @@ PanelWindow {
                     if (selectedIndex > 0) {
                         selectedIndex--
                         removeAurPackagesList.positionViewAtIndex(selectedIndex, ListView.Center)
-                    }
-                    event.accepted = true
-                } else if (currentMode === 2 && currentSettingsMode === -1) {
-                    // W trybie Settings - nawigacja po liście opcji
-                    if (selectedIndex > 0) {
-                        selectedIndex--
-                        settingsList.positionViewAtIndex(selectedIndex, ListView.Center)
-                    }
-                    event.accepted = true
-                } else if (currentMode === 2 && currentSettingsMode === 0) {
-                    // W trybie Wallpaper - nawigacja po GridView
-                    var columns = Math.floor(wallpapersGrid.width / wallpapersGrid.cellWidth)
-                    if (wallpaperSelectedIndex >= columns) {
-                        wallpaperSelectedIndex -= columns
-                        wallpapersGrid.currentIndex = wallpaperSelectedIndex
-                        wallpapersGrid.positionViewAtIndex(wallpaperSelectedIndex, GridView.Visible)
                     }
                     event.accepted = true
                 }
@@ -1956,50 +1795,11 @@ PanelWindow {
                         removeAurPackagesList.positionViewAtIndex(selectedIndex, ListView.Center)
                     }
                     event.accepted = true
-                } else if (currentMode === 2 && currentSettingsMode === -1) {
-                    // W trybie Settings - nawigacja po liście opcji
-                    if (selectedIndex < settingsList.count - 1) {
-                        selectedIndex++
-                        settingsList.positionViewAtIndex(selectedIndex, ListView.Center)
-                    }
-                    event.accepted = true
-                } else if (currentMode === 2 && currentSettingsMode === 0) {
-                    // W trybie Wallpaper - nawigacja po GridView
-                    var columns = Math.floor(wallpapersGrid.width / wallpapersGrid.cellWidth)
-                    var maxIndex = wallpapersModel.count - 1
-                    if (wallpaperSelectedIndex + columns <= maxIndex) {
-                        wallpaperSelectedIndex += columns
-                        wallpapersGrid.currentIndex = wallpaperSelectedIndex
-                        wallpapersGrid.positionViewAtIndex(wallpaperSelectedIndex, GridView.Visible)
-                    }
-                    event.accepted = true
-                } else if (currentMode === 2 && currentSettingsMode === 2) {
                     // W trybie Bluetooth - nawigacja po liście urządzeń
                     if (bluetoothSelectedIndex < bluetoothDevicesModel.count - 1) {
                         bluetoothSelectedIndex++
                         bluetoothDevicesList.currentIndex = bluetoothSelectedIndex
                         bluetoothDevicesList.positionViewAtIndex(bluetoothSelectedIndex, ListView.Center)
-                    }
-                    event.accepted = true
-                }
-            } else if (event.key === Qt.Key_Left) {
-                // Strzałka w lewo - nawigacja w GridView tapet
-                if (currentMode === 2 && currentSettingsMode === 0) {
-                    if (wallpaperSelectedIndex > 0) {
-                        wallpaperSelectedIndex--
-                        wallpapersGrid.currentIndex = wallpaperSelectedIndex
-                        wallpapersGrid.positionViewAtIndex(wallpaperSelectedIndex, GridView.Visible)
-                    }
-                    event.accepted = true
-                }
-            } else if (event.key === Qt.Key_Right) {
-                // Strzałka w prawo - nawigacja w GridView tapet
-                if (currentMode === 2 && currentSettingsMode === 0) {
-                    var maxIndex = wallpapersModel.count - 1
-                    if (wallpaperSelectedIndex < maxIndex) {
-                        wallpaperSelectedIndex++
-                        wallpapersGrid.currentIndex = wallpaperSelectedIndex
-                        wallpapersGrid.positionViewAtIndex(wallpaperSelectedIndex, GridView.Visible)
                     }
                     event.accepted = true
                 }
@@ -2009,19 +1809,28 @@ PanelWindow {
                     // Wybierz tryb
                     if (selectedIndex >= 0 && selectedIndex < modesList.count) {
                         var mode = modesList.model.get(selectedIndex)
-                        currentMode = mode.mode
-                        selectedIndex = 0
-                        modesList.currentIndex = -1
-                        appsList.currentIndex = -1
-                        packagesOptionsList.currentIndex = -1
-                        if (currentMode === 1) {
-                            currentPackageMode = -1
-                            installSourceMode = -1
-                            removeSourceMode = -1
-                        } else if (currentMode === 3) {
-                            currentNotesMode = -1
-                            notesMenuIndex = 0
-                            loadNotesList()
+                        if (mode.mode === 2) {
+                            // Launch settings application instead of entering settings mode
+                            Qt.createQmlObject("import Quickshell.Io; Process { command: ['" + projectPath + "/open-settings.sh']; running: true }", appLauncherRoot)
+                            // Close launcher after launching settings
+                            if (sharedData) {
+                                sharedData.launcherVisible = false
+                            }
+                        } else {
+                            currentMode = mode.mode
+                            selectedIndex = 0
+                            modesList.currentIndex = -1
+                            appsList.currentIndex = -1
+                            packagesOptionsList.currentIndex = -1
+                            if (currentMode === 1) {
+                                currentPackageMode = -1
+                                installSourceMode = -1
+                                removeSourceMode = -1
+                            } else if (currentMode === 3) {
+                                currentNotesMode = -1
+                                notesMenuIndex = 0
+                                loadNotesList()
+                            }
                         }
                     }
                     event.accepted = true
@@ -2059,54 +1868,6 @@ PanelWindow {
                     // W trybie Remove search - przekieruj do TextInput
                     if (removeSearchInput) removeSearchInput.forceActiveFocus()
                     event.accepted = false
-                } else if (currentMode === 2 && currentSettingsMode === -1) {
-                    // W trybie Settings - wybierz opcję
-                    if (selectedIndex >= 0 && selectedIndex < settingsList.count) {
-                        var settingOption = settingsList.model.get(selectedIndex)
-                        if (settingOption.settingId === 1) {
-                            // Toggle Sidebar - immediate action
-                            if (sharedData && sharedData.sidebarVisible !== undefined) {
-                                sharedData.sidebarVisible = !sharedData.sidebarVisible
-                                console.log("Sidebar toggled to:", sharedData.sidebarVisible)
-                            }
-                            // Close launcher after toggle
-                            if (sharedData) {
-                                sharedData.launcherVisible = false
-                            }
-                            event.accepted = true
-                        } else if (settingOption.settingId === 6) {
-                            // Toggle Sidebar Position - immediate action
-                            if (sharedData && sharedData.sidebarPosition !== undefined) {
-                                sharedData.sidebarPosition = (sharedData.sidebarPosition === "left") ? "top" : "left"
-                                console.log("Sidebar position changed to:", sharedData.sidebarPosition)
-                            }
-                            // Close launcher after toggle
-                            if (sharedData) {
-                                sharedData.launcherVisible = false
-                            }
-                            event.accepted = true
-                        } else {
-                            currentSettingsMode = settingOption.settingId
-                            if (settingOption.settingId === 0) {
-                                loadWallpapers()
-                                wallpaperSelectedIndex = 0  // Reset indeksu przy otwieraniu
-                                wallpapersGrid.currentIndex = 0
-                            } else if (settingOption.settingId === 3) {
-                                // Colors - no action needed
-                            }
-                            event.accepted = true
-                        }
-                    }
-                } else if (currentMode === 2 && currentSettingsMode === 0) {
-                    // W trybie Wallpaper - wybierz tapetę
-                    if (wallpaperSelectedIndex >= 0 && wallpaperSelectedIndex < wallpapersModel.count) {
-                        var wallpaper = wallpapersModel.get(wallpaperSelectedIndex)
-                        if (wallpaper && wallpaper.path) {
-                            setWallpaper(wallpaper.path)
-                        }
-                    }
-                    event.accepted = true
-                } else if (currentMode === 2 && currentSettingsMode === 2) {
                     // W trybie Bluetooth - połącz z wybranym urządzeniem
                     if (bluetoothSelectedIndex >= 0 && bluetoothSelectedIndex < bluetoothDevicesModel.count && !bluetoothConnecting) {
                         var device = bluetoothDevicesModel.get(bluetoothSelectedIndex)
@@ -2262,7 +2023,7 @@ PanelWindow {
                 ListElement { name: "Launcher"; description: "Launch applications"; mode: 0; icon: "󰈙" }
                 ListElement { name: "Packages"; description: "Manage packages"; mode: 1; icon: "󰏖" }
                 ListElement { name: "Notes"; description: "Quick notes and reminders"; mode: 3; icon: "󰎞" }
-                ListElement { name: "Settings"; description: "Configure launcher"; mode: 2; icon: "󰒓" }
+                ListElement { name: "Settings"; description: "Open settings application"; mode: 2; icon: "󰒓" }
             }
             
             delegate: Rectangle {
@@ -2352,11 +2113,20 @@ PanelWindow {
                     }
                     
                     onClicked: {
-                        currentMode = model.mode
-                        selectedIndex = 0
-                        modesList.currentIndex = -1
-                        if (model.mode === 1) {
-                            currentPackageMode = -1
+                        if (model.mode === 2) {
+                            // Launch settings application instead of entering settings mode
+                            Qt.createQmlObject("import Quickshell.Io; Process { command: ['" + projectPath + "/open-settings.sh']; running: true }", appLauncherRoot)
+                            // Close launcher after launching settings
+                            if (sharedData) {
+                                sharedData.launcherVisible = false
+                            }
+                        } else {
+                            currentMode = model.mode
+                            selectedIndex = 0
+                            modesList.currentIndex = -1
+                            if (model.mode === 1) {
+                                currentPackageMode = -1
+                            }
                         }
                     }
                 }
@@ -3768,1611 +3538,6 @@ PanelWindow {
                 }
             }
             
-            // Tryb 2: Settings
-            Item {
-                id: settingsMode
-                anchors.fill: parent
-                visible: currentMode === 2
-                enabled: true
-                z: 1
-                
-                // Lista ustawień (jedna prosta lista)
-                ListView {
-                    id: settingsList
-                    anchors.fill: parent
-                    anchors.margins: 20
-                    visible: currentSettingsMode === -1
-                    clip: true
-                    
-                    model: ListModel {
-                        id: settingsModel
-                        ListElement { name: "Wallpaper"; description: "Change wallpaper with swww"; icon: "󰸉"; settingId: 0 }
-                        ListElement { name: "Toggle Sidebar"; description: "Show or hide sidebar"; icon: "󰍁"; settingId: 1 }
-                        ListElement { name: "Sidebar Position"; description: "Change sidebar position (left/top)"; icon: "󰍇"; settingId: 6 }
-                        ListElement { name: "Colors"; description: "Customize color theme"; icon: "󰏘"; settingId: 3 }
-                    }
-                    
-                    delegate: Rectangle {
-                        width: settingsList.width
-                        height: 72
-                        color: "transparent"
-
-                        // Bottom accent line for selected items
-                        Rectangle {
-                            anchors.bottom: parent.bottom
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            width: selectedIndex === index ? parent.width * 0.8 : 0
-                            height: 3
-                            color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
-                            radius: 1.5
-
-                            Behavior on width {
-                                NumberAnimation {
-                                    duration: 300
-                                    easing.type: Easing.OutCubic
-                                }
-                            }
-                        }
-                        
-                        Row {
-                            anchors.left: parent.left
-                            anchors.leftMargin: 20
-                            anchors.verticalCenter: parent.verticalCenter
-                            spacing: 16
-                            
-                            Text {
-                                text: model.icon
-                                font.pixelSize: 22
-                                color: (selectedIndex === index) ? ((sharedData && sharedData.colorText) ? sharedData.colorText : colorText) : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
-                            
-                            Column {
-                                anchors.verticalCenter: parent.verticalCenter
-                                spacing: 4
-                                
-                                Text {
-                                    text: model.name
-                                    font.pixelSize: 15
-                                    font.family: "JetBrains Mono"
-                                    font.weight: selectedIndex === index ? Font.Bold : Font.Medium
-                                    color: (selectedIndex === index) ? ((sharedData && sharedData.colorText) ? sharedData.colorText : colorText) : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
-                                }
-                                
-                                Text {
-                                    text: model.description
-                                    font.pixelSize: 12
-                                    font.family: "JetBrains Mono"
-                                    color: ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
-                                    opacity: selectedIndex === index ? 0.85 : (settingsItemMouseArea.containsMouse ? 0.75 : 0.6)
-                                }
-                            }
-                        }
-                        
-                        MouseArea {
-                            id: settingsItemMouseArea
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            
-                            onEntered: {
-                                selectedIndex = index
-                            }
-                            
-                            onClicked: {
-                                if (model.settingId === 1) {
-                                    // Toggle Sidebar - immediate action, no submenu
-                                    if (sharedData && sharedData.sidebarVisible !== undefined) {
-                                        sharedData.sidebarVisible = !sharedData.sidebarVisible
-                                        console.log("Sidebar toggled to:", sharedData.sidebarVisible)
-                                    }
-                                    // Close launcher after toggle
-                                    if (sharedData) {
-                                        sharedData.launcherVisible = false
-                                    }
-                                } else if (model.settingId === 6) {
-                                    // Toggle Sidebar Position - immediate action, no submenu
-                                    if (sharedData && sharedData.sidebarPosition !== undefined) {
-                                        sharedData.sidebarPosition = (sharedData.sidebarPosition === "left") ? "top" : "left"
-                                        console.log("Sidebar position changed to:", sharedData.sidebarPosition)
-                                    }
-                                    // Close launcher after toggle
-                                    if (sharedData) {
-                                        sharedData.launcherVisible = false
-                                    }
-                                } else {
-                                    currentSettingsMode = model.settingId
-                                    if (model.settingId === 0) {
-                                        loadWallpapers()
-                                        wallpaperSelectedIndex = 0
-                                        wallpapersGrid.currentIndex = 0
-                                    } else if (model.settingId === 3) {
-                                        // Colors - no action needed
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                // Wallpaper picker
-                Item {
-                    id: wallpaperPicker
-                    anchors.fill: parent
-                    visible: currentSettingsMode === 0
-                    
-                    // Grid z tapetami
-                    GridView {
-                        id: wallpapersGrid
-                        anchors.fill: parent
-                        anchors.margins: 20
-                        cellWidth: Math.floor(width / 3)  // 3 tapety w rzędzie
-                        cellHeight: 124  // 95 * 1.3 = 123.5, rounded to 124 (30% taller)
-                        clip: true
-                        
-                        model: wallpapersModel
-                        currentIndex: wallpaperSelectedIndex
-                        
-                        onCurrentIndexChanged: {
-                            wallpaperSelectedIndex = currentIndex
-                        }
-                        
-                        delegate: Item {
-                            width: wallpapersGrid.cellWidth
-                            height: wallpapersGrid.cellHeight
-                            
-                            Rectangle {
-                                id: wallpaperItem
-                                anchors.centerIn: parent
-                                width: parent.width - 8
-                                height: parent.height - 8
-                                color: (wallpaperItemMouseArea.containsMouse || wallpapersGrid.currentIndex === index) ? colorPrimary : colorBackground
-                                scale: (wallpaperItemMouseArea.containsMouse || wallpapersGrid.currentIndex === index) ? 1.05 : 1.0
-                                
-                                Behavior on color {
-                                    ColorAnimation {
-                                        duration: 180
-                                        easing.type: Easing.OutQuart
-                                    }
-                                }
-                                
-                                Behavior on scale {
-                                    NumberAnimation {
-                                        duration: 180
-                                        easing.type: Easing.OutQuart
-                                    }
-                                }
-                                
-                                // Thumbnail
-                                Image {
-                                    id: wallpaperThumbnail
-                                    anchors.fill: parent
-                                    anchors.margins: 2
-                                    source: "file://" + model.path
-                                    fillMode: Image.PreserveAspectCrop
-                                    asynchronous: true
-                                    cache: true
-                                    sourceSize.width: 300
-                                    sourceSize.height: 200
-                                    
-                                    // Loading indicator
-                                    Rectangle {
-                                        anchors.fill: parent
-                                        color: colorPrimary
-                                        visible: wallpaperThumbnail.status === Image.Loading
-                                        
-                                        Text {
-                                            text: "󰔟"
-                                            font.pixelSize: 24
-                                            color: "#444444"
-                                            anchors.centerIn: parent
-                                        }
-                                    }
-                                }
-                                
-                                MouseArea {
-                                    id: wallpaperItemMouseArea
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        setWallpaper(model.path)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
-                    // Empty state
-                    Column {
-                        anchors.centerIn: parent
-                        spacing: 10
-                        visible: wallpapersModel.count === 0
-                        
-                        Text {
-                            text: "󰸉"
-                            font.pixelSize: 48
-                            color: "#333333"
-                            anchors.horizontalCenter: parent.horizontalCenter
-                        }
-                        
-                        Text {
-                            text: "No wallpapers found"
-                            font.pixelSize: 14
-                            font.family: "JetBrains Mono"
-                            color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.5) : "#666666"
-                            anchors.horizontalCenter: parent.horizontalCenter
-                        }
-                        
-                        Text {
-                            text: "Add images to ~/Pictures/Wallpapers"
-                            font.pixelSize: 11
-                            font.family: "JetBrains Mono"
-                            color: "#444444"
-                            anchors.horizontalCenter: parent.horizontalCenter
-                        }
-                    }
-                }
-                
-                // Bluetooth manager
-                Item {
-                    id: bluetoothManager
-                    anchors.fill: parent
-                    visible: currentSettingsMode === 2
-                    
-                    // Header
-                    Rectangle {
-                        id: bluetoothHeader
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        height: 50
-                        color: "transparent"
-                        
-                        Row {
-                            anchors.fill: parent
-                            anchors.margins: 20
-                            spacing: 12
-                            
-                            // Back button
-                            Rectangle {
-                                width: 30
-                                height: 30
-                                color: bluetoothBackMouseArea.containsMouse ? colorPrimary : "transparent"
-                                radius: 0
-                                anchors.verticalCenter: parent.verticalCenter
-                                
-                                Text {
-                                    text: "󰁍"
-                                    font.pixelSize: 18
-                                    color: colorText
-                                    anchors.centerIn: parent
-                                }
-                                
-                                MouseArea {
-                                    id: bluetoothBackMouseArea
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        currentSettingsMode = -1  // Back to Settings list
-                                        selectedIndex = 0
-                                    }
-                                }
-                            }
-                            
-                            Text {
-                                text: "Bluetooth"
-                                font.pixelSize: 18
-                                font.family: "JetBrains Mono"
-                                font.weight: Font.Bold
-                                color: colorText
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
-                        }
-                    }
-                    
-                    // Content
-                    Column {
-                        anchors.top: bluetoothHeader.bottom
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.bottom: parent.bottom
-                        anchors.margins: 20
-                        spacing: 16
-                        
-                        // Toggle switch
-                        Row {
-                            width: parent.width
-                            spacing: 12
-                            
-                            Text {
-                                text: "Power"
-                                font.pixelSize: 14
-                                font.family: "JetBrains Mono"
-                                font.weight: Font.Medium
-                                color: colorText
-                            }
-                            
-                            Rectangle {
-                                width: 50
-                                height: 26
-                                color: bluetoothEnabled ? "#4a9eff" : "#333333"
-                                radius: 0
-                                
-                                Rectangle {
-                                    width: 22
-                                    height: 22
-                                    radius: 0
-                                    color: colorText
-                                    y: (parent.height - height) / 2
-                                    x: bluetoothEnabled ? parent.width - width - 2 : 2
-                                    
-                                    Behavior on x {
-                                        NumberAnimation {
-                                            duration: 200
-                                            easing.type: Easing.OutQuart
-                                        }
-                                    }
-                                }
-                                
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: toggleBluetooth()
-                                }
-                                
-                                Behavior on color {
-                                    ColorAnimation {
-                                        duration: 180
-                                        easing.type: Easing.OutQuart
-                                    }
-                                }
-                            }
-                            
-                            Text {
-                                text: bluetoothEnabled ? "ON" : "OFF"
-                                font.pixelSize: 12
-                                font.family: "JetBrains Mono"
-                                color: bluetoothEnabled ? ((sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff") : ((sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.5) : "#666666")
-                            }
-                        }
-                        
-                        // Scan button
-                        Rectangle {
-                            width: parent.width
-                            height: 40
-                            color: bluetoothScanButtonArea.containsMouse ? colorPrimary : colorSecondary
-                            visible: bluetoothEnabled
-                            
-                            Row {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                anchors.verticalCenter: parent.verticalCenter
-                                spacing: 8
-                                
-                                Text {
-                                    text: bluetoothScanning ? "󰤻" : "󰤾"
-                                    font.pixelSize: 16
-                                    color: colorText
-                                }
-                                
-                                Text {
-                                    text: bluetoothScanning ? "Scanning..." : "Scan for devices"
-                                    font.pixelSize: 13
-                                    font.family: "JetBrains Mono"
-                                    color: colorText
-                                }
-                            }
-                            
-                            MouseArea {
-                                id: bluetoothScanButtonArea
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                enabled: !bluetoothScanning
-                                onClicked: scanBluetoothDevices()
-                            }
-                            
-                            Behavior on color {
-                                ColorAnimation {
-                                    duration: 200
-                                    easing.type: Easing.OutQuart
-                                }
-                            }
-                        }
-                        
-                        // Devices list
-                        ListView {
-                            id: bluetoothDevicesList
-                            width: parent.width
-                            height: parent.height - 100
-                            visible: bluetoothEnabled
-                            clip: true
-                            
-                            model: bluetoothDevicesModel
-                            currentIndex: bluetoothSelectedIndex
-                            
-                            onCurrentIndexChanged: {
-                                bluetoothSelectedIndex = currentIndex
-                            }
-                            
-                            delegate: Rectangle {
-                                width: bluetoothDevicesList.width
-                                height: 50
-                                color: (bluetoothDeviceMouseArea.containsMouse || bluetoothDevicesList.currentIndex === index) ? "#1a1a1a" : "transparent"
-                                
-                                Row {
-                                    width: parent.width - 24
-                                    height: parent.height
-                                    anchors.left: parent.left
-                                    anchors.leftMargin: 20
-                                    spacing: 12
-                                    
-                                    Text {
-                                        text: "󰂱"
-                                        font.pixelSize: 20
-                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
-                                    }
-                                    
-                                    Column {
-                                        spacing: 2
-                                        width: parent.width - 100
-                                        
-                                        Text {
-                                            text: model.name
-                                            font.pixelSize: 13
-                                            font.family: "JetBrains Mono"
-                                            font.weight: Font.Medium
-                                            color: colorText
-                                            elide: Text.ElideRight
-                                            width: parent.width
-                                        }
-                                        
-                                        Text {
-                                            text: model.mac
-                                            font.pixelSize: 10
-                                            font.family: "JetBrains Mono"
-                                            color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
-                                        }
-                                    }
-                                    
-                                    Rectangle {
-                                        width: 60
-                                        height: 28
-                                        color: bluetoothConnectArea.containsMouse ? "#4a9eff" : "#333333"
-                                        
-                                        Text {
-                                            text: bluetoothConnecting ? "..." : "Connect"
-                                            font.pixelSize: 10
-                                            font.family: "JetBrains Mono"
-                                            color: colorText
-                                            anchors.centerIn: parent
-                                        }
-                                        
-                                        MouseArea {
-                                            id: bluetoothConnectArea
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            cursorShape: Qt.PointingHandCursor
-                                            enabled: !bluetoothConnecting
-                                            onClicked: connectBluetoothDevice(model.mac)
-                                        }
-                                        
-                                        Behavior on color {
-                                            ColorAnimation {
-                                                duration: 200
-                                                easing.type: Easing.OutQuart
-                                            }
-                                        }
-                                    }
-                                }
-                                
-                                MouseArea {
-                                    id: bluetoothDeviceMouseArea
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                }
-                            }
-                        }
-                        
-                        // Empty state
-                        Column {
-                            anchors.centerIn: parent
-                            spacing: 10
-                            visible: !bluetoothEnabled || bluetoothDevicesModel.count === 0
-                            
-                            Text {
-                                text: "󰂯"
-                                font.pixelSize: 48
-                                color: "#333333"
-                                anchors.horizontalCenter: parent.horizontalCenter
-                            }
-                            
-                            Text {
-                                text: bluetoothEnabled ? "No devices found" : "Bluetooth is off"
-                                font.pixelSize: 14
-                                font.family: "JetBrains Mono"
-                                color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
-                                anchors.horizontalCenter: parent.horizontalCenter
-                            }
-                            
-                            Text {
-                                text: bluetoothEnabled ? "Click 'Scan for devices' to search" : "Turn on Bluetooth to scan"
-                                font.pixelSize: 11
-                                font.family: "JetBrains Mono"
-                                color: "#444444"
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                visible: bluetoothEnabled
-                            }
-                        }
-                    }
-                }
-                
-                // Colors menu (Presets/Custom HEX selection)
-                Item {
-                    id: colorsMenu
-                    anchors.fill: parent
-                    visible: currentSettingsMode === 3
-                    
-                    // Colors menu list
-                    ListView {
-                        id: colorsMenuList
-                        anchors.fill: parent
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.bottom: parent.bottom
-                        anchors.margins: 20
-                        visible: true
-                        clip: true
-                        
-                        model: ListModel {
-                            id: colorsMenuModel
-                            ListElement { name: "Presets"; description: "Choose from color presets"; icon: "󰏘"; settingId: 4 }
-                            ListElement { name: "Custom HEX"; description: "Edit colors manually"; icon: "󰆍"; settingId: 5 }
-                        }
-                        
-                        delegate: Rectangle {
-                            width: colorsMenuList.width
-                            height: 72
-                            color: "transparent"
-
-                            // Bottom accent line for selected items
-                            Rectangle {
-                                anchors.bottom: parent.bottom
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                width: selectedIndex === index ? parent.width * 0.8 : 0
-                                height: 3
-                                color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
-                                radius: 1.5
-
-                                Behavior on width {
-                                    NumberAnimation {
-                                        duration: 300
-                                        easing.type: Easing.OutCubic
-                                    }
-                                }
-                            }
-                            
-                            Row {
-                                anchors.left: parent.left
-                                anchors.leftMargin: 20
-                                anchors.verticalCenter: parent.verticalCenter
-                                spacing: 16
-                                
-                                Text {
-                                    text: model.icon
-                                    font.pixelSize: 22
-                                    color: (selectedIndex === index) ? colorText : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
-                                
-                                Column {
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    spacing: 4
-                                    
-                                    Text {
-                                        text: model.name
-                                        font.pixelSize: 15
-                                        font.family: "JetBrains Mono"
-                                        font.weight: selectedIndex === index ? Font.Bold : Font.Medium
-                                        color: (selectedIndex === index) ? colorText : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
-                                    }
-                                    
-                                    Text {
-                                        text: model.description
-                                        font.pixelSize: 12
-                                        font.family: "JetBrains Mono"
-                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
-                                        opacity: selectedIndex === index ? 0.85 : (colorsMenuMouseArea.containsMouse ? 0.75 : 0.6)
-                                    }
-                                }
-                            }
-                            
-                            MouseArea {
-                                id: colorsMenuMouseArea
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                
-                                onEntered: {
-                                    selectedIndex = index
-                                }
-                                
-                                onClicked: {
-                                    currentSettingsMode = model.settingId
-                                    selectedIndex = 0
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                // Presets picker
-                Item {
-                    id: presetsPicker
-                    anchors.fill: parent
-                    visible: currentSettingsMode === 4
-                    enabled: true
-                    z: 10
-                    
-                    // Content
-                    Flickable {
-                        anchors.fill: parent
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.bottom: parent.bottom
-                        anchors.margins: 20
-                        clip: true
-                        contentHeight: colorPickerColumn.height
-                        contentWidth: width
-                        
-                        // Color picker items
-                        Column {
-                            id: colorPickerColumn
-                            width: parent.width
-                            spacing: 16
-                            
-                            // Presets section
-                            Column {
-                                width: parent.width
-                                spacing: 12
-                                
-                                Text {
-                                    text: "Choose a preset"
-                                    font.pixelSize: 15
-                                    font.family: "JetBrains Mono"
-                                    font.weight: Font.Medium
-                                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
-                                    opacity: 0.8
-                                }
-                                
-                                // Presets grid - 2 kolumny dla lepszego layoutu
-                                Grid {
-                                    width: parent.width
-                                    columns: 2
-                                    spacing: 12
-                                    
-                                    Repeater {
-                                        model: ["Dark", "Ocean", "Forest", "Violet", "Crimson", "Amber", "Teal", "Rose", "Sunset", "Midnight", "Emerald", "Lavender", "Sapphire", "Coral", "Mint", "Plum", "Gold", "Monochrome", "Cherry", "Azure", "Jade", "Ruby", "Indigo"]
-                                        
-                                        Rectangle {
-                                            width: (parent.width - 12) / 2
-                                            height: 90
-                                            color: presetMouseArea.containsMouse ? 
-                                                ((sharedData && sharedData.colorPrimary) ? sharedData.colorPrimary : colorPrimary) : 
-                                                ((sharedData && sharedData.colorSecondary) ? sharedData.colorSecondary : colorSecondary)
-                                            radius: 0
-                                            Behavior on color {
-                                                ColorAnimation {
-                                                    duration: 180
-                                                    easing.type: Easing.OutQuart
-                                                }
-                                            }
-                                            
-                                            scale: presetMouseArea.containsMouse ? 1.03 : 1.0
-                                            
-                                            Behavior on scale {
-                                                NumberAnimation {
-                                                    duration: 180
-                                                    easing.type: Easing.OutQuart
-                                                }
-                                            }
-                                            
-                                            Row {
-                                                anchors.fill: parent
-                                                anchors.margins: 20
-                                                spacing: 12
-                                                
-                                                // Duży preview kolorów
-                                                Column {
-                                                    width: 50
-                                                    anchors.verticalCenter: parent.verticalCenter
-                                                    spacing: 4
-                                                    
-                                                    Rectangle {
-                                                        width: 50
-                                                        height: 12
-                                                        radius: 0
-                                                        color: {
-                                                            var preset = appLauncherRoot.colorPresets[modelData]
-                                                            return preset ? preset.background : "#000000"
-                                                        }
-                                                    }
-                                                    Rectangle {
-                                                        width: 50
-                                                        height: 12
-                                                        radius: 0
-                                                        color: {
-                                                            var preset = appLauncherRoot.colorPresets[modelData]
-                                                            return preset ? preset.primary : "#000000"
-                                                        }
-                                                    }
-                                                    Rectangle {
-                                                        width: 50
-                                                        height: 12
-                                                        radius: 0
-                                                        color: {
-                                                            var preset = appLauncherRoot.colorPresets[modelData]
-                                                            return preset ? preset.secondary : "#000000"
-                                                        }
-                                                    }
-                                                    Rectangle {
-                                                        width: 50
-                                                        height: 12
-                                                        radius: 0
-                                                        color: {
-                                                            var preset = appLauncherRoot.colorPresets[modelData]
-                                                            return preset ? preset.text : "#000000"
-                                                        }
-                                                    }
-                                                    Rectangle {
-                                                        width: 50
-                                                        height: 12
-                                                        radius: 0
-                                                        color: {
-                                                            var preset = appLauncherRoot.colorPresets[modelData]
-                                                            return preset ? preset.accent : "#000000"
-                                                        }
-                                                    }
-                                                }
-                                                
-                                                // Nazwa i opis
-                                                Column {
-                                                    anchors.verticalCenter: parent.verticalCenter
-                                                    spacing: 4
-                                                    width: parent.width - 50 - 12
-                                                    
-                                                    Text {
-                                                        text: modelData
-                                                        font.pixelSize: 16
-                                                        font.family: "JetBrains Mono"
-                                                        font.weight: Font.Bold
-                                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
-                                                    }
-                                                    
-                                                    Text {
-                                                        text: {
-                                                            var preset = appLauncherRoot.colorPresets[modelData]
-                                                            if (!preset) return ""
-                                                            return preset.background + " • " + preset.accent
-                                                        }
-                                                        font.pixelSize: 11
-                                                        font.family: "JetBrains Mono"
-                                                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
-                                                        opacity: 0.6
-                                                    }
-                                                }
-                                            }
-                                            
-                                            MouseArea {
-                                                id: presetMouseArea
-                                                anchors.fill: parent
-                                                hoverEnabled: true
-                                                cursorShape: Qt.PointingHandCursor
-                                                onClicked: {
-                                                    appLauncherRoot.applyPreset(modelData)
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                // Custom HEX picker
-                Item {
-                    id: customHexPicker
-                    anchors.fill: parent
-                    visible: currentSettingsMode === 5
-                    enabled: true
-                    z: 10
-                    
-                    // Content
-                    Flickable {
-                        anchors.fill: parent
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.bottom: parent.bottom
-                        anchors.margins: 20
-                        clip: true
-                        contentHeight: customHexColumn.height
-                        contentWidth: width
-                        
-                        // Color picker items
-                        Column {
-                            id: customHexColumn
-                            width: parent.width
-                            spacing: 8
-                            
-                            // Background
-                            Rectangle {
-                                width: parent.width
-                                height: 70
-                                color: colorRowMouseArea1.containsMouse ? colorPrimary : "transparent"
-                                radius: 0
-                                
-                                Behavior on color {
-                                    ColorAnimation {
-                                        duration: 180
-                                        easing.type: Easing.OutQuart
-                                    }
-                                }
-                                
-                                Row {
-                                    anchors.fill: parent
-                                    anchors.margins: 16
-                                    spacing: 16
-                                    
-                                    Rectangle {
-                                        width: 44
-                                        height: 44
-                                        color: colorBackground
-                                        radius: 0
-                                        anchors.verticalCenter: parent.verticalCenter
-                                    }
-                                    
-                                    Column {
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        spacing: 4
-                                        width: 120
-                                        
-                                        Text {
-                                            text: "Background"
-                                            font.pixelSize: 15
-                                            font.family: "JetBrains Mono"
-                                            font.weight: Font.Medium
-                                            color: colorText
-                                        }
-                                        
-                                        Text {
-                                            text: colorBackground
-                                            font.pixelSize: 12
-                                            font.family: "JetBrains Mono"
-                                            color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.6) : "#999999"
-                                        }
-                                    }
-                                    
-                                    Item {
-                                        width: parent.width - 44 - 16 - 16 - 120 - 16 - 120
-                                        height: parent.height
-                                    }
-                                    
-                                    Rectangle {
-                                        id: colorInputRect1
-                                        width: 120
-                                        height: 40
-                                        color: colorInput1.activeFocus ? colorSecondary : colorPrimary
-                                        radius: 0
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        Behavior on color {
-                                            ColorAnimation {
-                                                duration: 150
-                                                easing.type: Easing.OutQuart
-                                            }
-                                        }
-                                        
-                                        TextInput {
-                                            id: colorInput1
-                                            anchors.fill: parent
-                                            anchors.margins: 10
-                                            font.pixelSize: 14
-                                            font.family: "JetBrains Mono"
-                                            font.weight: Font.Medium
-                                            color: colorText
-                                            selectByMouse: true
-                                            activeFocusOnPress: true
-                                            verticalAlignment: TextInput.AlignVCenter
-                                            
-                                            property string savedValue: ""
-                                            property bool isEditing: false
-                                            
-                                            Component.onCompleted: {
-                                                savedValue = colorBackground
-                                                text = colorBackground
-                                            }
-                                            
-                                            property bool isUpdating: false
-                                            
-                                            onActiveFocusChanged: {
-                                                if (activeFocus) {
-                                                    isEditing = true
-                                                    savedValue = colorBackground
-                                                    text = colorBackground
-                                                    selectAll()
-                                                } else {
-                                                    isEditing = false
-                                                }
-                                            }
-                                            
-                                            onTextChanged: {
-                                                if (isEditing && !isUpdating) {
-                                                    // Zapobiegaj usunięciu # z początku
-                                                    if (text.length > 0 && !text.startsWith('#')) {
-                                                        isUpdating = true
-                                                        var cursorPos = cursorPosition
-                                                        text = '#' + text.replace(/#/g, '')
-                                                        cursorPosition = Math.min(cursorPos + 1, text.length)
-                                                        isUpdating = false
-                                                    }
-                                                }
-                                            }
-                                            
-                                            onEditingFinished: {
-                                                var newValue = normalizeHexColor(text)
-                                                console.log("Editing finished, newValue:", newValue, "isValid:", isValidHexColor(newValue))
-                                                if (isValidHexColor(newValue)) {
-                                                    console.log("Updating color to:", newValue)
-                                                    updateColor("background", newValue)
-                                                    // Force update after a short delay to ensure property is updated
-                                                    Qt.callLater(function() {
-                                                        savedValue = newValue
-                                                        text = newValue
-                                                        console.log("Text updated to:", text, "colorBackground is:", colorBackground)
-                                                    })
-                                                } else {
-                                                    console.log("Invalid color, resetting to:", savedValue)
-                                                    text = savedValue
-                                                }
-                                            }
-                                            
-                                            Keys.onEnterPressed: {
-                                                editingFinished()
-                                            }
-                                            Keys.onReturnPressed: {
-                                                editingFinished()
-                                            }
-                                        }
-                                        
-                                        Connections {
-                                            target: appLauncherRoot
-                                            function onColorBackgroundChanged() {
-                                                if (!colorInput1.isEditing && colorInput1.savedValue !== colorBackground) {
-                                                    colorInput1.text = colorBackground
-                                                    colorInput1.savedValue = colorBackground
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                
-                                MouseArea {
-                                    id: colorRowMouseArea1
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    acceptedButtons: Qt.NoButton
-                                }
-                            }
-                            
-                            // Primary
-                            Rectangle {
-                                width: parent.width
-                                height: 70
-                                color: colorRowMouseArea2.containsMouse ? colorPrimary : "transparent"
-                                radius: 0
-                                
-                                Behavior on color {
-                                    ColorAnimation {
-                                        duration: 180
-                                        easing.type: Easing.OutQuart
-                                    }
-                                }
-                                
-                                Row {
-                                    anchors.fill: parent
-                                    anchors.margins: 16
-                                    spacing: 16
-                                    
-                                    Rectangle {
-                                        width: 44
-                                        height: 44
-                                        color: colorPrimary
-                                        radius: 0
-                                        anchors.verticalCenter: parent.verticalCenter
-                                    }
-                                    
-                                    Column {
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        spacing: 4
-                                        width: 120
-                                        
-                                        Text {
-                                            text: "Primary"
-                                            font.pixelSize: 15
-                                            font.family: "JetBrains Mono"
-                                            font.weight: Font.Medium
-                                            color: colorText
-                                        }
-                                        
-                                        Text {
-                                            text: colorPrimary
-                                            font.pixelSize: 12
-                                            font.family: "JetBrains Mono"
-                                            color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.6) : "#999999"
-                                        }
-                                    }
-                                    
-                                    Item {
-                                        width: parent.width - 44 - 16 - 16 - 120 - 16 - 120
-                                        height: parent.height
-                                    }
-                                    
-                                    Rectangle {
-                                        id: colorInputRect2
-                                        width: 120
-                                        height: 40
-                                        color: colorInput2.activeFocus ? colorSecondary : colorPrimary
-                                        radius: 0
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        Behavior on color {
-                                            ColorAnimation {
-                                                duration: 150
-                                                easing.type: Easing.OutQuart
-                                            }
-                                        }
-                                        
-                                        TextInput {
-                                            id: colorInput2
-                                            anchors.fill: parent
-                                            anchors.margins: 10
-                                            font.pixelSize: 14
-                                            font.family: "JetBrains Mono"
-                                            font.weight: Font.Medium
-                                            color: colorText
-                                            selectByMouse: true
-                                            activeFocusOnPress: true
-                                            verticalAlignment: TextInput.AlignVCenter
-                                            
-                                            property string savedValue: ""
-                                            property bool isEditing: false
-                                            property bool isUpdating: false
-                                            
-                                            Component.onCompleted: {
-                                                savedValue = colorPrimary
-                                                text = colorPrimary
-                                            }
-                                            
-                                            onActiveFocusChanged: {
-                                                if (activeFocus) {
-                                                    isEditing = true
-                                                    savedValue = colorPrimary
-                                                    text = colorPrimary
-                                                    selectAll()
-                                                } else {
-                                                    isEditing = false
-                                                    if (text !== colorPrimary) {
-                                                        text = colorPrimary
-                                                        savedValue = colorPrimary
-                                                    }
-                                                }
-                                            }
-                                            
-                                            onTextChanged: {
-                                                if (isEditing && !isUpdating) {
-                                                    // Zapobiegaj usunięciu # z początku
-                                                    if (text.length > 0 && !text.startsWith('#')) {
-                                                        isUpdating = true
-                                                        var cursorPos = cursorPosition
-                                                        text = '#' + text.replace(/#/g, '')
-                                                        cursorPosition = Math.min(cursorPos + 1, text.length)
-                                                        isUpdating = false
-                                                    }
-                                                }
-                                            }
-                                            
-                                            onEditingFinished: {
-                                                var newValue = normalizeHexColor(text)
-                                                if (isValidHexColor(newValue)) {
-                                                    updateColor("primary", newValue)
-                                                    savedValue = newValue
-                                                    text = newValue
-                                                } else {
-                                                    text = savedValue
-                                                }
-                                            }
-                                            
-                                            Keys.onEnterPressed: editingFinished()
-                                            Keys.onReturnPressed: editingFinished()
-                                        }
-                                        
-                                        Connections {
-                                            target: appLauncherRoot
-                                            function onColorPrimaryChanged() {
-                                                if (!colorInput2.isEditing && colorInput2.savedValue !== colorPrimary) {
-                                                    colorInput2.text = colorPrimary
-                                                    colorInput2.savedValue = colorPrimary
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                
-                                MouseArea {
-                                    id: colorRowMouseArea2
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    acceptedButtons: Qt.NoButton
-                                }
-                            }
-                            
-                            // Secondary
-                            Rectangle {
-                                width: parent.width
-                                height: 70
-                                color: colorRowMouseArea3.containsMouse ? colorPrimary : "transparent"
-                                radius: 0
-                                
-                                Behavior on color {
-                                    ColorAnimation {
-                                        duration: 180
-                                        easing.type: Easing.OutQuart
-                                    }
-                                }
-                                
-                                Row {
-                                    anchors.fill: parent
-                                    anchors.margins: 16
-                                    spacing: 16
-                                    
-                                    Rectangle {
-                                        width: 44
-                                        height: 44
-                                        color: colorSecondary
-                                        radius: 0
-                                        anchors.verticalCenter: parent.verticalCenter
-                                    }
-                                    
-                                    Column {
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        spacing: 4
-                                        width: 120
-                                        
-                                        Text {
-                                            text: "Secondary"
-                                            font.pixelSize: 15
-                                            font.family: "JetBrains Mono"
-                                            font.weight: Font.Medium
-                                            color: colorText
-                                        }
-                                        
-                                        Text {
-                                            text: colorSecondary
-                                            font.pixelSize: 12
-                                            font.family: "JetBrains Mono"
-                                            color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.6) : "#999999"
-                                        }
-                                    }
-                                    
-                                    Item {
-                                        width: parent.width - 44 - 16 - 16 - 120 - 16 - 120
-                                        height: parent.height
-                                    }
-                                    
-                                    Rectangle {
-                                        id: colorInputRect3
-                                        width: 120
-                                        height: 40
-                                        color: colorInput3.activeFocus ? colorSecondary : colorPrimary
-                                        radius: 0
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        Behavior on color {
-                                            ColorAnimation {
-                                                duration: 150
-                                                easing.type: Easing.OutQuart
-                                            }
-                                        }
-                                        
-                                        TextInput {
-                                            id: colorInput3
-                                            anchors.fill: parent
-                                            anchors.margins: 10
-                                            font.pixelSize: 14
-                                            font.family: "JetBrains Mono"
-                                            font.weight: Font.Medium
-                                            color: colorText
-                                            selectByMouse: true
-                                            activeFocusOnPress: true
-                                            verticalAlignment: TextInput.AlignVCenter
-                                            
-                                            property string savedValue: ""
-                                            property bool isEditing: false
-                                            property bool isUpdating: false
-                                            
-                                            Component.onCompleted: {
-                                                savedValue = colorSecondary
-                                                text = colorSecondary
-                                            }
-                                            
-                                            onActiveFocusChanged: {
-                                                if (activeFocus) {
-                                                    isEditing = true
-                                                    savedValue = colorSecondary
-                                                    text = colorSecondary
-                                                    selectAll()
-                                                } else {
-                                                    isEditing = false
-                                                    if (text !== colorSecondary) {
-                                                        text = colorSecondary
-                                                        savedValue = colorSecondary
-                                                    }
-                                                }
-                                            }
-                                            
-                                            onTextChanged: {
-                                                if (isEditing && !isUpdating) {
-                                                    // Zapobiegaj usunięciu # z początku
-                                                    if (text.length > 0 && !text.startsWith('#')) {
-                                                        isUpdating = true
-                                                        var cursorPos = cursorPosition
-                                                        text = '#' + text.replace(/#/g, '')
-                                                        cursorPosition = Math.min(cursorPos + 1, text.length)
-                                                        isUpdating = false
-                                                    }
-                                                }
-                                            }
-                                            
-                                            onEditingFinished: {
-                                                var newValue = normalizeHexColor(text)
-                                                if (isValidHexColor(newValue)) {
-                                                    updateColor("secondary", newValue)
-                                                    savedValue = newValue
-                                                    text = newValue
-                                                } else {
-                                                    text = savedValue
-                                                }
-                                            }
-                                            
-                                            Keys.onEnterPressed: editingFinished()
-                                            Keys.onReturnPressed: editingFinished()
-                                        }
-                                        
-                                        Connections {
-                                            target: appLauncherRoot
-                                            function onColorSecondaryChanged() {
-                                                if (!colorInput3.isEditing && colorInput3.savedValue !== colorSecondary) {
-                                                    colorInput3.text = colorSecondary
-                                                    colorInput3.savedValue = colorSecondary
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                
-                                MouseArea {
-                                    id: colorRowMouseArea3
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    acceptedButtons: Qt.NoButton
-                                }
-                            }
-                            
-                            // Text
-                            Rectangle {
-                                width: parent.width
-                                height: 70
-                                color: colorRowMouseArea4.containsMouse ? colorPrimary : "transparent"
-                                radius: 0
-                                
-                                Behavior on color {
-                                    ColorAnimation {
-                                        duration: 180
-                                        easing.type: Easing.OutQuart
-                                    }
-                                }
-                                
-                                Row {
-                                    anchors.fill: parent
-                                    anchors.margins: 16
-                                    spacing: 16
-                                    
-                                    Rectangle {
-                                        width: 44
-                                        height: 44
-                                        color: colorText
-                                        radius: 0
-                                        anchors.verticalCenter: parent.verticalCenter
-                                    }
-                                    
-                                    Column {
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        spacing: 4
-                                        width: 120
-                                        
-                                        Text {
-                                            text: "Text"
-                                            font.pixelSize: 15
-                                            font.family: "JetBrains Mono"
-                                            font.weight: Font.Medium
-                                            color: colorText
-                                        }
-                                        
-                                        Text {
-                                            text: colorText
-                                            font.pixelSize: 12
-                                            font.family: "JetBrains Mono"
-                                            color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.6) : "#999999"
-                                        }
-                                    }
-                                    
-                                    Item {
-                                        width: parent.width - 44 - 16 - 16 - 120 - 16 - 120
-                                        height: parent.height
-                                    }
-                                    
-                                    Rectangle {
-                                        id: colorInputRect4
-                                        width: 120
-                                        height: 40
-                                        color: colorInput4.activeFocus ? colorSecondary : colorPrimary
-                                        radius: 0
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        Behavior on color {
-                                            ColorAnimation {
-                                                duration: 150
-                                                easing.type: Easing.OutQuart
-                                            }
-                                        }
-                                        
-                                        TextInput {
-                                            id: colorInput4
-                                            anchors.fill: parent
-                                            anchors.margins: 10
-                                            font.pixelSize: 14
-                                            font.family: "JetBrains Mono"
-                                            font.weight: Font.Medium
-                                            color: colorText
-                                            selectByMouse: true
-                                            activeFocusOnPress: true
-                                            verticalAlignment: TextInput.AlignVCenter
-                                            
-                                            property string savedValue: ""
-                                            property bool isEditing: false
-                                            property bool isUpdating: false
-                                            
-                                            Component.onCompleted: {
-                                                savedValue = colorText
-                                                text = colorText
-                                            }
-                                            
-                                            onActiveFocusChanged: {
-                                                if (activeFocus) {
-                                                    isEditing = true
-                                                    savedValue = colorText
-                                                    text = colorText
-                                                    selectAll()
-                                                } else {
-                                                    isEditing = false
-                                                    if (text !== colorText) {
-                                                        text = colorText
-                                                        savedValue = colorText
-                                                    }
-                                                }
-                                            }
-                                            
-                                            onTextChanged: {
-                                                if (isEditing && !isUpdating) {
-                                                    // Zapobiegaj usunięciu # z początku
-                                                    if (text.length > 0 && !text.startsWith('#')) {
-                                                        isUpdating = true
-                                                        var cursorPos = cursorPosition
-                                                        text = '#' + text.replace(/#/g, '')
-                                                        cursorPosition = Math.min(cursorPos + 1, text.length)
-                                                        isUpdating = false
-                                                    }
-                                                }
-                                            }
-                                            
-                                            onEditingFinished: {
-                                                var newValue = normalizeHexColor(text)
-                                                if (isValidHexColor(newValue)) {
-                                                    updateColor("text", newValue)
-                                                    savedValue = newValue
-                                                    text = newValue
-                                                } else {
-                                                    text = savedValue
-                                                }
-                                            }
-                                            
-                                            Keys.onEnterPressed: editingFinished()
-                                            Keys.onReturnPressed: editingFinished()
-                                        }
-                                        
-                                        Connections {
-                                            target: appLauncherRoot
-                                            function onColorTextChanged() {
-                                                if (!colorInput4.isEditing && colorInput4.savedValue !== colorText) {
-                                                    colorInput4.text = colorText
-                                                    colorInput4.savedValue = colorText
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                
-                                MouseArea {
-                                    id: colorRowMouseArea4
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    acceptedButtons: Qt.NoButton
-                                }
-                            }
-                            
-                            // Focus
-                            Rectangle {
-                                width: parent.width
-                                height: 70
-                                color: colorRowMouseArea5.containsMouse ? colorPrimary : "transparent"
-                                radius: 0
-                                
-                                Behavior on color {
-                                    ColorAnimation {
-                                        duration: 180
-                                        easing.type: Easing.OutQuart
-                                    }
-                                }
-                                
-                                Row {
-                                    anchors.fill: parent
-                                    anchors.margins: 16
-                                    spacing: 16
-                                    
-                                    Rectangle {
-                                        width: 44
-                                        height: 44
-                                        color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : colorAccent
-                                        radius: 0
-                                        anchors.verticalCenter: parent.verticalCenter
-                                    }
-                                    
-                                    Column {
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        spacing: 4
-                                        width: 120
-                                        
-                                        Text {
-                                            text: "Focus"
-                                            font.pixelSize: 15
-                                            font.family: "JetBrains Mono"
-                                            font.weight: Font.Medium
-                                            color: colorText
-                                        }
-                                        
-                                        Text {
-                                            text: colorAccent
-                                            font.pixelSize: 12
-                                            font.family: "JetBrains Mono"
-                                            color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.6) : "#999999"
-                                        }
-                                    }
-                                    
-                                    Item {
-                                        width: parent.width - 44 - 16 - 16 - 120 - 16 - 120
-                                        height: parent.height
-                                    }
-                                    
-                                    Rectangle {
-                                        id: colorInputRect5
-                                        width: 120
-                                        height: 40
-                                        color: colorInput5.activeFocus ? colorSecondary : colorPrimary
-                                        radius: 0
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        Behavior on color {
-                                            ColorAnimation {
-                                                duration: 150
-                                                easing.type: Easing.OutQuart
-                                            }
-                                        }
-                                        
-                                        TextInput {
-                                            id: colorInput5
-                                            anchors.fill: parent
-                                            anchors.margins: 10
-                                            font.pixelSize: 14
-                                            font.family: "JetBrains Mono"
-                                            font.weight: Font.Medium
-                                            color: colorText
-                                            selectByMouse: true
-                                            activeFocusOnPress: true
-                                            verticalAlignment: TextInput.AlignVCenter
-                                            
-                                            property string savedValue: ""
-                                            property bool isEditing: false
-                                            property bool isUpdating: false
-                                            
-                                            Component.onCompleted: {
-                                                savedValue = colorAccent
-                                                text = colorAccent
-                                            }
-                                            
-                                            onActiveFocusChanged: {
-                                                if (activeFocus) {
-                                                    isEditing = true
-                                                    savedValue = colorAccent
-                                                    text = colorAccent
-                                                    selectAll()
-                                                } else {
-                                                    isEditing = false
-                                                    if (text !== colorAccent) {
-                                                        text = colorAccent
-                                                        savedValue = colorAccent
-                                                    }
-                                                }
-                                            }
-                                            
-                                            onTextChanged: {
-                                                if (isEditing && !isUpdating) {
-                                                    // Zapobiegaj usunięciu # z początku
-                                                    if (text.length > 0 && !text.startsWith('#')) {
-                                                        isUpdating = true
-                                                        var cursorPos = cursorPosition
-                                                        text = '#' + text.replace(/#/g, '')
-                                                        cursorPosition = Math.min(cursorPos + 1, text.length)
-                                                        isUpdating = false
-                                                    }
-                                                }
-                                            }
-                                            
-                                            onEditingFinished: {
-                                                var newValue = normalizeHexColor(text)
-                                                if (isValidHexColor(newValue)) {
-                                                    updateColor("accent", newValue)
-                                                    savedValue = newValue
-                                                    text = newValue
-                                                } else {
-                                                    text = savedValue
-                                                }
-                                            }
-                                            
-                                            Keys.onEnterPressed: editingFinished()
-                                            Keys.onReturnPressed: editingFinished()
-                                        }
-                                        
-                                        Connections {
-                                            target: appLauncherRoot
-                                            function onColorAccentChanged() {
-                                                if (!colorInput5.isEditing && colorInput5.savedValue !== colorAccent) {
-                                                    colorInput5.text = colorAccent
-                                                    colorInput5.savedValue = colorAccent
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                
-                                MouseArea {
-                                    id: colorRowMouseArea5
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    acceptedButtons: Qt.NoButton
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
             // Tryb 3: Notes
             Item {
                 id: notesMode

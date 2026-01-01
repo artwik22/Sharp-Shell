@@ -1,8 +1,10 @@
 {
   "background": "#0a0a0a",
   "primary": "#1a1a1a",
-  "secondary": "#141414",
+  "secondary": "#121212",
   "text": "#ffffff",
-  "accent": "#ffffff",
-  "lastWallpaper": "/home/artwik/Pictures/Wallpapers/wallhaven-q65yq7.png"
+  "accent": "#9e9e9e",
+  "lastWallpaper": "/home/artwik/Pictures/Wallpapers/wallhaven-4yxj2k.jpg",
+  "colorPreset": "Monochrome",
+  "sidebarPosition": "left"
 }
