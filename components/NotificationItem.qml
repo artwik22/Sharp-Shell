@@ -122,26 +122,6 @@ Rectangle {
     color: getBackgroundColor()
     
     // Enhanced shadow effect with multiple layers
-    Rectangle {
-        anchors.fill: parent
-        anchors.margins: -3
-        radius: 0
-        color: "transparent"
-        border.color: Qt.rgba(0, 0, 0, 0.5)
-        border.width: 1
-        z: -1
-    }
-    
-    // Subtle inner glow
-    Rectangle {
-        anchors.fill: parent
-        anchors.margins: 1
-        radius: 0
-        color: "transparent"
-        border.color: Qt.rgba(255, 255, 255, 0.05)
-        border.width: 1
-        z: 1
-    }
     
     function getBackgroundColor() {
         if (!sharedData) return "#1e1e1e"
@@ -194,8 +174,6 @@ Rectangle {
                         anchors.margins: 1
                         radius: 0
                         color: "transparent"
-                        border.color: Qt.rgba(255, 255, 255, 0.08)
-                        border.width: 1
                     }
                     
                     Image {
@@ -219,7 +197,7 @@ Rectangle {
                         id: appNameText
                         text: "Notification"  // Default, will be updated in onNotificationChanged
                         font.pixelSize: 12
-                        font.family: "JetBrains Mono"
+                        font.family: "sans-serif"
                         font.weight: Font.Bold
                         color: sharedData && sharedData.colorAccent ? Qt.lighter(sharedData.colorAccent, 1.2) : "#9aa0a6"
                         elide: Text.ElideRight
@@ -232,7 +210,7 @@ Rectangle {
                         id: summaryText
                         text: ""  // Will be updated in onNotificationChanged
                         font.pixelSize: 15
-                        font.family: "JetBrains Mono"
+                        font.family: "sans-serif"
                         font.weight: Font.DemiBold
                         color: "#ffffff"
                         elide: Text.ElideRight
@@ -345,7 +323,7 @@ Rectangle {
                 id: bodyText
                 text: ""  // Will be updated in onNotificationChanged
                 font.pixelSize: 13
-                font.family: "JetBrains Mono"
+                font.family: "sans-serif"
                 font.weight: Font.Normal
                 color: "#b0b0b0"
                 wrapMode: Text.Wrap
@@ -361,8 +339,6 @@ Rectangle {
                 height: notification && notification.image ? Math.min(200, width * 0.75) : 0
                 visible: notification && notification.image && notification.image.length > 0
                 color: "transparent"
-                border.color: Qt.rgba(255, 255, 255, 0.1)
-                border.width: 1
                 radius: 0
                 
                 Image {

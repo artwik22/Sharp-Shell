@@ -47,5 +47,40 @@ QtObject {
         
         return { time: timeStr, date: dateStr }
     }
+    
+    // Shadow helper - returns shadow properties based on elevation level
+    // Levels: 0 (none), 1 (subtle), 2 (medium/cards), 3 (modals), 4 (overlays)
+    function getShadowProperties(level) {
+        switch(level) {
+            case 0: return { blur: 0, offset: 0, opacity: 0 }
+            case 1: return { blur: 4, offset: 0, opacity: 0.1 }
+            case 2: return { blur: 8, offset: 2, opacity: 0.15 }
+            case 3: return { blur: 16, offset: 4, opacity: 0.2 }
+            case 4: return { blur: 24, offset: 8, opacity: 0.25 }
+            default: return { blur: 8, offset: 2, opacity: 0.15 }
+        }
+    }
+    
+    // Gradient helper - creates subtle gradient from base color
+    function createAccentGradient(baseColor) {
+        // Lighten the color by 10% for gradient end
+        var r = Qt.color(baseColor).r
+        var g = Qt.color(baseColor).g
+        var b = Qt.color(baseColor).b
+        var lighter = Qt.rgba(Math.min(1, r * 1.1), Math.min(1, g * 1.1), Math.min(1, b * 1.1), 1)
+        return [baseColor, lighter]
+    }
+    
+    // Color helper - darken color for pressed states
+    function darkenColor(baseColor, factor) {
+        var c = Qt.color(baseColor)
+        return Qt.rgba(c.r * factor, c.g * factor, c.b * factor, c.a)
+    }
+    
+    // Color helper - lighten color for hover states
+    function lightenColor(baseColor, factor) {
+        var c = Qt.color(baseColor)
+        return Qt.rgba(Math.min(1, c.r * factor), Math.min(1, c.g * factor), Math.min(1, c.b * factor), c.a)
+    }
 }
 

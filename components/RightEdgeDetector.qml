@@ -18,7 +18,7 @@ PanelWindow {
         right: 0
         top: (screen && screen.height) ? (screen.height - 270) / 2 : 0
     }
-    implicitWidth: 20  // Szerszy pasek do wykrywania dla lepszej niezawodności
+    implicitWidth: 1  // Minimalna szerokość tylko do wykrywania hover
     implicitHeight: 270  // Tylko wysokość volume slidera (wyśrodkowany)
     
     WlrLayershell.layer: WlrLayer.Overlay
@@ -28,14 +28,17 @@ PanelWindow {
     color: "transparent"
     visible: true
     
-    // Niewidoczny obszar wykrywający hover - większy obszar dla lepszej niezawodności
+    // Niewidoczny obszar wykrywający hover - tylko wąski pasek przy krawędzi
     MouseArea {
         id: edgeMouseArea
-        anchors.fill: parent
-        anchors.margins: -5  // Większy obszar wykrywania poza granicami
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        width: 10  // Tylko 10px przy prawej krawędzi
+        height: 270  // Tylko wysokość volume slidera
         hoverEnabled: true
         acceptedButtons: Qt.NoButton  // Nie przechwytuj kliknięć
-        propagateComposedEvents: false
+        propagateComposedEvents: true  // Pozwól na propagację zdarzeń myszy
+        enabled: true
         
         onEntered: {
             console.log("RightEdgeDetector: Mouse entered, containsMouse:", containsMouse)

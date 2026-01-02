@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
+import "."
 
 PanelWindow {
     id: settingsApplicationRoot
@@ -345,6 +346,9 @@ PanelWindow {
     property color colorSecondary: "#1a1a1a"
     property color colorText: "#ffffff"
     property color colorAccent: "#4a9eff"
+    
+    // Global radius property
+    property int globalRadius: (sharedData && sharedData.globalRadius !== undefined) ? sharedData.globalRadius : 0
 
     // Settings state
     property int selectedIndex: 0
@@ -731,16 +735,49 @@ PanelWindow {
         id: audioSourcesModel
     }
 
+    // Shadow helper component for elevation
+    function getShadowProps(level) {
+        switch(level) {
+            case 0: return { blur: 0, offset: 0, opacity: 0 }
+            case 1: return { blur: 4, offset: 0, opacity: 0.1 }
+            case 2: return { blur: 8, offset: 2, opacity: 0.15 }
+            case 3: return { blur: 16, offset: 4, opacity: 0.2 }
+            case 4: return { blur: 24, offset: 8, opacity: 0.25 }
+            default: return { blur: 8, offset: 2, opacity: 0.15 }
+        }
+    }
+    
+    function darkenColor(baseColor, factor) {
+        var c = Qt.color(baseColor)
+        return Qt.rgba(c.r * factor, c.g * factor, c.b * factor, c.a)
+    }
+    
+    function lightenColor(baseColor, factor) {
+        var c = Qt.color(baseColor)
+        return Qt.rgba(Math.min(1, c.r * factor), Math.min(1, c.g * factor), Math.min(1, c.b * factor), c.a)
+    }
+    
+    property var shadowProps: getShadowProps(3)  // Modal elevation
+    
     // Main container
     Rectangle {
         id: settingsContainer
         anchors.fill: parent
+        anchors.margins: 8
         color: colorBackground
-        border.width: 1
-        border.color: colorPrimary
+        radius: globalRadius
         opacity: (sharedData && sharedData.settingsVisible) ? 1.0 : 0.0
         scale: (sharedData && sharedData.settingsVisible) ? 1.0 : 0.95
         enabled: opacity > 0.1
+        
+        // Shadow effect using layered rectangles
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: -shadowProps.offset
+            color: Qt.rgba(0, 0, 0, shadowProps.opacity)
+            radius: parent.radius + shadowProps.offset
+            z: -1
+        }
         
         Behavior on opacity {
             NumberAnimation {
@@ -750,9 +787,10 @@ PanelWindow {
         }
         
         Behavior on scale {
-            NumberAnimation {
-                duration: 300
-                easing.type: Easing.OutCubic
+            SpringAnimation {
+                spring: 3
+                damping: 0.3
+                epsilon: 0.01
             }
         }
 
@@ -762,15 +800,24 @@ PanelWindow {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            height: 50
+            height: 56
             color: colorPrimary
-            radius: 0
+            radius: globalRadius
+            
+            // Subtle shadow for header
+            Rectangle {
+                anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: 1
+                color: Qt.rgba(0, 0, 0, 0.1)
+            }
 
             Row {
                 anchors.fill: parent
-                anchors.leftMargin: 20
-                anchors.rightMargin: 20
-                spacing: 12
+                anchors.leftMargin: 16
+                anchors.rightMargin: 16
+                spacing: 16
 
                 Text {
                     id: titleText
@@ -781,7 +828,7 @@ PanelWindow {
                           currentTab === 4 ? "System" :
                           currentTab === 5 ? "Audio" : "Settings"
                     font.pixelSize: 18
-                    font.family: "JetBrains Mono"
+                    font.family: "sans-serif"
                     font.weight: Font.Bold
                     color: colorText
                     anchors.verticalCenter: parent.verticalCenter
@@ -796,11 +843,36 @@ PanelWindow {
                 // Close button
                 Rectangle {
                     id: closeButton
-                    width: 30
-                    height: 30
-                    color: closeMouseArea.containsMouse ? colorSecondary : "transparent"
-                    radius: 0
+                    width: 32
+                    height: 32
+                    color: closeMouseArea.pressed ? darkenColor(colorSecondary, 0.8) : (closeMouseArea.containsMouse ? colorSecondary : "transparent")
+                    radius: globalRadius
                     anchors.verticalCenter: parent.verticalCenter
+                    scale: closeMouseArea.pressed ? 0.95 : (closeMouseArea.containsMouse ? 1.05 : 1.0)
+                    
+                    // Subtle shadow on hover
+                    Rectangle {
+                        anchors.fill: parent
+                        anchors.margins: -1
+                        color: Qt.rgba(0, 0, 0, closeMouseArea.containsMouse ? 0.1 : 0)
+                        radius: parent.radius + 1
+                        z: -1
+                    }
+                    
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: 200
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                    
+                    Behavior on scale {
+                        SpringAnimation {
+                            spring: 4
+                            damping: 0.4
+                            epsilon: 0.01
+                        }
+                    }
 
                     Text {
                         text: "󰅖"
@@ -832,29 +904,61 @@ PanelWindow {
             anchors.bottom: parent.bottom
             width: 200
             color: colorSecondary
-            radius: 0
+            radius: globalRadius
+            
+            // Subtle shadow for sidebar
+            Rectangle {
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                width: 1
+                color: Qt.rgba(0, 0, 0, 0.1)
+            }
 
             Column {
-                anchors.fill: parent
-                anchors.margins: 10
-                spacing: 5
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: versionText.top
+                anchors.margins: 8
+                spacing: 4
 
                 // General tab
                 Rectangle {
                     width: parent.width
-                    height: 45
-                    color: generalMouseArea.containsMouse ? Qt.lighter(colorSecondary, 1.1) : "transparent"
-                    radius: 0
+                    height: 48
+                    color: generalMouseArea.pressed ? darkenColor(colorSecondary, 0.9) : (generalMouseArea.containsMouse ? lightenColor(colorSecondary, 1.05) : "transparent")
+                    radius: globalRadius
                     opacity: currentTab === 0 ? 1.0 : 0.7
+                    scale: generalMouseArea.pressed ? 0.98 : (generalMouseArea.containsMouse ? 1.02 : 1.0)
+                    
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: 200
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                    
+                    Behavior on scale {
+                        SpringAnimation {
+                            spring: 4
+                            damping: 0.4
+                            epsilon: 0.01
+                        }
+                    }
 
-                    // Bottom accent line for selected tab
+                    // Bottom accent line for selected tab with gradient
                     Rectangle {
                         anchors.bottom: parent.bottom
                         anchors.horizontalCenter: parent.horizontalCenter
                         width: currentTab === 0 ? parent.width * 0.8 : 0
                         height: 3
-                        color: colorAccent
                         radius: 1.5
+                        
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: colorAccent }
+                            GradientStop { position: 1.0; color: lightenColor(colorAccent, 1.1) }
+                        }
 
                         Behavior on width {
                             NumberAnimation {
@@ -866,22 +970,24 @@ PanelWindow {
 
                     Row {
                         anchors.fill: parent
-                        anchors.margins: 12
-                        spacing: 10
+                        anchors.margins: 16
+                        spacing: 12
 
                         Text {
                             text: "󰒓"
                             font.pixelSize: 16
                             color: colorText
+                            opacity: currentTab === 0 ? 1.0 : 0.8
                             anchors.verticalCenter: parent.verticalCenter
                         }
 
                         Text {
                             text: "General"
                             font.pixelSize: 14
-                            font.family: "JetBrains Mono"
+                            font.family: "sans-serif"
                             font.weight: currentTab === 0 ? Font.Bold : Font.Medium
                             color: colorText
+                            opacity: currentTab === 0 ? 1.0 : 0.8
                             anchors.verticalCenter: parent.verticalCenter
                         }
                     }
@@ -900,19 +1006,39 @@ PanelWindow {
                 // Appearance tab
                 Rectangle {
                     width: parent.width
-                    height: 45
-                    color: appearanceMouseArea.containsMouse ? Qt.lighter(colorSecondary, 1.1) : "transparent"
-                    radius: 0
+                    height: 48
+                    color: appearanceMouseArea.pressed ? darkenColor(colorSecondary, 0.9) : (appearanceMouseArea.containsMouse ? lightenColor(colorSecondary, 1.05) : "transparent")
+                    radius: globalRadius
                     opacity: currentTab === 1 ? 1.0 : 0.7
+                    scale: appearanceMouseArea.pressed ? 0.98 : (appearanceMouseArea.containsMouse ? 1.02 : 1.0)
+                    
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: 200
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                    
+                    Behavior on scale {
+                        SpringAnimation {
+                            spring: 4
+                            damping: 0.4
+                            epsilon: 0.01
+                        }
+                    }
 
-                    // Bottom accent line for selected tab
+                    // Bottom accent line for selected tab with gradient
                     Rectangle {
                         anchors.bottom: parent.bottom
                         anchors.horizontalCenter: parent.horizontalCenter
                         width: currentTab === 1 ? parent.width * 0.8 : 0
                         height: 3
-                        color: colorAccent
                         radius: 1.5
+                        
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: colorAccent }
+                            GradientStop { position: 1.0; color: lightenColor(colorAccent, 1.1) }
+                        }
 
                         Behavior on width {
                             NumberAnimation {
@@ -924,22 +1050,24 @@ PanelWindow {
 
                     Row {
                         anchors.fill: parent
-                        anchors.margins: 12
-                        spacing: 10
+                        anchors.margins: 16
+                        spacing: 12
 
                         Text {
                             text: "󰏘"
                             font.pixelSize: 16
                             color: colorText
+                            opacity: currentTab === 1 ? 1.0 : 0.8
                             anchors.verticalCenter: parent.verticalCenter
                         }
 
                         Text {
                             text: "Color Presets"
                             font.pixelSize: 14
-                            font.family: "JetBrains Mono"
+                            font.family: "sans-serif"
                             font.weight: currentTab === 1 ? Font.Bold : Font.Medium
                             color: colorText
+                            opacity: currentTab === 1 ? 1.0 : 0.8
                             anchors.verticalCenter: parent.verticalCenter
                         }
                     }
@@ -958,19 +1086,39 @@ PanelWindow {
                 // Wallpapers tab
                 Rectangle {
                     width: parent.width
-                    height: 45
-                    color: wallpapersMouseArea.containsMouse ? Qt.lighter(colorSecondary, 1.1) : "transparent"
-                    radius: 0
+                    height: 48
+                    color: wallpapersMouseArea.pressed ? darkenColor(colorSecondary, 0.9) : (wallpapersMouseArea.containsMouse ? lightenColor(colorSecondary, 1.05) : "transparent")
+                    radius: globalRadius
                     opacity: currentTab === 2 ? 1.0 : 0.7
+                    scale: wallpapersMouseArea.pressed ? 0.98 : (wallpapersMouseArea.containsMouse ? 1.02 : 1.0)
+                    
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: 200
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                    
+                    Behavior on scale {
+                        SpringAnimation {
+                            spring: 4
+                            damping: 0.4
+                            epsilon: 0.01
+                        }
+                    }
 
-                    // Bottom accent line for selected tab
+                    // Bottom accent line for selected tab with gradient
                     Rectangle {
                         anchors.bottom: parent.bottom
                         anchors.horizontalCenter: parent.horizontalCenter
                         width: currentTab === 2 ? parent.width * 0.8 : 0
                         height: 3
-                        color: colorAccent
                         radius: 1.5
+                        
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: colorAccent }
+                            GradientStop { position: 1.0; color: lightenColor(colorAccent, 1.1) }
+                        }
 
                         Behavior on width {
                             NumberAnimation {
@@ -982,22 +1130,24 @@ PanelWindow {
 
                     Row {
                         anchors.fill: parent
-                        anchors.margins: 12
-                        spacing: 10
+                        anchors.margins: 16
+                        spacing: 12
 
                         Text {
                             text: "󰸉"
                             font.pixelSize: 16
                             color: colorText
+                            opacity: currentTab === 2 ? 1.0 : 0.8
                             anchors.verticalCenter: parent.verticalCenter
                         }
 
                         Text {
                             text: "Wallpapers"
                             font.pixelSize: 14
-                            font.family: "JetBrains Mono"
+                            font.family: "sans-serif"
                             font.weight: currentTab === 2 ? Font.Bold : Font.Medium
                             color: colorText
+                            opacity: currentTab === 2 ? 1.0 : 0.8
                             anchors.verticalCenter: parent.verticalCenter
                         }
                     }
@@ -1017,19 +1167,39 @@ PanelWindow {
                 // Bar tab
                 Rectangle {
                     width: parent.width
-                    height: 45
-                    color: barMouseArea.containsMouse ? Qt.lighter(colorSecondary, 1.1) : "transparent"
-                    radius: 0
+                    height: 48
+                    color: barMouseArea.pressed ? darkenColor(colorSecondary, 0.9) : (barMouseArea.containsMouse ? lightenColor(colorSecondary, 1.05) : "transparent")
+                    radius: globalRadius
                     opacity: currentTab === 3 ? 1.0 : 0.7
+                    scale: barMouseArea.pressed ? 0.98 : (barMouseArea.containsMouse ? 1.02 : 1.0)
+                    
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: 200
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                    
+                    Behavior on scale {
+                        SpringAnimation {
+                            spring: 4
+                            damping: 0.4
+                            epsilon: 0.01
+                        }
+                    }
 
-                    // Bottom accent line for selected tab
+                    // Bottom accent line for selected tab with gradient
                     Rectangle {
                         anchors.bottom: parent.bottom
                         anchors.horizontalCenter: parent.horizontalCenter
                         width: currentTab === 3 ? parent.width * 0.8 : 0
                         height: 3
-                        color: colorAccent
                         radius: 1.5
+                        
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: colorAccent }
+                            GradientStop { position: 1.0; color: lightenColor(colorAccent, 1.1) }
+                        }
 
                         Behavior on width {
                             NumberAnimation {
@@ -1041,20 +1211,21 @@ PanelWindow {
 
                     Row {
                         anchors.fill: parent
-                        anchors.margins: 12
-                        spacing: 10
+                        anchors.margins: 16
+                        spacing: 12
 
                         Text {
                             text: "󰍁"
                             font.pixelSize: 16
                             color: colorText
+                            opacity: currentTab === 3 ? 1.0 : 0.8
                             anchors.verticalCenter: parent.verticalCenter
                         }
 
                         Text {
                             text: "Bar"
                             font.pixelSize: 14
-                            font.family: "JetBrains Mono"
+                            font.family: "sans-serif"
                             font.weight: currentTab === 3 ? Font.Bold : Font.Medium
                             color: colorText
                             anchors.verticalCenter: parent.verticalCenter
@@ -1075,19 +1246,39 @@ PanelWindow {
                 // System tab
                 Rectangle {
                     width: parent.width
-                    height: 45
-                    color: systemMouseArea.containsMouse ? Qt.lighter(colorSecondary, 1.1) : "transparent"
-                    radius: 0
+                    height: 48
+                    color: systemMouseArea.pressed ? darkenColor(colorSecondary, 0.9) : (systemMouseArea.containsMouse ? lightenColor(colorSecondary, 1.05) : "transparent")
+                    radius: globalRadius
                     opacity: currentTab === 4 ? 1.0 : 0.7
+                    scale: systemMouseArea.pressed ? 0.98 : (systemMouseArea.containsMouse ? 1.02 : 1.0)
+                    
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: 200
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                    
+                    Behavior on scale {
+                        SpringAnimation {
+                            spring: 4
+                            damping: 0.4
+                            epsilon: 0.01
+                        }
+                    }
 
-                    // Bottom accent line for selected tab
+                    // Bottom accent line for selected tab with gradient
                     Rectangle {
                         anchors.bottom: parent.bottom
                         anchors.horizontalCenter: parent.horizontalCenter
                         width: currentTab === 4 ? parent.width * 0.8 : 0
                         height: 3
-                        color: colorAccent
                         radius: 1.5
+                        
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: colorAccent }
+                            GradientStop { position: 1.0; color: lightenColor(colorAccent, 1.1) }
+                        }
 
                         Behavior on width {
                             NumberAnimation {
@@ -1099,22 +1290,24 @@ PanelWindow {
 
                     Row {
                         anchors.fill: parent
-                        anchors.margins: 12
-                        spacing: 10
+                        anchors.margins: 16
+                        spacing: 12
 
                         Text {
                             text: "󰒓"
                             font.pixelSize: 16
                             color: colorText
+                            opacity: currentTab === 4 ? 1.0 : 0.8
                             anchors.verticalCenter: parent.verticalCenter
                         }
 
                         Text {
                             text: "System"
                             font.pixelSize: 14
-                            font.family: "JetBrains Mono"
+                            font.family: "sans-serif"
                             font.weight: currentTab === 4 ? Font.Bold : Font.Medium
                             color: colorText
+                            opacity: currentTab === 4 ? 1.0 : 0.8
                             anchors.verticalCenter: parent.verticalCenter
                         }
                     }
@@ -1133,19 +1326,39 @@ PanelWindow {
                 // Audio tab
                 Rectangle {
                     width: parent.width
-                    height: 45
-                    color: audioMouseArea.containsMouse ? Qt.lighter(colorSecondary, 1.1) : "transparent"
-                    radius: 0
+                    height: 48
+                    color: audioMouseArea.pressed ? darkenColor(colorSecondary, 0.9) : (audioMouseArea.containsMouse ? lightenColor(colorSecondary, 1.05) : "transparent")
+                    radius: globalRadius
                     opacity: currentTab === 5 ? 1.0 : 0.7
+                    scale: audioMouseArea.pressed ? 0.98 : (audioMouseArea.containsMouse ? 1.02 : 1.0)
+                    
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: 200
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                    
+                    Behavior on scale {
+                        SpringAnimation {
+                            spring: 4
+                            damping: 0.4
+                            epsilon: 0.01
+                        }
+                    }
 
-                    // Bottom accent line for selected tab
+                    // Bottom accent line for selected tab with gradient
                     Rectangle {
                         anchors.bottom: parent.bottom
                         anchors.horizontalCenter: parent.horizontalCenter
                         width: currentTab === 5 ? parent.width * 0.8 : 0
                         height: 3
-                        color: colorAccent
                         radius: 1.5
+                        
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: colorAccent }
+                            GradientStop { position: 1.0; color: lightenColor(colorAccent, 1.1) }
+                        }
 
                         Behavior on width {
                             NumberAnimation {
@@ -1157,22 +1370,24 @@ PanelWindow {
 
                     Row {
                         anchors.fill: parent
-                        anchors.margins: 12
-                        spacing: 10
+                        anchors.margins: 16
+                        spacing: 12
 
                         Text {
                             text: "󰓃"
                             font.pixelSize: 16
                             color: colorText
+                            opacity: currentTab === 5 ? 1.0 : 0.8
                             anchors.verticalCenter: parent.verticalCenter
                         }
 
                         Text {
                             text: "Audio"
                             font.pixelSize: 14
-                            font.family: "JetBrains Mono"
+                            font.family: "sans-serif"
                             font.weight: currentTab === 5 ? Font.Bold : Font.Medium
                             color: colorText
+                            opacity: currentTab === 5 ? 1.0 : 0.8
                             anchors.verticalCenter: parent.verticalCenter
                         }
                     }
@@ -1188,6 +1403,21 @@ PanelWindow {
                         }
                     }
                 }
+            }
+            
+            // Version text at bottom of sidebar
+            Text {
+                id: versionText
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.margins: 16
+                text: "v2.2.0"
+                font.pixelSize: 11
+                font.family: "sans-serif"
+                font.weight: Font.Medium
+                color: colorText
+                opacity: 0.5
             }
         }
 
@@ -1227,46 +1457,57 @@ PanelWindow {
 
                 Flickable {
                     anchors.fill: parent
-                    anchors.margins: 20
+                    anchors.margins: 16
                     clip: true
                     contentHeight: generalColumn.implicitHeight
 
                     Column {
                         id: generalColumn
-                        width: parent.width - 40
-                        spacing: 20
+                        width: parent.width - 32
+                        spacing: 24
 
                         Text {
                             text: "General Settings"
                             font.pixelSize: 24
-                            font.family: "JetBrains Mono"
+                            font.family: "sans-serif"
                             font.weight: Font.Bold
                             color: colorText
+                            opacity: 1.0
                         }
 
                         // Notifications Section
                         Column {
                             width: parent.width
-                            spacing: 20
+                            spacing: 16
 
                             Text {
                                 text: "Notifications"
                                 font.pixelSize: 18
-                                font.family: "JetBrains Mono"
+                                font.family: "sans-serif"
                                 font.weight: Font.Bold
                                 color: colorText
+                                opacity: 1.0
                             }
 
                             // Enable Notifications Toggle
                             Rectangle {
                                 width: parent.width
-                                height: 60
+                                height: 64
                                 color: colorPrimary
                                 radius: globalRadius
+                                
+                                // Card shadow
+                                Rectangle {
+                                    anchors.fill: parent
+                                    anchors.margins: -getShadowProps(2).offset
+                                    color: Qt.rgba(0, 0, 0, getShadowProps(2).opacity)
+                                    radius: parent.radius + getShadowProps(2).offset
+                                    z: -1
+                                }
 
                                 Row {
                                     anchors.fill: parent
-                                    anchors.margins: 15
+                                    anchors.margins: 16
                                     spacing: 15
 
                                     Column {
@@ -1277,7 +1518,7 @@ PanelWindow {
                                         Text {
                                             text: "Show Notifications"
                                             font.pixelSize: 14
-                                            font.family: "JetBrains Mono"
+                                            font.family: "sans-serif"
                                             font.weight: Font.Medium
                                             color: colorText
                                         }
@@ -1285,7 +1526,7 @@ PanelWindow {
                                         Text {
                                             text: "Enable or disable notification display"
                                             font.pixelSize: 11
-                                            font.family: "JetBrains Mono"
+                                            font.family: "sans-serif"
                                             color: colorText
                                             opacity: 0.7
                                         }
@@ -1331,14 +1572,23 @@ PanelWindow {
                             // Notification Sounds Toggle
                             Rectangle {
                                 width: parent.width
-                                height: 60
+                                height: 64
                                 color: colorPrimary
                                 radius: globalRadius
+                                
+                                // Card shadow
+                                Rectangle {
+                                    anchors.fill: parent
+                                    anchors.margins: -getShadowProps(2).offset
+                                    color: Qt.rgba(0, 0, 0, getShadowProps(2).opacity)
+                                    radius: parent.radius + getShadowProps(2).offset
+                                    z: -1
+                                }
 
                                 Row {
                                     anchors.fill: parent
-                                    anchors.margins: 15
-                                    spacing: 15
+                                    anchors.margins: 16
+                                    spacing: 16
 
                                     Column {
                                         width: parent.width - 80
@@ -1348,7 +1598,7 @@ PanelWindow {
                                         Text {
                                             text: "Notification Sounds"
                                             font.pixelSize: 14
-                                            font.family: "JetBrains Mono"
+                                            font.family: "sans-serif"
                                             font.weight: Font.Medium
                                             color: colorText
                                         }
@@ -1356,7 +1606,7 @@ PanelWindow {
                                         Text {
                                             text: "Play sound when notification arrives"
                                             font.pixelSize: 11
-                                            font.family: "JetBrains Mono"
+                                            font.family: "sans-serif"
                                             color: colorText
                                             opacity: 0.7
                                         }
@@ -1432,32 +1682,33 @@ PanelWindow {
                     // Color customization content
                     Flickable {
                         anchors.fill: parent
-                        anchors.margins: 20
+                        anchors.margins: 16
                         clip: true
                         contentHeight: colorPickerColumn.implicitHeight
 
                         Column {
                             id: colorPickerColumn
-                            width: parent.width - 40
-                            spacing: 30
+                            width: parent.width - 32
+                            spacing: 24
 
                             Text {
                                 text: "Color Presets"
                                 font.pixelSize: 24
-                                font.family: "JetBrains Mono"
+                                font.family: "sans-serif"
                                 font.weight: Font.Bold
                                 color: colorText
+                                opacity: 1.0
                             }
 
                             // Color Presets Section
                             Column {
                                 width: parent.width
-                                spacing: 15
+                                spacing: 16
 
                                 Text {
                                     text: "Color Presets"
                                     font.pixelSize: 18
-                                    font.family: "JetBrains Mono"
+                                    font.family: "sans-serif"
                                     font.weight: Font.Bold
                                     color: colorText
                                 }
@@ -1465,7 +1716,7 @@ PanelWindow {
                                 Text {
                                     text: "Choose from predefined color schemes"
                                     font.pixelSize: 12
-                                    font.family: "JetBrains Mono"
+                                    font.family: "sans-serif"
                                     color: colorText
                                     opacity: 0.7
                                 }
@@ -1474,21 +1725,46 @@ PanelWindow {
                                 Grid {
                                     width: parent.width
                                     columns: 3
-                                    spacing: 15
+                                    spacing: 16
 
                                     Repeater {
                                         model: ["Dark", "Ocean", "Forest", "Violet", "Crimson", "Amber", "Teal", "Rose", "Sunset", "Midnight", "Emerald", "Lavender", "Sapphire", "Coral", "Mint", "Plum", "Gold", "Monochrome", "Cherry", "Azure", "Jade", "Ruby", "Indigo"]
 
                                         Rectangle {
-                                            width: (parent.width - 30) / 3
-                                            height: 100
-                                            color: presetMouseArea.containsMouse ? Qt.lighter(colorSecondary, 1.1) : colorSecondary
-                                            radius: 0
+                                            width: (parent.width - 32) / 3
+                                            height: 104
+                                            color: presetMouseArea.pressed ? darkenColor(colorSecondary, 0.9) : (presetMouseArea.containsMouse ? lightenColor(colorSecondary, 1.05) : colorSecondary)
+                                            radius: globalRadius
+                                            scale: presetMouseArea.pressed ? 0.98 : (presetMouseArea.containsMouse ? 1.02 : 1.0)
+                                            
+                                            // Card shadow
+                                            Rectangle {
+                                                anchors.fill: parent
+                                                anchors.margins: -getShadowProps(2).offset
+                                                color: Qt.rgba(0, 0, 0, getShadowProps(2).opacity)
+                                                radius: parent.radius + getShadowProps(2).offset
+                                                z: -1
+                                            }
+                                            
+                                            Behavior on color {
+                                                ColorAnimation {
+                                                    duration: 200
+                                                    easing.type: Easing.OutCubic
+                                                }
+                                            }
+                                            
+                                            Behavior on scale {
+                                                SpringAnimation {
+                                                    spring: 4
+                                                    damping: 0.4
+                                                    epsilon: 0.01
+                                                }
+                                            }
 
                                             // Color preview bars
                                             Column {
                                                 anchors.fill: parent
-                                                anchors.margins: 12
+                                                anchors.margins: 16
                                                 spacing: 4
 
                                                 Rectangle {
@@ -1521,12 +1797,13 @@ PanelWindow {
                                             Text {
                                                 anchors.bottom: parent.bottom
                                                 anchors.horizontalCenter: parent.horizontalCenter
-                                                anchors.margins: 10
+                                                anchors.margins: 12
                                                 text: modelData
                                                 font.pixelSize: 13
-                                                font.family: "JetBrains Mono"
+                                                font.family: "sans-serif"
                                                 font.weight: Font.Medium
                                                 color: colorText
+                                                opacity: 1.0
                                             }
 
                                             MouseArea {
@@ -1552,20 +1829,21 @@ PanelWindow {
                             // Custom Colors Section
                             Column {
                                 width: parent.width
-                                spacing: 15
+                                spacing: 16
 
                                 Text {
                                     text: "Custom Colors"
                                     font.pixelSize: 18
-                                    font.family: "JetBrains Mono"
+                                    font.family: "sans-serif"
                                     font.weight: Font.Bold
                                     color: colorText
+                                    opacity: 1.0
                                 }
 
                                 Text {
                                     text: "Enter custom HEX color values"
                                     font.pixelSize: 12
-                                    font.family: "JetBrains Mono"
+                                    font.family: "sans-serif"
                                     color: colorText
                                     opacity: 0.7
                                 }
@@ -1573,7 +1851,7 @@ PanelWindow {
                                 // Color input fields
                                 Column {
                                     width: parent.width
-                                    spacing: 12
+                                    spacing: 16
 
                                     // Background
                                     Row {
@@ -1597,7 +1875,7 @@ PanelWindow {
                                             Text {
                                                 text: "Background"
                                                 font.pixelSize: 14
-                                                font.family: "JetBrains Mono"
+                                                font.family: "sans-serif"
                                                 font.weight: Font.Medium
                                                 color: colorText
                                             }
@@ -1607,7 +1885,7 @@ PanelWindow {
                                                 width: parent.width
                                                 text: colorBackground
                                                 font.pixelSize: 12
-                                                font.family: "JetBrains Mono"
+                                                font.family: "sans-serif"
                                                 color: colorText
                                                 selectionColor: colorAccent
 
@@ -1648,7 +1926,7 @@ PanelWindow {
                                             Text {
                                                 text: "Primary"
                                                 font.pixelSize: 14
-                                                font.family: "JetBrains Mono"
+                                                font.family: "sans-serif"
                                                 font.weight: Font.Medium
                                                 color: colorText
                                             }
@@ -1658,7 +1936,7 @@ PanelWindow {
                                                 width: parent.width
                                                 text: colorPrimary
                                                 font.pixelSize: 12
-                                                font.family: "JetBrains Mono"
+                                                font.family: "sans-serif"
                                                 color: colorText
                                                 selectionColor: colorAccent
 
@@ -1699,7 +1977,7 @@ PanelWindow {
                                             Text {
                                                 text: "Secondary"
                                                 font.pixelSize: 14
-                                                font.family: "JetBrains Mono"
+                                                font.family: "sans-serif"
                                                 font.weight: Font.Medium
                                                 color: colorText
                                             }
@@ -1709,7 +1987,7 @@ PanelWindow {
                                                 width: parent.width
                                                 text: colorSecondary
                                                 font.pixelSize: 12
-                                                font.family: "JetBrains Mono"
+                                                font.family: "sans-serif"
                                                 color: colorText
                                                 selectionColor: colorAccent
 
@@ -1750,7 +2028,7 @@ PanelWindow {
                                             Text {
                                                 text: "Text"
                                                 font.pixelSize: 14
-                                                font.family: "JetBrains Mono"
+                                                font.family: "sans-serif"
                                                 font.weight: Font.Medium
                                                 color: colorText
                                             }
@@ -1760,7 +2038,7 @@ PanelWindow {
                                                 width: parent.width
                                                 text: colorText
                                                 font.pixelSize: 12
-                                                font.family: "JetBrains Mono"
+                                                font.family: "sans-serif"
                                                 color: colorText
                                                 selectionColor: colorAccent
 
@@ -1801,7 +2079,7 @@ PanelWindow {
                                             Text {
                                                 text: "Accent"
                                                 font.pixelSize: 14
-                                                font.family: "JetBrains Mono"
+                                                font.family: "sans-serif"
                                                 font.weight: Font.Medium
                                                 color: colorText
                                             }
@@ -1811,7 +2089,7 @@ PanelWindow {
                                                 width: parent.width
                                                 text: colorAccent
                                                 font.pixelSize: 12
-                                                font.family: "JetBrains Mono"
+                                                font.family: "sans-serif"
                                                 color: colorText
                                                 selectionColor: colorAccent
 
@@ -1842,7 +2120,7 @@ PanelWindow {
                                     Text {
                                         text: "Apply Custom Colors"
                                         font.pixelSize: 14
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         font.weight: Font.Medium
                                         color: colorText
                                         anchors.centerIn: parent
@@ -1905,21 +2183,22 @@ PanelWindow {
 
                     Flickable {
                         anchors.fill: parent
-                        anchors.margins: 20
+                        anchors.margins: 16
                         clip: true
                         contentHeight: wallpaperPickerColumn.implicitHeight
 
                         Column {
                             id: wallpaperPickerColumn
-                            width: parent.width - 40
-                            spacing: 20
+                            width: parent.width - 32
+                            spacing: 24
 
                             Text {
                                 text: "Select Wallpaper"
                                 font.pixelSize: 24
-                                font.family: "JetBrains Mono"
+                                font.family: "sans-serif"
                                 font.weight: Font.Bold
                                 color: colorText
+                                opacity: 1.0
                             }
 
                             // Wallpapers Grid
@@ -1927,7 +2206,7 @@ PanelWindow {
                                 id: wallpapersGrid
                                 width: parent.width
                                 height: 600
-                                cellWidth: Math.floor(width / 3)  // 3 wallpapers per row (16:9 aspect ratio)
+                                cellWidth: Math.floor((width - 32) / 3)  // 3 wallpapers per row (16:9 aspect ratio) with spacing
                                 cellHeight: Math.floor(cellWidth * 9 / 16)  // 16:9 aspect ratio
                                 clip: true
 
@@ -1945,11 +2224,20 @@ PanelWindow {
                                     Rectangle {
                                         id: wallpaperItem
                                         anchors.centerIn: parent
-                                        width: parent.width - 12
-                                        height: parent.height - 12
+                                        width: parent.width - 16
+                                        height: parent.height - 16
                                         color: colorPrimary
                                         radius: globalRadius
                                         scale: wallpaperItemMouseArea.containsMouse ? 1.05 : 1.0
+                                        
+                                        // Card shadow
+                                        Rectangle {
+                                            anchors.fill: parent
+                                            anchors.margins: -getShadowProps(2).offset
+                                            color: Qt.rgba(0, 0, 0, getShadowProps(2).opacity)
+                                            radius: parent.radius + getShadowProps(2).offset
+                                            z: -1
+                                        }
                                         
                                         Behavior on scale {
                                             SpringAnimation {
@@ -2016,7 +2304,7 @@ PanelWindow {
                                     Text {
                                         text: "No wallpapers found"
                                         font.pixelSize: 16
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         color: colorText
                                         anchors.horizontalCenter: parent.horizontalCenter
                                     }
@@ -2062,7 +2350,7 @@ PanelWindow {
                         Text {
                             text: "Bar Settings"
                             font.pixelSize: 24
-                            font.family: "JetBrains Mono"
+                            font.family: "sans-serif"
                             font.weight: Font.Bold
                             color: colorText
                         }
@@ -2094,7 +2382,7 @@ PanelWindow {
                                     Text {
                                         text: "Show Sidebar"
                                         font.pixelSize: 14
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         font.weight: Font.Medium
                                         color: colorText
                                     }
@@ -2102,7 +2390,7 @@ PanelWindow {
                                     Text {
                                         text: "Toggle visibility of the side panel"
                                         font.pixelSize: 11
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         color: colorText
                                         opacity: 0.7
                                     }
@@ -2167,7 +2455,7 @@ PanelWindow {
                                     Text {
                                         text: "Sidebar Position"
                                         font.pixelSize: 14
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         font.weight: Font.Medium
                                         color: colorText
                                     }
@@ -2175,7 +2463,7 @@ PanelWindow {
                                     Text {
                                         text: "Choose sidebar position: Left or Top"
                                         font.pixelSize: 11
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         color: colorText
                                         opacity: 0.7
                                     }
@@ -2194,7 +2482,7 @@ PanelWindow {
                                         Text {
                                             text: "Left"
                                             font.pixelSize: 12
-                                            font.family: "JetBrains Mono"
+                                            font.family: "sans-serif"
                                             color: colorText
                                             anchors.centerIn: parent
                                         }
@@ -2220,7 +2508,7 @@ PanelWindow {
                                         Text {
                                             text: "Top"
                                             font.pixelSize: 12
-                                            font.family: "JetBrains Mono"
+                                            font.family: "sans-serif"
                                             color: colorText
                                             anchors.centerIn: parent
                                         }
@@ -2278,7 +2566,7 @@ PanelWindow {
                         Text {
                             text: "System Settings"
                             font.pixelSize: 24
-                            font.family: "JetBrains Mono"
+                            font.family: "sans-serif"
                             font.weight: Font.Bold
                             color: colorText
                         }
@@ -2286,7 +2574,7 @@ PanelWindow {
                         Text {
                             text: "System-related settings will appear here."
                             font.pixelSize: 14
-                            font.family: "JetBrains Mono"
+                            font.family: "sans-serif"
                             color: colorText
                             opacity: 0.7
                         }
@@ -2329,7 +2617,7 @@ PanelWindow {
                         Text {
                             text: "Audio Settings"
                             font.pixelSize: 24
-                            font.family: "JetBrains Mono"
+                            font.family: "sans-serif"
                             font.weight: Font.Bold
                             color: colorText
                         }
@@ -2357,7 +2645,7 @@ PanelWindow {
                                     Text {
                                         text: "Output"
                                         font.pixelSize: 20
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         font.weight: Font.Bold
                                         color: colorText
                                     }
@@ -2365,7 +2653,7 @@ PanelWindow {
                                     Text {
                                         text: defaultSinkDescription || defaultSink || "No device"
                                         font.pixelSize: 13
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         color: colorText
                                         opacity: 0.8
                                         elide: Text.ElideRight
@@ -2475,7 +2763,7 @@ PanelWindow {
                                                 Text {
                                                     text: Math.round(defaultSinkVolume) + "%"
                                                     font.pixelSize: 13
-                                                    font.family: "JetBrains Mono"
+                                                    font.family: "sans-serif"
                                                     font.weight: Font.Medium
                                                     color: colorText
                                                     width: 40
@@ -2511,7 +2799,7 @@ PanelWindow {
                                     Text {
                                         text: "Input"
                                         font.pixelSize: 20
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         font.weight: Font.Bold
                                         color: colorText
                                     }
@@ -2519,7 +2807,7 @@ PanelWindow {
                                     Text {
                                         text: defaultSourceDescription || defaultSource || "No device"
                                         font.pixelSize: 13
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         color: colorText
                                         opacity: 0.8
                                         elide: Text.ElideRight
@@ -2629,7 +2917,7 @@ PanelWindow {
                                                 Text {
                                                     text: Math.round(defaultSourceVolume) + "%"
                                                     font.pixelSize: 13
-                                                    font.family: "JetBrains Mono"
+                                                    font.family: "sans-serif"
                                                     font.weight: Font.Medium
                                                     color: colorText
                                                     width: 40
@@ -2670,7 +2958,7 @@ PanelWindow {
                                 Text {
                                     text: "All Output Devices"
                                     font.pixelSize: 18
-                                    font.family: "JetBrains Mono"
+                                    font.family: "sans-serif"
                                     font.weight: Font.Bold
                                     color: colorText
                                     anchors.verticalCenter: parent.verticalCenter
@@ -2702,7 +2990,7 @@ PanelWindow {
                                                 Text {
                                                     text: model.description || model.name
                                                     font.pixelSize: 14
-                                                    font.family: "JetBrains Mono"
+                                                    font.family: "sans-serif"
                                                     font.weight: Font.Medium
                                                     color: colorText
                                                     elide: Text.ElideRight
@@ -2711,7 +2999,7 @@ PanelWindow {
                                                 Text {
                                                     text: model.name
                                                     font.pixelSize: 11
-                                                    font.family: "JetBrains Mono"
+                                                    font.family: "sans-serif"
                                                     color: colorText
                                                     opacity: 0.6
                                                     elide: Text.ElideRight
@@ -2805,7 +3093,7 @@ PanelWindow {
                                             Text {
                                                 text: Math.round(volumeBar.parent.volumeValue) + "%"
                                                 font.pixelSize: 12
-                                                font.family: "JetBrains Mono"
+                                                font.family: "sans-serif"
                                                 font.weight: Font.Medium
                                                 color: colorText
                                                 width: 45
@@ -2845,7 +3133,7 @@ PanelWindow {
                                 Text {
                                     text: "All Input Devices"
                                     font.pixelSize: 18
-                                    font.family: "JetBrains Mono"
+                                    font.family: "sans-serif"
                                     font.weight: Font.Bold
                                     color: colorText
                                     anchors.verticalCenter: parent.verticalCenter
@@ -2877,7 +3165,7 @@ PanelWindow {
                                                 Text {
                                                     text: model.description || model.name
                                                     font.pixelSize: 14
-                                                    font.family: "JetBrains Mono"
+                                                    font.family: "sans-serif"
                                                     font.weight: Font.Medium
                                                     color: colorText
                                                     elide: Text.ElideRight
@@ -2886,7 +3174,7 @@ PanelWindow {
                                                 Text {
                                                     text: model.name
                                                     font.pixelSize: 11
-                                                    font.family: "JetBrains Mono"
+                                                    font.family: "sans-serif"
                                                     color: colorText
                                                     opacity: 0.6
                                                     elide: Text.ElideRight
@@ -2980,7 +3268,7 @@ PanelWindow {
                                             Text {
                                                 text: Math.round(inputVolumeBar.parent.volumeValue) + "%"
                                                 font.pixelSize: 12
-                                                font.family: "JetBrains Mono"
+                                                font.family: "sans-serif"
                                                 font.weight: Font.Medium
                                                 color: colorText
                                                 width: 45

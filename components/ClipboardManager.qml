@@ -122,7 +122,7 @@ PanelWindow {
                     Text {
                         text: "󰨸 Clipboard"
                         font.pixelSize: 18
-                        font.family: "JetBrains Mono"
+                        font.family: "sans-serif"
                         font.weight: Font.Bold
                         color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                     }
@@ -220,7 +220,7 @@ PanelWindow {
                                     return txt.length > 100 ? txt.substring(0, 100) + "..." : txt
                                 }
                                 font.pixelSize: 13
-                                font.family: "JetBrains Mono"
+                                font.family: "sans-serif"
                                 color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                 wrapMode: Text.Wrap
                                 elide: Text.ElideRight

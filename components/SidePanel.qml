@@ -56,22 +56,37 @@ PanelWindow {
         }
     }
     
-    // No global MouseArea needed - individual MouseAreas handle clicks
-    
-    Rectangle {
+    Item {
         id: sidePanelRect
         anchors.fill: parent
-        color: (sharedData && sharedData.colorBackground) ? sharedData.colorBackground : "#0d0d0d"
-        radius: 0
-        // Ensure this doesn't block mouse events for buttons outside
-        enabled: false
-
-        // Smooth fade animation when panel appears/disappears
-        opacity: visible ? 1.0 : 0.0
-        Behavior on opacity {
-            NumberAnimation {
-                duration: 300
-                easing.type: Easing.OutCubic
+        enabled: false  // Disable to allow clicks to pass through
+        z: -1  // Put background behind everything to ensure buttons are clickable
+        
+        // MouseArea to pass through all clicks - must be first child
+        MouseArea {
+            anchors.fill: parent
+            enabled: true
+            acceptedButtons: Qt.NoButton  // Don't capture any clicks
+            propagateComposedEvents: true
+            z: -1000  // Very low z to ensure it doesn't interfere
+        }
+        
+        // Background Rectangle - separate to avoid blocking clicks
+        Rectangle {
+            id: sidePanelBackground
+            anchors.fill: parent
+            color: (sharedData && sharedData.colorBackground) ? sharedData.colorBackground : "#0d0d0d"
+            radius: 0
+            enabled: false  // Don't capture mouse events
+            z: -1
+            
+            // Smooth fade animation when panel appears/disappears
+            opacity: sidePanel.visible ? 1.0 : 0.0
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 300
+                    easing.type: Easing.OutCubic
+                }
             }
         }
         
@@ -98,7 +113,7 @@ PanelWindow {
                 id: sidePanelHoursDisplay
                 text: "00"
                 font.pixelSize: 20
-                font.family: "JetBrains Mono"
+                font.family: "sans-serif"
                 font.weight: Font.Bold
                 color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
                 horizontalAlignment: Text.AlignHCenter
@@ -115,7 +130,7 @@ PanelWindow {
                 id: sidePanelMinutesDisplay
                 text: "00"
                 font.pixelSize: 20
-                font.family: "JetBrains Mono"
+                font.family: "sans-serif"
                 font.weight: Font.Bold
                 color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
                 horizontalAlignment: Text.AlignHCenter
@@ -151,7 +166,7 @@ PanelWindow {
                 id: sidePanelHoursDisplayTop
                 text: "00"
                 font.pixelSize: 20
-                font.family: "JetBrains Mono"
+                font.family: "sans-serif"
                 font.weight: Font.Bold
                 color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
                 verticalAlignment: Text.AlignVCenter
@@ -167,7 +182,7 @@ PanelWindow {
             Text {
                 text: ":"
                 font.pixelSize: 20
-                font.family: "JetBrains Mono"
+                font.family: "sans-serif"
                 font.weight: Font.Bold
                 color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
                 verticalAlignment: Text.AlignVCenter
@@ -177,7 +192,7 @@ PanelWindow {
                 id: sidePanelMinutesDisplayTop
                 text: "00"
                 font.pixelSize: 20
-                font.family: "JetBrains Mono"
+                font.family: "sans-serif"
                 font.weight: Font.Bold
                 color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
                 verticalAlignment: Text.AlignVCenter
@@ -221,20 +236,35 @@ PanelWindow {
         }
         
         // Workspace switcher - pionowy dla pozycji left
-        Column {
-            id: sidePanelWorkspaceColumn
-            spacing: 9
-            width: 4
+        Item {
+            id: sidePanelWorkspaceColumnContainer
+            width: 8
+            height: parent.height
             visible: panelPosition === "left"
-            anchors.centerIn: parent
-            z: 100  // Higher than visualizer to ensure clicks work
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
+            z: 50  // Lower than buttons (z: 10000) to not block clicks
+            
+            Column {
+                id: sidePanelWorkspaceColumn
+                spacing: 9
+                width: parent.width
+                x: (parent.width - width) / 2
+                y: (parent.height - height) / 2
+                
+                // MouseArea to pass through clicks - don't block buttons
+                MouseArea {
+                    anchors.fill: parent
+                    enabled: false  // Don't capture events, just pass them through
+                    z: -1
+                }
                 
                 Repeater {
                     model: 4  // Workspaces 1-4
                 
                 Item {
                     id: workspaceItem
-                    width: 4
+                    width: 8  // Większa szerokość tylko dla MouseArea
                     height: workspaceLine.height
                     anchors.horizontalCenter: parent.horizontalCenter
                     
@@ -325,10 +355,12 @@ PanelWindow {
                     
                     MouseArea {
                         id: workspaceMouseArea
-                        anchors.fill: parent
-                        anchors.margins: -5
+                        anchors.fill: workspaceLine  // Tylko w obszarze workspace line, nie całego item
+                        anchors.margins: -2  // Mały margines tylko dla łatwiejszego klikania
                         hoverEnabled: true
-                        propagateComposedEvents: false
+                        propagateComposedEvents: true  // Pozwól na propagację zdarzeń poza workspace
+                        z: 50  // Niższy niż przyciski (które mają z: 10000)
+                        acceptedButtons: Qt.LeftButton
                         
                         onEntered: {
                             workspaceLine.scale = 1.25
@@ -365,26 +397,42 @@ PanelWindow {
                         }
                     }
                 }
+                }
             }
         }
         
         // Workspace switcher - poziomy dla pozycji top
-        Row {
-            id: sidePanelWorkspaceRow
-            spacing: 9
-            height: 4
+        Item {
+            id: sidePanelWorkspaceRowContainer
+            width: parent.width
+            height: 8
             visible: panelPosition === "top"
-            anchors.centerIn: parent
-            z: 100  // Higher than visualizer to ensure clicks work
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
+            z: 50  // Lower than buttons (z: 10000) to not block clicks
+            
+            Row {
+                id: sidePanelWorkspaceRow
+                spacing: 9
+                height: parent.height
+                x: (parent.width - width) / 2
+                y: (parent.height - height) / 2
                 
-            Repeater {
-                model: 4  // Workspaces 1-4
+                // MouseArea to pass through clicks - don't block buttons
+                MouseArea {
+                    anchors.fill: parent
+                    enabled: false  // Don't capture events, just pass them through
+                    z: -1
+                }
                 
-                Item {
-                    id: workspaceItemTop
-                    height: 4
-                    width: workspaceLineTop.width
-                    anchors.verticalCenter: parent.verticalCenter
+                Repeater {
+                    model: 4  // Workspaces 1-4
+                
+                    Item {
+                        id: workspaceItemTop
+                        height: 8  // Większa wysokość tylko dla MouseArea
+                        width: workspaceLineTop.width
+                        anchors.verticalCenter: parent.verticalCenter
                     
                     property bool isActive: Hyprland.focusedWorkspace ? 
                         Hyprland.focusedWorkspace.id === (index + 1) : false
@@ -474,10 +522,12 @@ PanelWindow {
                     
                     MouseArea {
                         id: workspaceMouseAreaTop
-                        anchors.fill: parent
-                        anchors.margins: -5
+                        anchors.fill: workspaceLineTop  // Tylko w obszarze workspace line, nie całego item
+                        anchors.margins: -2  // Mały margines tylko dla łatwiejszego klikania
                         hoverEnabled: true
-                        propagateComposedEvents: false
+                        propagateComposedEvents: true  // Pozwól na propagację zdarzeń poza workspace
+                        z: 50  // Niższy niż przyciski (które mają z: 10000)
+                        acceptedButtons: Qt.LeftButton
                         
                         onEntered: {
                             workspaceLineTop.scale = 1.25
@@ -514,61 +564,62 @@ PanelWindow {
                         }
                     }
                 }
+                }
             }
         }
         
         // Music Visualizer - PIONOWY dla pozycji left
-        Column {
-            id: musicVisualizerColumn
-            spacing: 2
-            width: 24  // Szerokość pasków
+        Item {
+            id: musicVisualizerColumnContainer
+            width: 24
+            height: parent.height - 85  // Height minus space for buttons
             visible: panelPosition === "left"
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 270  // Above buttons but not at the very top
+            anchors.bottomMargin: 85  // Above buttons (clipboard at 45px + 32px height + 8px spacing)
             z: 0  // Lower z-order to ensure buttons are clickable
+            
+            Column {
+                id: musicVisualizerColumn
+                spacing: 2
+                width: parent.width
+                anchors.bottom: parent.bottom
 
-            // Smooth fade when switching panel positions
-            opacity: visible ? 1.0 : 0.0
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: 300
-                    easing.type: Easing.OutCubic
-                }
-            }
-            
-            // MouseArea to pass through mouse events - don't block clicks
-            MouseArea {
-                anchors.fill: parent
-                enabled: false  // Don't capture events, just pass them through
-                z: -1
-            }
-            
-            Repeater {
-                id: visualizerBarsRepeater
-                model: 36  // 36 pasków pionowo - 3x dłuższy visualizer
-                
-                Rectangle {
-                    id: visualizerBar
-                    height: 3  // Grubość paska
-                    width: Math.max(3, visualizerBarValue)  // Szerokość zależy od audio
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
-                    radius: 0
-                    visible: true
-                    
-                    property real visualizerBarValue: 5  // Start z widoczną szerokością
-                    
-                    Behavior on width {
-                        NumberAnimation {
-                            duration: 80
-                            easing.type: Easing.OutQuad
-                        }
+                // Smooth fade when switching panel positions
+                opacity: parent.visible ? 1.0 : 0.0
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: 300
+                        easing.type: Easing.OutCubic
                     }
-                    
-                    Behavior on color {
-                        ColorAnimation {
-                            duration: 100
+                }
+                
+                Repeater {
+                    id: visualizerBarsRepeater
+                    model: 36  // 36 pasków pionowo - 3x dłuższy visualizer
+                
+                    Rectangle {
+                        id: visualizerBar
+                        height: 3  // Grubość paska
+                        width: Math.max(3, visualizerBarValue)  // Szerokość zależy od audio
+                        x: (parent.width - width) / 2  // Wyśrodkuj bez anchors
+                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                        radius: 0
+                        visible: true
+                        
+                        property real visualizerBarValue: 5  // Start z widoczną szerokością
+                        
+                        Behavior on width {
+                            NumberAnimation {
+                                duration: 80
+                                easing.type: Easing.OutQuad
+                            }
+                        }
+                        
+                        Behavior on color {
+                            ColorAnimation {
+                                duration: 100
+                            }
                         }
                     }
                 }
@@ -576,57 +627,58 @@ PanelWindow {
         }
         
         // Music Visualizer - POZIOMY dla pozycji top
-        Row {
-            id: musicVisualizerRow
-            spacing: 2
-            height: 24  // Wysokość pasków
+        Item {
+            id: musicVisualizerRowContainer
+            width: parent.width
+            height: 24
             visible: panelPosition === "top"
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
             anchors.rightMargin: 100  // Space for buttons on right (moved above buttons)
             z: 1
 
-            // Smooth fade when switching panel positions
-            opacity: visible ? 1.0 : 0.0
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: 300
-                    easing.type: Easing.OutCubic
-                }
-            }
-            
-            // MouseArea to pass through mouse events - don't block clicks
-            MouseArea {
-                anchors.fill: parent
-                enabled: false  // Don't capture events, just pass them through
-                z: -1
-            }
-            
-            Repeater {
-                id: visualizerBarsRepeaterTop
-                model: 36  // 36 pasków poziomo
-                
-                Rectangle {
-                    id: visualizerBarTop
-                    width: 3  // Grubość paska
-                    height: Math.max(3, visualizerBarValueTop)  // Wysokość zależy od audio
-                    anchors.verticalCenter: parent.verticalCenter
-                    color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
-                    radius: 0
-                    visible: true
-                    
-                    property real visualizerBarValueTop: 5  // Start z widoczną wysokością
-                    
-                    Behavior on height {
-                        NumberAnimation {
-                            duration: 80
-                            easing.type: Easing.OutQuad
-                        }
+            Row {
+                id: musicVisualizerRow
+                spacing: 2
+                height: parent.height
+                width: parent.width
+                x: parent.width - width
+
+                // Smooth fade when switching panel positions
+                opacity: parent.visible ? 1.0 : 0.0
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: 300
+                        easing.type: Easing.OutCubic
                     }
+                }
+                
+                Repeater {
+                    id: visualizerBarsRepeaterTop
+                    model: 36  // 36 pasków poziomo
                     
-                    Behavior on color {
-                        ColorAnimation {
-                            duration: 100
+                    Rectangle {
+                        id: visualizerBarTop
+                        width: 3  // Grubość paska
+                        height: Math.max(3, visualizerBarValueTop)  // Wysokość zależy od audio
+                        y: (parent.height - height) / 2  // Wyśrodkuj bez anchors
+                        color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
+                        radius: 0
+                        visible: true
+                        
+                        property real visualizerBarValueTop: 5  // Start z widoczną wysokością
+                        
+                        Behavior on height {
+                            NumberAnimation {
+                                duration: 80
+                                easing.type: Easing.OutQuad
+                            }
+                        }
+                        
+                        Behavior on color {
+                            ColorAnimation {
+                                duration: 100
+                            }
                         }
                     }
                 }

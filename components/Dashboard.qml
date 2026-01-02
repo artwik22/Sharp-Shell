@@ -4,6 +4,7 @@ import QtQuick.Controls
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
+import "."
 
 PanelWindow {
     id: dashboardRoot
@@ -20,20 +21,20 @@ PanelWindow {
     property int currentTab: 0
     property var sharedData: null
     
-    visible: true
+    // Ukryj całkowicie gdy nie jest widoczny, aby nie blokować kliknięć
+    visible: (sharedData && sharedData.menuVisible) ? true : false
     color: "transparent"
     
-    property int slideOffset: (sharedData && sharedData.menuVisible) ? 0 : -implicitHeight
     property int sidebarTopOffset: (sharedData && sharedData.menuVisible && sharedData.sidebarVisible && sharedData.sidebarPosition === "top") ? 36 : 0
     
     margins {
-        top: slideOffset + sidebarTopOffset
+        top: sidebarTopOffset
         left: 0
         right: 0
     }
     
-    Behavior on slideOffset {
-        NumberAnimation { 
+    Behavior on visible {
+        NumberAnimation {
             duration: 400
             easing.type: Easing.OutQuart
         }
@@ -56,7 +57,7 @@ PanelWindow {
             }
         }
         
-        enabled: opacity > 0.1
+        enabled: isShowing && opacity > 0.1
         focus: (sharedData && sharedData.menuVisible)
         
         Keys.onPressed: function(event) {
@@ -162,7 +163,7 @@ PanelWindow {
                                 Text {
                                     text: modelData.label
                                     font.pixelSize: 14
-                                    font.family: "JetBrains Mono"
+                                    font.family: "sans-serif"
                                     font.weight: tabRect.isActive ? Font.Bold : Font.Normal
                                     color: tabRect.isActive ? 
                                         ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff") : 
@@ -302,14 +303,14 @@ PanelWindow {
                                         text: weatherTemp
                                         font.pixelSize: 28
                                         font.weight: Font.Bold
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                     }
                                     
                                     Text {
                                         text: weatherCondition
                                         font.pixelSize: 12
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
                                         elide: Text.ElideRight
                                     }
@@ -336,7 +337,7 @@ PanelWindow {
                                 Text {
                                     text: "󰣇"
                                     font.pixelSize: 40
-                                    font.family: "JetBrains Mono Nerd Font"
+                                    font.family: "sans-serif"
                                     color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                 }
                                 
@@ -347,14 +348,14 @@ PanelWindow {
                                     Text {
                                         text: "A: Arch Linux"
                                         font.pixelSize: 14
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                     }
                                     
                                     Text {
                                         text: "󰨳: Hyprland"
                                         font.pixelSize: 14
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                     }
                                     
@@ -362,7 +363,7 @@ PanelWindow {
                                         id: uptimeText
                                         text: "󰥔: up 1 hour, 23 minutes"
                                         font.pixelSize: 14
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                     }
                                 }
@@ -401,7 +402,7 @@ PanelWindow {
                                         text: "21"
                                         font.pixelSize: 68
                                         font.weight: Font.Bold
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                         anchors.horizontalCenter: parent.horizontalCenter
                                     }
@@ -411,7 +412,7 @@ PanelWindow {
                                         text: "06"
                                         font.pixelSize: 68
                                         font.weight: Font.Bold
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                         anchors.horizontalCenter: parent.horizontalCenter
                                     }
@@ -438,7 +439,7 @@ PanelWindow {
                                             Text {
                                                 text: modelData
                                                 font.pixelSize: 11
-                                                font.family: "JetBrains Mono"
+                                                font.family: "sans-serif"
                                                 color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
                                                 width: 24
                                                 horizontalAlignment: Text.AlignHCenter
@@ -466,7 +467,7 @@ PanelWindow {
                                                 Text {
                                                     text: modelData.day
                                                     font.pixelSize: 12
-                                                    font.family: "JetBrains Mono"
+                                                    font.family: "sans-serif"
                                                     color: modelData.isToday ? 
                                                         ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff") : 
                                                         (modelData.isCurrentMonth ? 
@@ -519,7 +520,7 @@ PanelWindow {
                                         Text {
                                             text: modelData.label
                                             font.pixelSize: 13
-                                            font.family: "JetBrains Mono"
+                                            font.family: "sans-serif"
                                             color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                             anchors.horizontalCenter: parent.horizontalCenter
                                         }
@@ -527,7 +528,7 @@ PanelWindow {
                                         Text {
                                             text: modelData.value + "%"
                                             font.pixelSize: 16
-                                            font.family: "JetBrains Mono"
+                                            font.family: "sans-serif"
                                             font.weight: Font.Bold
                                             color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
                                             anchors.horizontalCenter: parent.horizontalCenter
@@ -634,7 +635,7 @@ PanelWindow {
                                         id: mediaTitle
                                         text: mpTitle ? mpTitle : "Nothing playing"
                                         font.pixelSize: 18
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         font.weight: Font.Bold
                                         color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                         elide: Text.ElideRight
@@ -646,7 +647,7 @@ PanelWindow {
                                         id: mediaArtist
                                         text: mpArtist ? mpArtist : "—"
                                         font.pixelSize: 16
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                         elide: Text.ElideRight
                                         width: parent.width
@@ -657,7 +658,7 @@ PanelWindow {
                                         id: mediaAlbum
                                         text: mpAlbum ? mpAlbum : "—"
                                         font.pixelSize: 15
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
                                         elide: Text.ElideRight
                                         width: parent.width
@@ -976,7 +977,7 @@ PanelWindow {
                                     Text {
                                         text: mpTitle ? mpTitle : "Nothing playing"
                                         font.pixelSize: 18
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         font.weight: Font.Bold
                                         color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                         elide: Text.ElideRight
@@ -986,7 +987,7 @@ PanelWindow {
                                     Text {
                                         text: mpArtist ? mpArtist : "—"
                                         font.pixelSize: 16
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                         elide: Text.ElideRight
                                         width: parent.width
@@ -995,7 +996,7 @@ PanelWindow {
                                     Text {
                                         text: mpAlbum ? mpAlbum : "—"
                                         font.pixelSize: 15
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
                                         elide: Text.ElideRight
                                         width: parent.width
@@ -1249,7 +1250,7 @@ PanelWindow {
                                         Text {
                                             text: "CPU"
                                             font.pixelSize: 16
-                                            font.family: "JetBrains Mono"
+                                            font.family: "sans-serif"
                                             font.weight: Font.Bold
                                             color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                         }
@@ -1257,7 +1258,7 @@ PanelWindow {
                                         Text {
                                             text: cpuUsageValue + "%"
                                             font.pixelSize: 28
-                                            font.family: "JetBrains Mono"
+                                            font.family: "sans-serif"
                                             font.weight: Font.Bold
                                             color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
                                         }
@@ -1289,7 +1290,7 @@ PanelWindow {
                                 Text {
                                     text: "Temperature: " + cpuTempValue + "°C"
                                     font.pixelSize: 12
-                                    font.family: "JetBrains Mono"
+                                    font.family: "sans-serif"
                                     color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
                                 }
                             }
@@ -1326,7 +1327,7 @@ PanelWindow {
                                         Text {
                                             text: "RAM"
                                             font.pixelSize: 16
-                                            font.family: "JetBrains Mono"
+                                            font.family: "sans-serif"
                                             font.weight: Font.Bold
                                             color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                         }
@@ -1334,7 +1335,7 @@ PanelWindow {
                                         Text {
                                             text: ramUsageValue + "%"
                                             font.pixelSize: 28
-                                            font.family: "JetBrains Mono"
+                                            font.family: "sans-serif"
                                             font.weight: Font.Bold
                                             color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
                                         }
@@ -1366,7 +1367,7 @@ PanelWindow {
                                 Text {
                                     text: "Available: " + Math.round((100 - ramUsageValue) / 100 * ramTotalGB) + "GB / " + ramTotalGB + "GB"
                                     font.pixelSize: 12
-                                    font.family: "JetBrains Mono"
+                                    font.family: "sans-serif"
                                     color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
                                 }
                             }
@@ -1403,7 +1404,7 @@ PanelWindow {
                                         Text {
                                             text: "GPU"
                                             font.pixelSize: 16
-                                            font.family: "JetBrains Mono"
+                                            font.family: "sans-serif"
                                             font.weight: Font.Bold
                                             color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                         }
@@ -1411,7 +1412,7 @@ PanelWindow {
                                         Text {
                                             text: gpuUsageValue + "%"
                                             font.pixelSize: 28
-                                            font.family: "JetBrains Mono"
+                                            font.family: "sans-serif"
                                             font.weight: Font.Bold
                                             color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
                                         }
@@ -1443,7 +1444,7 @@ PanelWindow {
                                 Text {
                                     text: "Temperature: " + gpuTempValue + "°C"
                                     font.pixelSize: 12
-                                    font.family: "JetBrains Mono"
+                                    font.family: "sans-serif"
                                     color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
                                 }
                             }
@@ -1467,7 +1468,7 @@ PanelWindow {
                                 Text {
                                     text: "󰨳 Top Processes"
                                     font.pixelSize: 16
-                                    font.family: "JetBrains Mono"
+                                    font.family: "sans-serif"
                                     font.weight: Font.Bold
                                     color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                 }
@@ -1486,7 +1487,7 @@ PanelWindow {
                                             Text {
                                                 text: (index + 1) + "."
                                                 font.pixelSize: 12
-                                                font.family: "JetBrains Mono"
+                                                font.family: "sans-serif"
                                                 color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
                                                 width: 25
                                             }
@@ -1494,7 +1495,7 @@ PanelWindow {
                                             Text {
                                                 text: modelData.name.length > 20 ? modelData.name.substring(0, 20) + "..." : modelData.name
                                                 font.pixelSize: 12
-                                                font.family: "JetBrains Mono"
+                                                font.family: "sans-serif"
                                                 color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                                 width: parent.width - 120
                                             }
@@ -1502,7 +1503,7 @@ PanelWindow {
                                             Text {
                                                 text: modelData.cpu + "%"
                                                 font.pixelSize: 12
-                                                font.family: "JetBrains Mono"
+                                                font.family: "sans-serif"
                                                 font.weight: Font.Bold
                                                 color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
                                                 width: 45
@@ -1511,7 +1512,7 @@ PanelWindow {
                                             Text {
                                                 text: modelData.mem + "%"
                                                 font.pixelSize: 12
-                                                font.family: "JetBrains Mono"
+                                                font.family: "sans-serif"
                                                 color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
                                                 width: 45
                                             }
@@ -1538,7 +1539,7 @@ PanelWindow {
                                 Text {
                                     text: "󰋼 Disk Usage"
                                     font.pixelSize: 16
-                                    font.family: "JetBrains Mono"
+                                    font.family: "sans-serif"
                                     font.weight: Font.Bold
                                     color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                 }
@@ -1561,7 +1562,7 @@ PanelWindow {
                                                 Text {
                                                     text: modelData.mount
                                                     font.pixelSize: 12
-                                                    font.family: "JetBrains Mono"
+                                                    font.family: "sans-serif"
                                                     font.weight: Font.Bold
                                                     color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"
                                                     width: 60
@@ -1570,7 +1571,7 @@ PanelWindow {
                                                 Text {
                                                     text: modelData.usage + "%"
                                                     font.pixelSize: 12
-                                                    font.family: "JetBrains Mono"
+                                                    font.family: "sans-serif"
                                                     font.weight: Font.Bold
                                                     color: (sharedData && sharedData.colorAccent) ? sharedData.colorAccent : "#4a9eff"
                                                     width: 45
@@ -1581,7 +1582,7 @@ PanelWindow {
                                                 Text {
                                                     text: modelData.used + " / " + modelData.total
                                                     font.pixelSize: 11
-                                                    font.family: "JetBrains Mono"
+                                                    font.family: "sans-serif"
                                                     color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#aaaaaa"
                                                 }
                                             }

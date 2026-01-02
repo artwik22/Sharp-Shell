@@ -20,29 +20,25 @@ PanelWindow {
     property var sharedData: null
     property var screen: null
     
-    // Kontrola widoczności - zawsze widoczne, przesuwamy przez margins
-    visible: true
+    // Kontrola widoczności - całkowicie ukryj gdy nie jest widoczny, aby nie blokować kliknięć
+    visible: (sharedData && sharedData.volumeVisible) ? true : false
     color: "transparent"
-    
-    // Właściwość do animacji margins.right
-    property int slideOffset: (sharedData && sharedData.volumeVisible) ? 0 : -implicitWidth
     
     margins {
         top: (screen && screen.height) ? (screen.height - 270) / 2 : 0
         bottom: 0
-        right: slideOffset
+        right: 0
         left: 0
     }
     
-    // Animacja slideOffset dla slide in/out - szybsza i bardziej płynna
-    Behavior on slideOffset {
-        NumberAnimation { 
+    Behavior on visible {
+        NumberAnimation {
             duration: 300
             easing.type: Easing.OutQuart
         }
     }
 
-    // MouseArea dla slidera - umieszczony PRZED kontenerem, zawsze aktywny
+    // MouseArea dla slidera - umieszczony PRZED kontenerem, aktywny tylko gdy widoczny
     MouseArea {
         id: sliderMouseArea
         anchors.fill: parent
@@ -50,8 +46,9 @@ PanelWindow {
         cursorShape: Qt.PointingHandCursor
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         z: 99999  // Very high z-index to ensure it's on top of everything
-        enabled: true  // Always enabled
-        propagateComposedEvents: false
+        visible: (sharedData && sharedData.volumeVisible) ? true : false  // Visible only when slider is shown
+        enabled: (sharedData && sharedData.volumeVisible) ? true : false  // Enabled only when visible
+        propagateComposedEvents: true  // Allow events to propagate when disabled
         
         // Calculate slider bounds (centered, 180px high)
         property real sliderY: (parent.height - 180) / 2
@@ -253,7 +250,7 @@ PanelWindow {
                 id: volumeValueText
                 text: Math.round(volumeValue) + "%"
                 font.pixelSize: 12
-                font.family: "JetBrains Mono"
+                font.family: "sans-serif"
                 font.weight: Font.Medium
                 font.letterSpacing: 0.2
                 color: (sharedData && sharedData.colorText) ? sharedData.colorText : "#f5f5f5"

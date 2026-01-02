@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
+import "."
 
 PanelWindow {
     id: appLauncherRoot
@@ -2085,7 +2086,7 @@ PanelWindow {
                         Text {
                             text: model.name
                             font.pixelSize: 15
-                            font.family: "JetBrains Mono"
+                            font.family: "sans-serif"
                             font.weight: selectedIndex === index ? Font.Bold : Font.Medium
                             color: selectedIndex === index ? colorText : (modeItemMouseArea.containsMouse ? colorText : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"))
                         }
@@ -2093,7 +2094,7 @@ PanelWindow {
                         Text {
                             text: model.description
                             font.pixelSize: 12
-                            font.family: "JetBrains Mono"
+                            font.family: "sans-serif"
                             color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                             opacity: selectedIndex === index ? 0.85 : (modeItemMouseArea.containsMouse ? 0.75 : 0.6)
                         }
@@ -2171,7 +2172,7 @@ PanelWindow {
                                     anchors.fill: parent
                                     anchors.margins: 20
                                     font.pixelSize: 15
-                                    font.family: "JetBrains Mono"
+                                    font.family: "sans-serif"
                                     font.weight: Font.Medium
                                     font.letterSpacing: 0.2
                                     color: colorText
@@ -2248,7 +2249,7 @@ PanelWindow {
                                     anchors.margins: 0
                                     text: "Search applications..."
                                     font.pixelSize: 15
-                                    font.family: "JetBrains Mono"
+                                    font.family: "sans-serif"
                                     font.weight: Font.Medium
                                     color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                                     verticalAlignment: Text.AlignVCenter
@@ -2331,7 +2332,7 @@ PanelWindow {
                                     Text {
                                         text: appItem.appName
                                         font.pixelSize: 15
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         font.weight: selectedIndex === index ? Font.Bold : Font.Medium
                                         font.letterSpacing: 0.1
                                         color: selectedIndex === index ? colorText : (appItemMouseArea.containsMouse ? colorText : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"))
@@ -2340,7 +2341,7 @@ PanelWindow {
                                     Text {
                                         text: appItem.appComment
                                         font.pixelSize: 12
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         font.weight: Font.Normal
                                         font.letterSpacing: 0.1
                                         color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
@@ -2466,7 +2467,7 @@ PanelWindow {
                         Text {
                             text: model.name || "Unknown"
                                 font.pixelSize: 15
-                            font.family: "JetBrains Mono"
+                            font.family: "sans-serif"
                             font.weight: selectedIndex === index ? Font.Bold : Font.Medium
                             color: selectedIndex === index ? colorText : (packageOptionItemMouseArea.containsMouse ? colorText : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff"))
                         }
@@ -2474,7 +2475,7 @@ PanelWindow {
                         Text {
                             text: model.description || ""
                                 font.pixelSize: 12
-                            font.family: "JetBrains Mono"
+                            font.family: "sans-serif"
                             color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                             opacity: selectedIndex === index ? 0.85 : (packageOptionItemMouseArea.containsMouse ? 0.75 : 0.6)
                             }
@@ -2574,7 +2575,7 @@ PanelWindow {
                             Text {
                                 text: model.name || "Unknown"
                                 font.pixelSize: 15
-                                font.family: "JetBrains Mono"
+                                font.family: "sans-serif"
                                 font.weight: selectedIndex === index ? Font.Bold : Font.Medium
                                 color: selectedIndex === index ? colorText : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
                             }
@@ -2582,7 +2583,7 @@ PanelWindow {
                             Text {
                                 text: model.description || ""
                                 font.pixelSize: 12
-                                font.family: "JetBrains Mono"
+                                font.family: "sans-serif"
                                 color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                                 opacity: selectedIndex === index ? 0.85 : (installSourceItemMouseArea.containsMouse ? 0.75 : 0.6)
                             }
@@ -2659,7 +2660,7 @@ PanelWindow {
                             anchors.fill: parent
                             anchors.margins: 20
                             font.pixelSize: 14
-                            font.family: "JetBrains Mono"
+                            font.family: "sans-serif"
                             color: colorText
                             verticalAlignment: TextInput.AlignVCenter
                             z: 10
@@ -2720,7 +2721,7 @@ PanelWindow {
                             anchors.margins: 0
                             text: "Search packages (pacman)..."
                             font.pixelSize: 14
-                            font.family: "JetBrains Mono"
+                            font.family: "sans-serif"
                             color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.5) : "#666666"
                             verticalAlignment: Text.AlignVCenter
                             visible: pacmanSearchInput.text.length === 0
@@ -2781,7 +2782,7 @@ PanelWindow {
                                 Text {
                                     text: packageItem.packageName
                                     font.pixelSize: 15
-                                    font.family: "JetBrains Mono"
+                                    font.family: "sans-serif"
                                     font.weight: selectedIndex === index ? Font.Bold : Font.Medium
                                     color: selectedIndex === index ? colorText : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
                                 }
@@ -2789,7 +2790,7 @@ PanelWindow {
                                 Text {
                                     text: packageItem.packageDescription
                                     font.pixelSize: 12
-                                    font.family: "JetBrains Mono"
+                                    font.family: "sans-serif"
                                     color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                                     opacity: selectedIndex === index ? 0.85 : (packageItemMouseArea.containsMouse ? 0.75 : 0.6)
                                     visible: packageItem.packageDescription && packageItem.packageDescription.length > 0
@@ -2850,7 +2851,7 @@ PanelWindow {
                             anchors.fill: parent
                             anchors.margins: 20
                             font.pixelSize: 14
-                            font.family: "JetBrains Mono"
+                            font.family: "sans-serif"
                             color: colorText
                             verticalAlignment: TextInput.AlignVCenter
                             z: 10
@@ -2911,7 +2912,7 @@ PanelWindow {
                             anchors.margins: 0
                             text: "Search packages (AUR)..."
                             font.pixelSize: 14
-                            font.family: "JetBrains Mono"
+                            font.family: "sans-serif"
                             color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.5) : "#666666"
                             verticalAlignment: Text.AlignVCenter
                             visible: aurSearchInput.text.length === 0
@@ -2979,7 +2980,7 @@ PanelWindow {
                                 Text {
                                     text: aurPackageItem.packageName
                                     font.pixelSize: 15
-                                    font.family: "JetBrains Mono"
+                                    font.family: "sans-serif"
                                     font.weight: selectedIndex === index ? Font.Bold : Font.Medium
                                     color: selectedIndex === index ? colorText : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
                                 }
@@ -2987,7 +2988,7 @@ PanelWindow {
                                 Text {
                                     text: aurPackageItem.packageDescription
                                     font.pixelSize: 12
-                                    font.family: "JetBrains Mono"
+                                    font.family: "sans-serif"
                                     color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                                     opacity: selectedIndex === index ? 0.85 : (aurPackageItemMouseArea.containsMouse ? 0.75 : 0.6)
                                     visible: aurPackageItem.packageDescription && aurPackageItem.packageDescription.length > 0
@@ -3092,7 +3093,7 @@ PanelWindow {
                             Text {
                                 text: model.name || "Unknown"
                                 font.pixelSize: 15
-                                font.family: "JetBrains Mono"
+                                font.family: "sans-serif"
                                 font.weight: selectedIndex === index ? Font.Bold : Font.Medium
                                 color: selectedIndex === index ? colorText : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
                             }
@@ -3100,7 +3101,7 @@ PanelWindow {
                             Text {
                                 text: model.description || ""
                                 font.pixelSize: 12
-                                font.family: "JetBrains Mono"
+                                font.family: "sans-serif"
                                 color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                                 opacity: selectedIndex === index ? 0.85 : (removeSourceItemMouseArea.containsMouse ? 0.75 : 0.6)
                             }
@@ -3179,7 +3180,7 @@ PanelWindow {
                             anchors.fill: parent
                             anchors.margins: 20
                             font.pixelSize: 14
-                            font.family: "JetBrains Mono"
+                            font.family: "sans-serif"
                             color: colorText
                             verticalAlignment: TextInput.AlignVCenter
                             z: 10
@@ -3240,7 +3241,7 @@ PanelWindow {
                             anchors.margins: 0
                             text: "Search installed packages..."
                             font.pixelSize: 14
-                            font.family: "JetBrains Mono"
+                            font.family: "sans-serif"
                             color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.5) : "#666666"
                             verticalAlignment: Text.AlignVCenter
                             visible: removeSearchInput.text.length === 0
@@ -3301,7 +3302,7 @@ PanelWindow {
                                 Text {
                                     text: installedPackageItem.packageName
                                     font.pixelSize: 15
-                                    font.family: "JetBrains Mono"
+                                    font.family: "sans-serif"
                                     font.weight: selectedIndex === index ? Font.Bold : Font.Medium
                                     color: selectedIndex === index ? colorText : ((sharedData && sharedData.colorText) ? sharedData.colorText : "#ffffff")
                                 }
@@ -3309,7 +3310,7 @@ PanelWindow {
                                 Text {
                                     text: installedPackageItem.packageVersion
                                     font.pixelSize: 12
-                                    font.family: "JetBrains Mono"
+                                    font.family: "sans-serif"
                                     color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                                     opacity: selectedIndex === index ? 0.85 : (installedPackageItemMouseArea.containsMouse ? 0.75 : 0.6)
                                     visible: installedPackageItem.packageVersion && installedPackageItem.packageVersion.length > 0
@@ -3374,7 +3375,7 @@ PanelWindow {
                             anchors.fill: parent
                             anchors.margins: 20
                             font.pixelSize: 14
-                            font.family: "JetBrains Mono"
+                            font.family: "sans-serif"
                             color: colorText
                             verticalAlignment: TextInput.AlignVCenter
                             z: 10
@@ -3431,7 +3432,7 @@ PanelWindow {
                             anchors.margins: 0
                             text: "Search installed AUR packages..."
                             font.pixelSize: 14
-                            font.family: "JetBrains Mono"
+                            font.family: "sans-serif"
                             color: (sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.5) : "#666666"
                             verticalAlignment: Text.AlignVCenter
                             visible: removeAurSearchInput.text.length === 0
@@ -3499,7 +3500,7 @@ PanelWindow {
                                 Text {
                                     text: installedAurPackageItem.packageName
                                     font.pixelSize: 14
-                                    font.family: "JetBrains Mono"
+                                    font.family: "sans-serif"
                                     font.weight: Font.Medium
                                     color: selectedIndex === index ? colorText : ((sharedData && sharedData.colorText) ? Qt.lighter(sharedData.colorText, 1.3) : "#cccccc")
                                 }
@@ -3507,7 +3508,7 @@ PanelWindow {
                                 Text {
                                     text: installedAurPackageItem.packageVersion
                                     font.pixelSize: 11
-                                    font.family: "JetBrains Mono"
+                                    font.family: "sans-serif"
                                     color: (sharedData && sharedData.colorText) ? sharedData.colorText : colorText
                                     visible: installedAurPackageItem.packageVersion && installedAurPackageItem.packageVersion.length > 0
                                 }
@@ -3567,7 +3568,7 @@ PanelWindow {
                             Text {
                                 text: "Notes Manager"
                                 font.pixelSize: 18
-                                font.family: "JetBrains Mono"
+                                font.family: "sans-serif"
                                 font.weight: Font.Bold
                                 color: colorText
                             }
@@ -3591,7 +3592,7 @@ PanelWindow {
                                 Text {
                                     text: "➕ Nowa notatka"
                                     font.pixelSize: 16
-                                    font.family: "JetBrains Mono"
+                                    font.family: "sans-serif"
                                     font.weight: Font.Bold
                                     color: colorText
                                     anchors.centerIn: parent
@@ -3632,7 +3633,7 @@ PanelWindow {
                             Text {
                                 text: "Zapisane notatki:"
                                 font.pixelSize: 14
-                                font.family: "JetBrains Mono"
+                                font.family: "sans-serif"
                                 font.weight: Font.Bold
                                 color: colorText
                                 visible: notesList.count > 0
@@ -3656,7 +3657,7 @@ PanelWindow {
                                     Text {
                                         text: model.name
                                         font.pixelSize: 14
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         color: colorText
                                         anchors.verticalCenter: parent.verticalCenter
                                         anchors.left: parent.left
@@ -3726,7 +3727,7 @@ PanelWindow {
                             Text {
                                 text: currentNotesMode === 0 ? "Nowa notatka" : "Edytuj notatkę"
                                 font.pixelSize: 18
-                                font.family: "JetBrains Mono"
+                                font.family: "sans-serif"
                                 font.weight: Font.Bold
                                 color: colorText
                             }
@@ -3738,7 +3739,7 @@ PanelWindow {
                                     "Wpisz tytuł notatki w pierwszej linii, potem treść.\nNazwa pliku zostanie utworzona automatycznie." :
                                     "Edytuj notatkę. Pierwsza linia to tytuł."
                                 font.pixelSize: 12
-                                font.family: "JetBrains Mono"
+                                font.family: "sans-serif"
                                 color: "#888888"
                                 wrapMode: Text.Wrap
                                 visible: currentNotesMode === 0 || currentNotesMode === 1
@@ -3758,7 +3759,7 @@ PanelWindow {
                                     anchors.fill: parent
                                     anchors.margins: 12
                                     font.pixelSize: 14
-                                    font.family: "JetBrains Mono"
+                                    font.family: "sans-serif"
                                     color: colorText
                                     wrapMode: TextEdit.Wrap
                                     selectByMouse: true
@@ -3768,7 +3769,7 @@ PanelWindow {
                                     Text {
                                         text: "Wpisz swoją notatkę tutaj..."
                                         font.pixelSize: 14
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         color: Qt.lighter(colorText, 1.5)
                                         visible: parent.text.length === 0
                                         anchors.fill: parent
@@ -3793,7 +3794,7 @@ PanelWindow {
                                     Text {
                                         text: "💾 Zapisz"
                                         font.pixelSize: 14
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         font.weight: Font.Bold
                                         color: colorText
                                         anchors.centerIn: parent
@@ -3822,7 +3823,7 @@ PanelWindow {
                                     Text {
                                         text: "❌ Anuluj"
                                         font.pixelSize: 14
-                                        font.family: "JetBrains Mono"
+                                        font.family: "sans-serif"
                                         font.weight: Font.Bold
                                         color: colorText
                                         anchors.centerIn: parent

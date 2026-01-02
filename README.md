@@ -92,15 +92,6 @@
 - **🔧 Enhanced Installer**: Auto-detection of package manager with manual selection fallback
 - **🎨 UI Improvements**: Refined launcher animations and menu interactions
 
-### Version 2.0.0 - UI/UX Improvements
-
-- **Fixed Selection Visibility**: Resolved issue where selected items in launcher were too bright with invisible text
-- **Enhanced Keyboard Navigation**: Fixed inconsistent keyboard navigation across all launcher submenus
-- **Unified Animations**: Added smooth scale and opacity animations to all menu items for consistent user experience
-- **Improved Color Contrast**: Changed selected item backgrounds to use darker colors for better text visibility
-- **UI Polish**: Standardized animation durations and easing functions across all components
-- **Removed Change Password**: Eliminated the Change Password feature for a cleaner settings interface
-
 ---
 
 ## Showcase

@@ -4,7 +4,9 @@
   "secondary": "#121212",
   "text": "#ffffff",
   "accent": "#9e9e9e",
-  "lastWallpaper": "/home/artwik/Pictures/Wallpapers/wallhaven-4yxj2k.jpg",
+  "lastWallpaper": "/home/artwik/Pictures/Wallpapers/wallhaven-83qo22.jpg",
   "colorPreset": "Monochrome",
-  "sidebarPosition": "left"
+  "sidebarPosition": "left",
+  "notificationsEnabled": true,
+  "notificationSoundsEnabled": true
 }
